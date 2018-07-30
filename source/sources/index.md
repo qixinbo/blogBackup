@@ -2,6 +2,8 @@
 title: sources
 date: 2016-01-13 10:37:25
 ---
+# Interesting Blog Posts:
+- [bibtex: 如何自定义参考文献格式 .bst 文件 how to generate a customized .bst file](https://kingdomhe.wordpress.com/2017/12/02/%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89-bibtex-%E7%9A%84%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%E6%A0%BC%E5%BC%8F-bst-%E6%96%87%E4%BB%B6-how-to-generate-a-customized-bst-file/)
 
 # Search:
 
