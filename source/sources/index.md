@@ -6,7 +6,6 @@ date: 2016-01-13 10:37:25
 - [bibtex: 如何自定义参考文献格式 .bst 文件 how to generate a customized .bst file](https://kingdomhe.wordpress.com/2017/12/02/%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89-bibtex-%E7%9A%84%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%E6%A0%BC%E5%BC%8F-bst-%E6%96%87%E4%BB%B6-how-to-generate-a-customized-bst-file/)
 
 # Search:
-
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
 - [通往外网的梯子 | 404car](http://www.404car.com/666.html)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
@@ -50,7 +49,7 @@ date: 2016-01-13 10:37:25
 
 
 # Widgets:
-
+- [微博图床](http://tool.mkblog.cn/tuchuang/)
 - [Make PDF easy | smallpdf.com](http://smallpdf.com/)
 - [免费在线OCR | Online OCR](http://www.onlineocr.net/)
 - [File type converter | convertfiles.com](http://www.convertfiles.com)
