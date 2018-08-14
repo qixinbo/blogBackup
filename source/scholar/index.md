@@ -56,6 +56,7 @@ date: 2016-01-13 08:41:43
 
 # E-collaboration toolsets
 
+- [Academic Torrents](http://academictorrents.com/)
 - [Dataverse](https://github.com/IQSS/dataverse)
 - [Jupyter](http://jupyter.org/)
 - [Galaxy](https://galaxyproject.org/)
