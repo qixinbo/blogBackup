@@ -1,5 +1,5 @@
 ---
-title: ImageJ 用户指南-- 2. 基本概念
+title: ImageJ 用户指南 -- 2. 基本概念
 tags: [ImageJ]
 categories: programming
 date: 2018-9-1

@@ -1,5 +1,5 @@
 ---
-title: ImageJ 用户指南-- 4.用户界面：状态栏和工具栏
+title: ImageJ 用户指南 -- 4. 用户界面：状态栏和工具栏
 tags: [ImageJ]
 categories: programming
 date: 2018-9-3

@@ -1,5 +1,5 @@
 ---
-title: ImageJ 用户指南-- 3.扩展：宏、插件和脚本
+title: ImageJ 用户指南 -- 3. 扩展：宏、插件和脚本
 tags: [ImageJ]
 categories: programming
 date: 2018-9-2
@@ -29,6 +29,8 @@ ImageJ的功能可以通过宏、插件和脚本三种形式进行扩展：
 
 Fiji则支持其他语言，比如BeanShell、Clojure、Python和Ruby。
 资源有：
+- [Jython Scripting](https://imagej.net/Jython_Scripting)
+- [Jython Scripting Examples](http://imagej.net/Jython_Scripting_Examples)
 - [The extensive tutorial on scripting Fiji with Jython by Albert Cardona](http://www.ini.uzh.ch/~acardona/fiji-tutorial/)
 - [Dedicated tutorials on the Fiji webpage](http://fiji.sc/wiki/index.php/Scripting_comparisons)
 

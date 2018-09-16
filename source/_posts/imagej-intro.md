@@ -1,5 +1,5 @@
 ---
-title: ImageJ 用户指南-- 1.简介和安装
+title: ImageJ 用户指南 -- 1. 简介和安装
 tags: [ImageJ]
 categories: programming
 date: 2018-9-1

@@ -4,28 +4,28 @@ date: 2016-01-13 10:37:25
 ---
 # Interesting Blog Posts:
 - [bibtex: 如何自定义参考文献格式 .bst 文件 how to generate a customized .bst file](https://kingdomhe.wordpress.com/2017/12/02/%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89-bibtex-%E7%9A%84%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%E6%A0%BC%E5%BC%8F-bst-%E6%96%87%E4%BB%B6-how-to-generate-a-customized-bst-file/)
+- [迅雷极速版任务出错的解决办法](https://abelsu7.top/2018/03/16/thunderspeed-task-error/)
+- [新手怎么买美股？这里有最详细的购买教程](https://mp.weixin.qq.com/s?src=11&timestamp=1537089778&ver=1126&signature=o9PEc-XRERc*6G5tteDeN0AvpWS2*iYDmJCRWX8TTl8aMz4PK2iFjipyDLLgEpMtP9qC*t2lO1bgknbkr8s2P06mCqlW4X*17c9FtQSttU5lwegfnCM6E6foPSB5jPGN&new=1)
+- [自动机器学习工具全景图：精选22种框架，解放炼丹师](https://zhuanlan.zhihu.com/p/42715527)
+
+# Machine Learning Tools
+- [auto-sklearn: Automated Machine Learning with scikit-learn](https://github.com/automl/auto-sklearn)
+- [ENAS-pytorch: PyTorch implementation of "Efficient Neural Architecture Search via Parameters Sharing"](https://github.com/carpedm20/ENAS-pytorch)
+- [skopt: Sequential model-based optimization](https://github.com/scikit-optimize/scikit-optimize)
+- [Featuretools: An open source python framework for automated feature engineering](https://github.com/Featuretools/featuretools)
+- [Open Datasets](https://skymind.ai/wiki/open-datasets)
+- [NNI by Microsoft: An open source AutoML toolkit for neural architecture search and hyper-parameter tuning](https://github.com/Microsoft/nni)
+- [GAN Lab: An Interactive, Visual Experimentation Tool for Generative Adversarial Networks](https://github.com/poloclub/ganlab)
+- [GraphPipe by Oracle: Machine Learning Model Deployment Made Simple](https://github.com/oracle/graphpipe)
 
 # Search:
+- [大木虫学术导航](http://www.4243.net/)
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
-- [通往外网的梯子 | 404car](http://www.404car.com/666.html)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
-- [Hosts by RunningCheese](http://www.runningcheese.com/cheesehosts)
-- [Hosts by laod](http://laod.cn/hosts/2015-google-hosts.html)
-- [Hosts by Netsh](http://serve.netsh.org/pub/ipv4-hosts/)
-- [Hosts by wowrk](http://www.wowrk.com/without-vpn-visit-googlewikitwitterfacebookflickrimguyoutube/)
-- [Search privately using Google | Disconnect Search](https://search.disconnect.me/)
 - [聚课盒子](http://www.gkrbox.com/)
-
-# ss站点推荐
-- [lalala游戏加速](http://lalala.pw)
-- [牛牛数据](https://www.niuniu-ss.com/index.php)
-- [正确上网](https://rightssr.cf/)
-- [SSBetter](http://ssbetter.org)
-- [CRH](https://caoo.me/)
-- [优越加速](https://www.kycloud.co/)
-- [u1un](http://cp.u9un.com) 速度快，有免费节点
-- [看世界穿越服务](https://www.11world.top) 服务稳定，但域名易被墙，建议加QQ群保持跟踪
-- [MianVPN](http://t.cn/RIPdgkA) 速度相当快且便宜，有多种套餐方案
+- [u9un](http://cp.u9un.com)
+- [看世界穿越服务](https://www.ssbeer.info/) 
+- [MianVPN](http://t.cn/RIPdgkA)
 
 # Movies:
 
