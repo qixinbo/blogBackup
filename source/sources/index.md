@@ -3,12 +3,19 @@ title: sources
 date: 2016-01-13 10:37:25
 ---
 # Interesting Blog Posts:
+- [KINDLE安卓系统安装步骤](http://182.254.232.41/firmware/kindle/kindle.180121/0.%E5%88%B7%E6%9C%BA%E6%AD%A5%E9%AA%A4.html)
+- [如果选错了中介，你买房已经失败了一半！](https://mp.weixin.qq.com/s?src=11&timestamp=1537523820&ver=1136&signature=mFzI4mhLwWz9cZQ2umSLR8dHv1i3oLXF-*2DANjHt*y8tCj99*8ezkBShBm9E5bHCD184wCkMraLc3oElmfC5HpUiPm6dY*Go6PfzF3RsWOmVXi4ryutlYGX*vc9HCwF&new=1)
+- [如果现在硬把房价降一半，会怎么样](https://mp.weixin.qq.com/s?src=11&timestamp=1537522178&ver=1136&signature=3tLphhNEqOXywVd-tqCjXks-iP8UGuOojyE5shRvpjwv3iUyeHrmJA08xS9mXMCv1L*Zv6j2uQ0cFcOLBL4F2aZ-ioGKL8uR1h8irR4iVWs5Ib-SV1EoaQmGS5JXEfDL&new=1)
+- [如何选择合适的损失函数，请看......](https://zhuanlan.zhihu.com/p/38529433)
+- [When Python imports but IPython does not](https://www.lucypark.kr/blog/2013/02/10/when-python-imports-and-ipython-does-not/)
 - [bibtex: 如何自定义参考文献格式 .bst 文件 how to generate a customized .bst file](https://kingdomhe.wordpress.com/2017/12/02/%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89-bibtex-%E7%9A%84%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%E6%A0%BC%E5%BC%8F-bst-%E6%96%87%E4%BB%B6-how-to-generate-a-customized-bst-file/)
 - [迅雷极速版任务出错的解决办法](https://abelsu7.top/2018/03/16/thunderspeed-task-error/)
 - [新手怎么买美股？这里有最详细的购买教程](https://mp.weixin.qq.com/s?src=11&timestamp=1537089778&ver=1126&signature=o9PEc-XRERc*6G5tteDeN0AvpWS2*iYDmJCRWX8TTl8aMz4PK2iFjipyDLLgEpMtP9qC*t2lO1bgknbkr8s2P06mCqlW4X*17c9FtQSttU5lwegfnCM6E6foPSB5jPGN&new=1)
 - [自动机器学习工具全景图：精选22种框架，解放炼丹师](https://zhuanlan.zhihu.com/p/42715527)
 
 # Machine Learning Tools
+- [Yellowbrick: Machine Learning Visualization](https://github.com/DistrictDataLabs/yellowbrick)
+- [What-If Tool: inspect a machine learning model, with no coding required](https://pair-code.github.io/what-if-tool/)
 - [auto-sklearn: Automated Machine Learning with scikit-learn](https://github.com/automl/auto-sklearn)
 - [ENAS-pytorch: PyTorch implementation of "Efficient Neural Architecture Search via Parameters Sharing"](https://github.com/carpedm20/ENAS-pytorch)
 - [skopt: Sequential model-based optimization](https://github.com/scikit-optimize/scikit-optimize)
@@ -29,14 +36,14 @@ date: 2016-01-13 10:37:25
 
 # Movies:
 
-- [电影下载 | 比特大熊](http://www.btdx8.com/)
-- [电影下载 | BT天堂吧](http://www.bttt8.com/)
+- [更新迅速地在线观看电影 | 97电影](http://www.id97.com/)
+- [优质电影网](http://www.youzhidy.com/)
 - [电影下载 | 80s](http://www.80s.tw/)
 - [电影推荐 | 电影FM](http://dianying.fm)
 - [会员视频解析 | 紫狐解析](http://yun.zihu.tv/)
-- [更新迅速地在线观看电影 | 97电影](http://www.id97.com/)
 - [更新迅速地在线观看电影 | 云影院](http://www.yunyy.cc/)
 - [磁力链接直接观看 | 九秒磁力云播](http://apiv.ga/magnet/)
+- [电影下载 | BT天堂吧](http://www.bttt8.com/)
 
 # Softwares:
 - [Music/movies/games/softwares downloader | The pirate bay](https://thepiratebay.mn/)

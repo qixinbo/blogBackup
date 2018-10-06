@@ -371,16 +371,16 @@ return 0;
 
 # 计算结果：
 最终输出的解为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.solution.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkc5872dj308d05umzs.jpg)
 每步循环得到的网格为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-0.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-1.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-2.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-3.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-4.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-5.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-6.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-6.grid-7.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkcgcd26j308d08d0st.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkcrecpej308d08d0t0.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkd3x4cyj308d08dgm2.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjke3uyanj308d08daan.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkefkmexj308d08daax.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkerwqhbj308d08dq3y.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkf3nbh0j308d08ddgw.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkfexab3j308d08dq41.jpg)
 
 # 可扩展性
 ## 求解器和预条件子

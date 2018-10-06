@@ -67,7 +67,7 @@ make test
 
 # Step17编译运行成功
 最后附上一张Step17编译运行成功的靓照：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step17-screenshot.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjxhizrlj30zk0sgqif.jpg)
 
 
 # 参考文献

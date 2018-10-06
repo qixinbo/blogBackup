@@ -823,8 +823,8 @@ DoFs u(x_0)
 24838 1.5932
 ```
 局部细化9次以后的网格：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-13-1.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl4qyzqsj30o910eh05.jpg)
 从上面看网格是这样的：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-13-2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl575tdjj30at0a9glf.jpg)
 本例中还有一个问题：局部细化的效果要差于全局细化！全局细化能提供一个与网格尺寸相关的稳定收敛性，而局部细化的收敛性不规则，虽然也是网格越细越收敛，但收敛阶忽高忽低。
 原教程中有答案使得局部细化的效果变好。

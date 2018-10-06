@@ -4,8 +4,8 @@ date: 2016-01-12 22:40:47
 ---
 
 # Here is my detailed CV:
-- [Resume](http://7xrm8i.com1.z0.glb.clouddn.com/Resume-Xin-Bo-Qi.pdf)
-- [简历](http://7xrm8i.com1.z0.glb.clouddn.com/%E7%AE%80%E5%8E%86-%E4%BA%93%E6%AC%A3%E6%B3%A2.pdf)
+- [Resume](https://www.jianguoyun.com/p/DQjiVbYQ5NH7Bhj79HQ)
+- [简历](https://www.jianguoyun.com/p/Dbyx6BQQ5NH7Bhj69HQ)
 
 # Self-Introduction:
 
@@ -26,4 +26,4 @@ Xin Bo Qi (亓欣波)
 
 # Ingo Steinbach & me at CSSCR2016
 
-![](http://7xrm8i.com1.z0.glb.clouddn.com/Steinbach.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjlby1erxj31w02iob29.jpg)

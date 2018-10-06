@@ -136,7 +136,7 @@ $$
 
 
 # deal.II的程序结构
-![](http://7xrm8i.com1.z0.glb.clouddn.com/fem-4-3.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkliv2w9j30gm0atjru.jpg)
 deal.II采用面向对象编程，其中包含了很多的Modules，各自实现不同的功能，并有机地结合起来。如上图所示。具体为：
 1. Triangulation
 Triangulations是单元及其更低维度的边界的集合。triangulation存储了网格的几何和拓扑性质：单元怎样接触，它们的顶点在哪里。triangulation不知道将要在它上面使用的有限元的任何信息，甚至不知道它自己的单元的形状，它只知道在二维情形下有4条线段和4个顶点，三维下有6个面、12条线段和8个顶点。不过其他所有信息都定义在映射类mapping中，由该类将参考单元的坐标映射到真实单元的坐标上，通常采用线性映射。
@@ -466,6 +466,6 @@ DEAL:cg::Convergence step 48 value 5.33692e-13
 ```
 即，说明了单元个数1024、自由度个数1089，CG算法的起始残差是0.12，经过47步迭代后满足精度要求。
 图形结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/3-1.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/3-2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjklvv10zj30hs0dc77g.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkm5ntoaj30hs0dcjub.jpg)
 

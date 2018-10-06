@@ -73,9 +73,9 @@ if(numSolution == 2)
 ```
 # 计算结果
 二维结果：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/2D.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvji141btng30hs0f2dra.gif)
 三维结果
-![](http://7xrm8i.com1.z0.glb.clouddn.com/3D.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvji1ln258g30hs0f2n4t.gif)
 
 # 后记
 (1)书写方程各项时一定注意，将其弱形式仔细写下来，尤其是分部积分时对拉普拉斯算子分解时的符号变化。

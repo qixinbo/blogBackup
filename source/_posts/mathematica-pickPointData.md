@@ -14,7 +14,7 @@ Attention：这里的版本强烈依赖于Mathematica的版本，此处使用的
 # 实际坐标系与图像坐标系的对应
 首先使用工具提示条中的“坐标工具”提取已知点的图像坐标，然后选择“复制坐标”并保存(注意保存的数据中的点的先后顺序)。
 如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mma-getdata1.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj3b3vslj30ku0m1jt6.jpg)
 利用这些图像中的坐标与实际坐标建立对应关系：
 ```cpp
 trans = FindGeometricTransform[{{0, 1.2}, {0, 1.1}, {4, 0.82}, {2, 0.82}},
@@ -37,18 +37,18 @@ img1 = ImageApply[
 ```
 此忍量的值可视情形调节。以上策略就是当某点的RGB值在忍量之内时，就变为(0.0,0.0,0.0)，即黑色，否则则为白色(1.0,1.0,1.0)。
 效果如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mma-getdata2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj3sqt1rj30a0060t8h.jpg)
 
 # 选区和去噪点 
 从上图可以看出，识别出的曲线中含有一些噪点，如果不处理掉就会影响结果。此时需要对图片进行精修，使其干净无污染。具体方法是采用工具提示条的“掩模工具”(话说10版本的MMA工具提示条真是逆天的存在)，将要选择的区域勾勒出来，然后选择“逆掩模为一个图”，之所以是“逆掩模”，是因为要将这部分选出来而不是去除，也不选择“逆掩模为一个图像”，经测试选择“图”而不是“图像”，分辨率要更高。
 逆掩模如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mma-getdata6.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj47z069j309w05y3yc.jpg)
 将此逆掩模的图放入下面代码中的Masking参数中即可：
 ```cpp
 curve = ImageApply[{1.0, 1.0, 1.0} &, img1, Masking -> 此处是那个选区]
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mma-getdata3.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj4m1nkcj30a0060mwx.jpg)
 可以看出噪点已经被去除。
 
 # 提取数据点的位置
@@ -57,7 +57,7 @@ curve = ImageApply[{1.0, 1.0, 1.0} &, img1, Masking -> 此处是那个选区]
 curvLoc = Reverse /@ Position[ImageData[curve, DataReversed -> True], {0., 0., 0.}];
 ```
 注意这里需要注意Position取得的位置是(1,1)在左上角，而图像坐标则是(1,1)在左下角，所以需要进行一系列变换，具体的变换规则如示意图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mma-getdata4.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj4zmetsj30qo0zk3zn.jpg)
 
 # 作图并与解析解作对比
 实际要提取的曲线是有具体的表达式的，此处将提取出的数据与解析表达式对比：
@@ -65,7 +65,7 @@ curvLoc = Reverse /@ Position[ImageData[curve, DataReversed -> True], {0., 0., 0
 Show[ListPlot[trans@curvLoc],Plot[x^((x-2)^2 E^-x)+E^-x, {x, 0, 10}, PlotStyle->Red]]
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mma-getdata5.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj5k5eefj30a006caa3.jpg)
 可以看出效果还不错。
 
 目前还是以代码的形式操作，以后没准能有图形界面？

@@ -263,9 +263,9 @@ int main ()
 }
 ```
 # 计算结果
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-10.quarter-q1.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-10.quarter-q2.png)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-10.quarter-q3.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl2m8t1wj308c08c74g.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl33o61aj308c08c74i.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl3b1j24j308c081mxd.jpg)
 上面展示的是粗网格上的结果。实线是网格，虚线是精确的圆。
 可以看出，即使在粗网格上，二次和三次映射都取得了很好的吻合结果。
 然后是计算精度：

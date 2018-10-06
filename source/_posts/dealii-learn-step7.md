@@ -807,7 +807,7 @@ int main ()
 # 计算结果
 
 以下是使用双二次单元的自适应计算的结果：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/adaptive-q2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk8u4xgkj30qx0k50tt.jpg)
 收敛性结果如下：
 ```cpp
 Solving with Q1 elements, adaptive refinement

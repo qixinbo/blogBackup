@@ -4,10 +4,10 @@ date: 2016-09-08 21:21:42
 ---
 
 - Polycrystalline growth considering only diffusion
-![](http://7xrm8i.com1.z0.glb.clouddn.com/diffusion.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl7iu35vg30yy0ozhdu.gif)
 - Polycrystalline growth considering liquid convection
-![](http://7xrm8i.com1.z0.glb.clouddn.com/solutal_convection.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl8asvreg30yy0ozb2b.gif)
 - Polycrystalline growth considering both liquid convection and solid motion
-![](http://7xrm8i.com1.z0.glb.clouddn.com/solid_motion.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl8yx09ng30yy0oz4qr.gif)
 - 3D dendritic growth
-![](http://7xrm8i.com1.z0.glb.clouddn.com/3D.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvji1ln258g30hs0f2n4t.gif)

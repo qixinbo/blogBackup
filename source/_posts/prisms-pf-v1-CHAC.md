@@ -334,7 +334,7 @@ computeRHS();
 
 # 计算结果
 如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/coupledCHAC.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjhzxkp8ig30hs0f2n3y.gif)
 
 # 后记
 (1) make debug 比 make release 严格很多，同时计算也更加慢，因为其要检查很多东西。

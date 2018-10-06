@@ -38,7 +38,7 @@ var imageList = \
 data1 = StringCases[input, "\"img_1000\"" ~~ Shortest[__] ~~ "jpg"]
 ```
 得到的结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mathematica-crawler-1.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjvvmi55j30m90ar40c.jpg)
 
 继续利用StringCases进一步提炼：
 ```cpp
@@ -46,7 +46,7 @@ data2 = StringCases[data1, "http" ~~ Shortest[__] ~~ "jpg"];
 data3 = Flatten[data2];
 ```
 得到的结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mathematica-crawler-2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjw69w1sj30iq0femzp.jpg)
 
 # 第四步：批量导出图片
 将图片批量保存到本地，这一步参考了[这篇博文](http://www.kylen314.com/archives/1647)。
@@ -54,7 +54,7 @@ data3 = Flatten[data2];
 Export["~/Public/" <> StringSplit[#, "/"][[-1]], Import[#]] & /@ data3;
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/mathematica-crawler-3.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjwhkbzrj30s10h6thl.jpg)
 
 Over!
 

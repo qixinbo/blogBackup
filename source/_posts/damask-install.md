@@ -68,11 +68,11 @@ abaqus viewer database=Job_sx-px.odb
 第一个问题是出现在Abaqus编译.f文件时，第二个是出现在Abaqus开始运行程序时，原因可能是电脑的运行资源不够。此时的一个方法是重启电脑，然后启动后直接运行该模型，保证程序拥有最多的计算资源。
 ## 运行结果
 两个圆柱体，一个是单晶，一个是多晶，其受压变形：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/damask.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjyg1ei7j31b90nimy0.jpg)
 
 # 前处理生成晶粒
 用DAMASK生成50个晶粒：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/grains-damask.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjypvjb5j312d0li0u9.jpg)
 
 
 

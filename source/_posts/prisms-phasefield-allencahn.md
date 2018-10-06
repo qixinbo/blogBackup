@@ -91,4 +91,4 @@ valN.submit_gradient(constNx*rnxV,q);
 
 # 结果
 结果如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/AC_outAnimation.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjhy2xnszg30o40kgkjn.gif)

@@ -10,7 +10,7 @@ date: 2016-8-18
 # 桁架元的特点 
 平面桁架元是既有局部坐标又有整体坐标的二维有限元，因此比起之前的杆单元，需要多一步坐标变换。
 桁架元示意图如下：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/fem-3-1.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjq6vt55j30l0098t8w.jpg)
 指定整体坐标系为X-Y，局部坐标系为x-y。则两者之间的转换关系为：
 $$
 \begin{equation}
@@ -116,4 +116,4 @@ AssembleSpringKm[p1_, p2_, m_] := Module[{j, k}, f = {p1, p2};
 ```
 这里的组装与之前的杆单元不同，注意此处每个节点上有两个自由度，但总体原则还是将单刚的每个元素叠加到总刚的对应位置上，只是自由度的多少决定了每个单刚的矩阵块的大小，所以得乘以适当的系数。
 比如平面刚架元，其既考虑轴向变形，也考虑弯曲变形，每个节点上有三个自由度，其总刚组装时的系数同时变化，如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/fem-3-2.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjqkfym8j30mc0ay3zt.jpg)

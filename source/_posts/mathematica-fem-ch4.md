@@ -11,7 +11,7 @@ date: 2016-8-19
 # 双线性三角形单元
 ## 局部坐标系
 之前的杆单元和桁架元的局部坐标系容易建立，即建在其自身上即可。而三角形单元的局部坐标系显然不能这样建立，其常采用一套无量纲的自然坐标系——面积坐标，如下图所示：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/fem-4-1.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjrmjerxj30c50890su.jpg)
 三角形123内部有一任意点P，P与顶点1、2、3组成3个子三角形，每个子三角形的面积与总面积之比记为$L\_i$，即P点的面积坐标为$(L\_1,L\_2,L\_3)$。
 因为三个坐标相加为1，所以仅有两个独立的自然坐标，所以可以简记为：
 $$(\xi,\eta,1-\xi-\eta)$$
@@ -243,5 +243,5 @@ AssembleLinearTriangKm[p1_, p2_, p3_, m_] :=
 
 # 二次三角形单元
 二次三角形单元就是在每条边上还各有一个节点，如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/fem-4-2.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjjryk2i9j30fa0a774i.jpg)
 具体分析过程跟双线性三角形单元相同，只不过形函数更加复杂。且在组装总刚时循环系数为6。

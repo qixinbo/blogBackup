@@ -93,7 +93,7 @@ std::cout << "Grid written to grid-1.eps" << std::endl;
 然后输出，这里使用的是eps格式。
 
 第一个函数first_grid生成一个由一个单元网格加密四次后生成的4的4次方=256个正方形单元的网格。
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-1-1.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkunipr2j30i60i4myi.jpg)
 
 然后是第二个函数：
 ```cpp
@@ -112,7 +112,7 @@ center, inner_radius, outer_radius,
 triangulation.refine_global (3);
 ```
 结果如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/hypershell-nothing.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkv8lgfkj308d07yq39.jpg)
 对边界进行特定标识后，效果会好一些：
 ```cpp
 Triangulation<2> triangulation;
@@ -127,7 +127,7 @@ triangulation.set_boundary (0, boundary_description);
 triangulation.refine_global (3);
 ```
 结果如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/hypershell-boundary-only.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkvs65zlj308d08d74o.jpg)
 可以看出此时能较好地表现出内外边界的圆形特征，但仍然能从切线上的弯折分辨出最初的10个cell。这可以通过不光对边界上的线，而是对所有的线都指定indicator来优化：
 ```cpp
 Triangulation<2> triangulation;
@@ -147,7 +147,7 @@ cell->set_all_manifold_ids (0);
 triangulation.refine_global (3);
 ```
 效果如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/hypershell-all.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkw5vj6zj308d08ddg7.jpg)
 
 之前设定的hyper_shell初始周向网格为10个cell，如果设置为3,且只对边界上的cell设定indicator：
 ```cpp
@@ -163,7 +163,7 @@ triangulation.set_boundary (0, boundary_description);
 triangulation.refine_global (3);
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/hypershell-boundary-only-3.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkz3xiwyj308d08d0sx.jpg)
 可以看出细化效果很差，但即使初始为3,也可以通过对全部的cell设定indicator来优化：
 ```cpp
 Triangulation<2> triangulation;
@@ -183,7 +183,7 @@ cell->set_all_manifold_ids (0);
 triangulation.refine_global (3);
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/hypershell-all-3.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkzr11lfj308d08d74f.jpg)
 
 以上分析过程见[这里](https://dealii.org/8.4.1/doxygen/deal.II/group__manifold.html)。
 
@@ -215,7 +215,7 @@ break;
 triangulation.execute_coarsening_and_refinement ();
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-1.grid-2r2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl0si8vzj308b08c0t0.jpg)
 
 注意：当函数结束，开始销毁所创建的对象时，按相反顺序进行，因为定义的manifold object是在triangulation之后，所以manifold object先销毁，此时将会报错，因此必须先释放它：
 ```cpp
@@ -230,7 +230,7 @@ if (cell->center()[1] > 0)
 cell->set_refine_flag ();
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-1-2.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl1612r5j30lv0l9td6.jpg)
 
 # 最后
 deal.II的作者建议尽早学会使用一个debugger！

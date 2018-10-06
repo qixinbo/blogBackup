@@ -288,7 +288,7 @@ Number of degrees of freedom: 4913
 ```
 可以看出3维时的自由度数要大很多，计算量也相应增大。
 2维计算结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/2d.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkk1jqg9j30qx0k5abx.jpg)
 3维计算结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/3d.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkkbrbhcj30qx0k542b.jpg)
 

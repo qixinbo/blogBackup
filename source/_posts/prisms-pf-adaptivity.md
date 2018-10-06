@@ -121,4 +121,4 @@ void generalizedProblem<dim>::adaptiveRefine(unsigned int currentIncrement){
 将判断条件也改一下。
 
 # 计算结果
-![](http://7xrm8i.com1.z0.glb.clouddn.com/2D-adaptivity.gif)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvji2w5oh7g30hs0f2e81.gif)

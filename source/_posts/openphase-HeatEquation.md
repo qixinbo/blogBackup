@@ -171,7 +171,7 @@ Sphere函数与Single函数逻辑类似，Single相当于Sphere的一个初级�
 1. 不同的变量用的编号不同，有的是从0号到63号，有的是从1号到64号，还有65号的，这期间应涉及一个特殊处理——Ghost nodes，暂时没弄明白怎么回事，留待以后解决。
 
 # 附录一：Doxygen的dot图的涵义
-![doxygen_dot](http://7xrm8i.com1.z0.glb.clouddn.com/doxygen_graph_legend.png)
+![doxygen_dot](https://ws1.sinaimg.cn/large/0072Lfvtly1fvji79gecjj30iz06gmxc.jpg)
 ## 上图中的box的涵义：
 - 实心的灰色box代表绘制此图所基于的结构体或类
 - 黑色边界的box意味着此结构体或类有记录

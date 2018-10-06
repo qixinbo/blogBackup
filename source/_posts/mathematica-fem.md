@@ -94,7 +94,7 @@ k\_{ij}=\frac{EA}{L}
 \end{bmatrix}
 $$
 二次杆单元的刚度矩阵可通过能量法求解。应用能量法的示意图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/fem-2-1.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj7einyuj30a405wt8q.jpg)
 应变能为：
 $$
 U=\int\_\Omega \frac{1}{2}\sigma\epsilon dV=\int\_0^L\frac{1}{2}EA\epsilon^2dx
@@ -116,7 +116,7 @@ K // MatrixForm
 ```
 注意：代码中的L这个系数是因为使用了之前位于0到1上的形函数，如果直接采用0到L，则形函数的具体形式会发生改变。
 输出结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/chapter-2.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjj7okixoj308y034t8m.jpg)
 
 # 模块分析
 ## 模块1:建立单元刚度矩阵

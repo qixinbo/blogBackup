@@ -925,5 +925,5 @@ int main ()
 
 # 计算结果
 自适应网格是：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-9-1.jpeg)
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-9-2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk098ejhj30mb0m0aii.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk0jwpe3j30qx0k5wkl.jpg)

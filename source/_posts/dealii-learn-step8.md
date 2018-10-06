@@ -77,17 +77,17 @@ $$
 \end{bmatrix}
 $$
 回到力与位移的系数矩阵，按各个字母的序号循环可得：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-8-1.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk3ow7k0j32eo37k4qq.jpg)
 它的系数矩阵是一个$2\*2$的矩阵，其中各个元素可由上图得到。
 对于各向同性材料，代入上面的取值后，有：
 $$
 -\nabla\lambda(\nabla\cdot{\mathbf u})-(\nabla\cdot\mu\nabla){\mathbf u}-\nabla\cdot\mu (\nabla{\mathbf u})^T = {\mathbf f},
 $$
 其展开就是如图：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-8-2.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk60wib7j32eo37khdu.jpg)
 注意各种标量、矢量和张量的梯度和散度运算。
 其弱形式为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-8-3.jpg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk70cfz7j32eo37ke82.jpg)
 
 下面就是怎样组装这个线性系统。第一件事情就是需要知道在矢量值的有限元中形函数是怎样工作的。大体过程这样：设$n$为要建立的矢量单元的分量，即标量单元，的形函数的个数，比如之前用的双线性单元，二维情形下$n=4$。设$N$是矢量单元的形函数的个数，二维情形下，$N=2n$，那么矢量单元的第i个形函数的形式为：
 $$
@@ -619,7 +619,7 @@ int main ()
 ```
 # 计算结果
 x分量为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step8-out-1.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk7bplf8j30qx0k5dhl.jpg)
 y分量为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step8-out-2.png)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjk7ml9eij30qx0k5dhh.jpg)
 注意，虽然这两个分量组合起来是位移，即它们两个不是完全孤立的，比如说是压力和浓度的关系，而是一个量的两个分量，但现在的output方式没法将两者组合起来，即这里还是将两者看成两个孤立的量，真正组合起来显示矢量的例子是step22，到时再说。

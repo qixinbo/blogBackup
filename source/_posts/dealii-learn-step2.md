@@ -69,11 +69,11 @@ void make_grid (Triangulation<2> &triangulation)
 首先描述自由度是如何分布的。这里使用类模板FE_Q来创建拉格朗日单元，它的成员函数需要一个参数来描述单元的多项式次数，此处是1,表明是双线性单元，也就意味着自由度只在顶点上。如果参数是3,那么意味着是双三次单元，自由度分布为：每个顶点上一个，每条边上两个，每个cell内有四个。
 示意图为：
 对于Q1单元：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-2-1.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjknj5y7uj30ej0ha0t7.jpg)
 对于Q2单元：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-2-2.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjknsl84nj30f90jujs4.jpg)
 对于Q3单元：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/dealii-step-2-3.jpeg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjko5pvifj30890833yi.jpg)
 每种单元上形函数的模样可以参见[这里](https://dealii.org/8.4.1/doxygen/deal.II/classFE__Q.html)。
 通过创建一个有限元对象，然后用DoFHandler分配自由度：
 ```cpp
@@ -102,7 +102,7 @@ std::ofstream out ("sparsity_pattern1.svg");
 sparsity_pattern.print_svg (out);
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-2.sparsity-1.svg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkqcgh74j30480483yd.jpg)
 其中每个小红方块都是矩阵中的一个非0元素。
 
 # 对自由度重新编号
@@ -117,6 +117,6 @@ SparsityPattern sparsity_pattern;
 sparsity_pattern.copy_from (dynamic_sparsity_pattern);
 ```
 结果为：
-![](http://7xrm8i.com1.z0.glb.clouddn.com/step-2.sparsity-2.svg)
+![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjkqt98kkj3048048gli.jpg)
 
 
