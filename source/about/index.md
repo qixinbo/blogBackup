@@ -4,8 +4,8 @@ date: 2016-01-12 22:40:47
 ---
 
 # Here is my detailed CV:
-- [Resume](https://www.jianguoyun.com/p/DQjiVbYQ5NH7Bhj79HQ)
-- [简历](https://www.jianguoyun.com/p/Dbyx6BQQ5NH7Bhj69HQ)
+- [Resume](https://www.jianguoyun.com/p/DS_c0l0Q5NH7Bhj3gXs)
+- [简历](https://www.jianguoyun.com/p/DfaLAzcQ5NH7Bhj9gXs)
 
 # Self-Introduction:
 

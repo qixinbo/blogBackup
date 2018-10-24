@@ -90,7 +90,7 @@ public class SpecialService implements Service { }
 @Plugin(priority=Priority.HIGH_PRIORITY+124)
 public class SpecialService implements Service { }
 ```
-### 命令的输入输出
+### 该命令的输入输出，两者都是使用Parameter注解。
 ```java
 public class HelloWorld implements Command {
 
@@ -101,6 +101,7 @@ public class HelloWorld implements Command {
 	private String greeting;
 ```
 从command类中派生出helloWorld类。每个command类都有input和output，所以这里使用两个成员变量来承载，两者都要用Parameter来注解，所不同的是output需要Parameter的type明确指定为"ItemIO.OUTPUT"。
+即，使用Parameter来注解的变量都是该命令的输入或输出，其中非Service类的变量会明确显示出来，而Service类的变量是用来隐式地调用。
 
 ### 命令的运行函数
 ```java
