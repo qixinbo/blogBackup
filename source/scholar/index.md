@@ -6,6 +6,9 @@ date: 2016-01-13 08:41:43
 - [My Google Scholar](https://scholar.google.com/citations?user=HOwir_sAAAAJ)
 - [My ResearchGate](https://www.researchgate.net/profile/Xin_Bo_Qi)
 
+# 2018
+- [Wan, H. Y., Chen, G. F., Li, C. P., Qi, X. B., & Zhang, G. P. (2018). Data-driven evaluation of fatigue performance of additive manufactured parts using miniature specimens. Journal of Materials Science & Technology. (IF: 3.609)](https://www.sciencedirect.com/science/article/pii/S1005030218303426)
+
 # 2017
 - [X.B. Qi, Y. Chen, X.H. Kang, D.Z. Li, T.Z. Gong. Modeling of coupled motion and growth interaction of equiaxed dendritic crystals in a binary alloy during solidification, Scientific Reports 7 (2017) 45770. (IF: 5.228)](http://www.nature.com/articles/srep45770)
 

@@ -12,7 +12,7 @@ DAMASK是马普钢铁研究所开发的一款用于晶体塑性有限元模拟�
 
 # 求解器和编译器
 DAMASK可以调用三种求解器：MSC.Marc/Mentat，Abaqus和自带的谱方法求解器。鉴于Abaqus用得范围广，这里选择Abaqus作为求解器。DAMASK实际是Abaqus的子程序，因此还需要安装Abaqus的subroutine编译器，即Intel的Fortran编译器。
-这两个软件的安装及相互调用在之前的博客中已写过，见[here](http://qixinbo.info/2017/06/20/abaqus-install/)。
+这两个软件的安装及相互调用在之前的博客中已写过，见[here](http://qixinbo.info/2018/01/12/abaqus-install/)。
 
 # Python及其Modules
 DAMASK的安装脚本、前处理和后处理等工具都是由Python写的，所以还要安装Python的编译器及相关Module。
@@ -41,6 +41,8 @@ set ABAQUS_VERSION=6.14-1  // Abaqus的版本
 source DAMASK_env.sh
 ```
 这一步是编译或运行DAMASK的必要条件，因为它让DAMASK知道其使用怎样的配置，同时将DAMASK的bin路径加入到PATH变量中。因此，必须确保它是第一个执行的。或者直接就将该source命令加入到用户配置文件.bashrc中，让其自动生效。
+
+*ATTENTION!: 如果之前abaqus是用sudo安装并运行的，那么还要将该命令加入到root用户的.bashrc中，否则sudo运行abaqus后，会将普通用户的环境变量覆盖，导致找不到DAMASK。*
 
 # 安装前处理和后处理工具
 DAMASK有一些前后处理的工具放在了processing路径下，在有Makefile文件的那级目录下使用：
