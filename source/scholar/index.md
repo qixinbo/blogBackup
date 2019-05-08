@@ -24,12 +24,13 @@ date: 2016-01-13 08:41:43
 
 # Tools
 
-- 期刊缩写查询 [1](http://www.journalabbr.com/),  [2](https://images.webofknowledge.com/WOK46/help/WOS/A_abrvjt.html)
+- 期刊缩写查询 [JournalAbbr.com](http://www.journalabbr.com/),  [Berkeley Library](https://guides.lib.berkeley.edu/bioscience-journal-abbreviations)
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
 - [论文配色方案 | ColorBrewer](http://colorbrewer2.org/)
 - 英语语法检查 [Ginger](http://www.gingersoftware.com/zh), [Grammarly](https://www.grammarly.com/)
 - [英语前后词查询 | linggle](http://linggle.com/)
 - [English Grammar | COCA](http://corpus.byu.edu/coca/)
+- [Academic writing | Academic Phrasebank](http://www.phrasebank.manchester.ac.uk/)
 - [EBooks downloader | Library Genesis](http://gen.lib.rus.ec/)
 - [EBooks downloader | books43](http://www.books43.com/)
 - [Sci-hub in China](www.sci-hub.cn)

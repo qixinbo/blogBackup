@@ -16,6 +16,7 @@ date: 2016-01-13 10:37:25
 - [如何选择合适的损失函数，请看......](https://zhuanlan.zhihu.com/p/38529433)
 - [When Python imports but IPython does not](https://www.lucypark.kr/blog/2013/02/10/when-python-imports-and-ipython-does-not/)
 - [自动机器学习工具全景图：精选22种框架，解放炼丹师](https://zhuanlan.zhihu.com/p/42715527)
+- [7 个 AutoML 库：应对机器学习的下一波浪潮](https://www.infoq.cn/article/luFB33Zy*WrHdRQh8Mo8)
 
 # Interesting Blog Posts -- Life
 - [KINDLE安卓系统安装步骤](http://182.254.232.41/firmware/kindle/kindle.180121/0.%E5%88%B7%E6%9C%BA%E6%AD%A5%E9%AA%A4.html)
