@@ -9,14 +9,15 @@
 .menu .menu-item {
   display: inline-block;
   margin: 0 10px;
-  @media screen and (max-width: 767px) {
+  list-style: none;
+
+  +mobile() {
     margin-top: 10px;
   }
 
-  a {
-    display: block;
+  a, span.exturl {
+    show();
     font-size: 13px;
-    text-transform: capitalize;
     line-height: inherit;
     border-bottom: 1px solid $menu-link-border;
     transition-property: border-color;

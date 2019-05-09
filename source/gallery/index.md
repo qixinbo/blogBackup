@@ -3,6 +3,8 @@ title: gallery
 date: 2016-09-08 21:21:42
 ---
 
+<meta name="referrer" content="no-referrer" />
+
 - Polycrystalline growth considering only diffusion
 ![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl7iu35vg30yy0ozhdu.gif)
 - Polycrystalline growth considering liquid convection

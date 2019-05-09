@@ -17,12 +17,11 @@ Xin Bo Qi (亓欣波)
 # Skills:
 - Programming languages: C/C++, Mathematica, Python
 - Major: Modeling/Simulation, Machine Learning, Materials Informatics
-- OS Platform: Linux
+- OS Platform: Linux, Windows
 
 # Contact details
 
 - E-mail: qixinbo@gmail.com
-- Skype : qixinbo@outlook.com
 
 # Ingo Steinbach & me at CSSCR2016
 
