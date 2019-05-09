@@ -2,6 +2,7 @@
 title: 自适应有限元包AFEPack教学系列
 tags: [AFEPack, linux]
 categories: programming
+mathjax: true
 date: 2016-3-11
 ---
 写在前面：本文转自原AFEPack论坛afepack.org。
