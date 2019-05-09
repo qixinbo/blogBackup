@@ -611,8 +611,8 @@ calendar:
 
 # Disqus
 disqus:
-  enable: false
-  shortname:
+  enable: true
+  shortname: qixinbo
   count: true
   lazyload: false
 
