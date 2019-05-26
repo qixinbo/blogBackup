@@ -47,6 +47,7 @@ date: 2016-01-13 10:37:25
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
 - [u9un](http://cp.u9un.com)
+- [ssr在线解析](https://xiaohutong.org/)
 - [看世界穿越服务](https://www.ssbeer.info/) 
 - [依米](https://pro.eimi.me/)
 - [Puff云服务](https://www.puffss.me)
@@ -54,6 +55,8 @@ date: 2016-01-13 10:37:25
 
 
 # Widgets:
+- [趣推：创意视频制作神器](http://www.qutui360.com/)
+- [Twitter Video Downloader](https://twdownload.net/)
 - [MikuTools-一个轻量的工具集合](https://miku.tools/)
 - [Online Document Translator](https://www.onlinedoctranslator.com/)
 - [Bootstrap Builder](https://layoutit.com/)

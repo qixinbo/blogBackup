@@ -1,9 +1,26 @@
 ---
-title: 命令行设置代理上网（pac文件）
+title: 命令行终端设置代理上网（pac文件）
 tags: [Proxy]
 categories: programming
-date: 2019-5-8
+date: 2019-5-26
 ---
+
+==== 2019.5.26更新：增加socks代理 ===
+一般我们使用SSR来代理，所以这里增加这种方式的设置。
+首先，还是需要先设置好SSR，这部分不详述。
+然后，终端配置的命令是：
+```cpp
+export ALL_PROXY=socks5://127.0.0.1:1080
+```
+
+有时这样设置好了以后，通过pip下载时又报如下错误：
+```python
+Missing dependencies for SOCKS support
+```
+此时，可以：
+```python
+pip install pysocks
+```
 
 # 事件起因
 之前公司给了一个pac文件，可以实现对国外网站的访问，具体加载该文件的过程也非常简单，即：
