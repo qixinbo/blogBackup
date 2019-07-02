@@ -5,6 +5,22 @@ categories: programming
 date: 2019-5-26
 ---
 
+==== 2019.7.2更新：增加apt走代理 ===
+Linux系统下经过下面的设置后，pip可以正常联网，但apt仍然无法联网，这是因为apt已经不读取http_proxy，需要编辑
+```cpp
+/etc/apt/apt.conf
+```
+文件，加入：
+```cpp
+Acquire::http::proxy "http://username:password@proxyserver:port/";
+Acquire::https::proxy "https://username:password@proxyserver:port/";
+Acquire::socks::proxy "socks://username:password@proxyserver:port/";
+```
+具体参考见：
+[How to config proxy in Ubuntu on VirtualBox](https://askubuntu.com/questions/641409/how-to-config-proxy-in-ubuntu-on-virtualbox)
+[怎样设置 Linux 虚拟机通过代理服务器上网？](https://www.zhihu.com/question/29442534)
+多说一句，虚拟机下的设置，首先设置虚拟机与主机的连接方式为NAT。
+
 ==== 2019.5.26更新：增加socks代理 ===
 一般我们使用SSR来代理，所以这里增加这种方式的设置。
 首先，还是需要先设置好SSR，这部分不详述。

@@ -19,6 +19,9 @@ date: 2016-01-13 10:37:25
 - [7 个 AutoML 库：应对机器学习的下一波浪潮](https://www.infoq.cn/article/luFB33Zy*WrHdRQh8Mo8)
 
 # Interesting Blog Posts -- Life
+- [不要让业务牵着鼻子走](https://www.raychase.net/5302)
+- [百年宿怨：中西医之争](https://www.chainnews.com/articles/961792229844.htm)
+- [卫哲：今日头条之所以成功，是因为第一个建立了中台系统](https://www.huxiu.com/article/292605.html)
 - [KINDLE安卓系统安装步骤](http://182.254.232.41/firmware/kindle/kindle.180121/0.%E5%88%B7%E6%9C%BA%E6%AD%A5%E9%AA%A4.html)
 - [如果选错了中介，你买房已经失败了一半！](https://mp.weixin.qq.com/s?src=11&timestamp=1537523820&ver=1136&signature=mFzI4mhLwWz9cZQ2umSLR8dHv1i3oLXF-*2DANjHt*y8tCj99*8ezkBShBm9E5bHCD184wCkMraLc3oElmfC5HpUiPm6dY*Go6PfzF3RsWOmVXi4ryutlYGX*vc9HCwF&new=1)
 - [如果现在硬把房价降一半，会怎么样](https://mp.weixin.qq.com/s?src=11&timestamp=1537522178&ver=1136&signature=3tLphhNEqOXywVd-tqCjXks-iP8UGuOojyE5shRvpjwv3iUyeHrmJA08xS9mXMCv1L*Zv6j2uQ0cFcOLBL4F2aZ-ioGKL8uR1h8irR4iVWs5Ib-SV1EoaQmGS5JXEfDL&new=1)
@@ -55,6 +58,7 @@ date: 2016-01-13 10:37:25
 
 
 # Widgets:
+- [视频解析下载器](https://www.urlgot.com/zh_CN/)
 - [趣推：创意视频制作神器](http://www.qutui360.com/)
 - [Twitter Video Downloader](https://twdownload.net/)
 - [MikuTools-一个轻量的工具集合](https://miku.tools/)
