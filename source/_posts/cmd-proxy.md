@@ -2,8 +2,18 @@
 title: 命令行终端设置代理上网（pac文件）
 tags: [Proxy]
 categories: programming
-date: 2019-5-26
+date: 2019-7-20
 ---
+
+==== 2019.7.20 更新：增加docker走代理 ====
+docker也是不走.bashrc中配置的代理，需要走自己的配置文件，修改/etc/default/docker文件，增加：
+```cpp
+HTTP_PROXY="http://[proxy-addr]:[proxy-port]/"
+HTTPS_PROXY="https://[proxy-addr]:[proxy-port]/"
+```
+然后重启docker服务。
+参考见：
+[Docker网络代理设置](https://blog.csdn.net/styshoo/article/details/55657714)
 
 ==== 2019.7.2更新：增加apt走代理 ===
 Linux系统下经过下面的设置后，pip可以正常联网，但apt仍然无法联网，这是因为apt已经不读取http_proxy，需要编辑
@@ -37,6 +47,9 @@ Missing dependencies for SOCKS support
 ```python
 pip install pysocks
 ```
+=======================================================================
+
+以下是正文。
 
 # 事件起因
 之前公司给了一个pac文件，可以实现对国外网站的访问，具体加载该文件的过程也非常简单，即：
