@@ -38,8 +38,25 @@ Acquire::socks::proxy "socks://username:password@proxyserver:port/";
 ```cpp
 export ALL_PROXY=socks5://127.0.0.1:1080
 ```
+但实测这样还是不走ssr代理，此时可以借助proxychains这个软件。
+```cpp
+sudo apt install proxychains
+```
+然后修改：
+```cpp
+sudo vim /etc/proxychains.conf
+```
+加入：
+```cpp
+socks5 127.0.0.1 1080
+```
+然后，运行需要代理的命令时都在前面加上proxychains，比如：
+```cpp
+proxychains wget www.google.com
+```
 
-有时这样设置好了以后，通过pip下载时又报如下错误：
+
+这样设置好了以后，通过pip下载时又报如下错误：
 ```python
 Missing dependencies for SOCKS support
 ```

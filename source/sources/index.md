@@ -34,6 +34,7 @@ date: 2016-01-13 10:37:25
 - [今日柳叶刀: 备孕多重要? 受孕前父母饮食和生活方式关乎儿女健康!](https://mp.weixin.qq.com/s?__biz=MzIwMjk1OTc2MA==&mid=2247490929&idx=1&sn=019c00fedf8de705a06121005fd53f90&chksm=96d7e38ea1a06a9873518cb0938704c968499131ec0b5e212bed361d0ee97ecd7685177de4f9&mpshare=1&scene=1&srcid=1028oUTcW8EHw634DiCWabwX&pass_ticket=xGTBW8d87E8egmyyYVsgy%2FYFdky48xD53kDGB9hrcK0VDwq4QPoiUl1EIH%2FULZYX#rd)
 
 # Machine Learning Tools
+- [十个最常用深度学习图像/视频数据标注工具](https://mp.weixin.qq.com/s?src=11&timestamp=1563609408&ver=1739&signature=Bp52t66KpnXZom-lSXbtz8vcGzrXMYyySEn0NpeWlgm7of1dljieABL*CeuAUDVyYkJN5I-LSQtwhHV0ZT7flP5KOGo6g87Pa5Vtcu62IkoTbUThzp09hF4chJXqIuFu&new=1)
 - [Yellowbrick: Machine Learning Visualization](https://github.com/DistrictDataLabs/yellowbrick)
 - [What-If Tool: inspect a machine learning model, with no coding required](https://pair-code.github.io/what-if-tool/)
 - [auto-sklearn: Automated Machine Learning with scikit-learn](https://github.com/automl/auto-sklearn)
@@ -46,6 +47,7 @@ date: 2016-01-13 10:37:25
 - [GraphPipe by Oracle: Machine Learning Model Deployment Made Simple](https://github.com/oracle/graphpipe)
 
 # Search:
+- [电子书下载](http://cn.epubee.com/books/)
 - [大木虫学术导航](http://www.4243.net/)
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
