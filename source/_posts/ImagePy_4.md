@@ -2,7 +2,7 @@
 title: ImagePy解析：4 -- 主界面渲染
 tags: [ImagePy]
 categories: computational material science 
-date: 2019-9-10
+date: 2019-8-31
 ---
 
 ImagePy的主界面就是名为ImagePy的类，这一部分详解主界面是如何渲染出来的。
