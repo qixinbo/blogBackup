@@ -6,6 +6,11 @@ date: 2016-01-13 08:41:43
 - [My Google Scholar](https://scholar.google.com/citations?user=HOwir_sAAAAJ)
 - [My ResearchGate](https://www.researchgate.net/profile/Xin_Bo_Qi)
 
+# 2019
+- [X.B. Qi, G.F. Chen, Y. Li, C.P. Li, X. Cheng. Applying Neural Network based Machine Learning to Additive Manufacturing: current applications, challenges and future perspectives, Engineering, 2019(5), 721-729. (IF: 4.568)](https://www.sciencedirect.com/science/article/pii/S2095809918307732)
+
+- [亓欣波, 李长鹏, 李阳, 林峰, 李勇, 程宣, 陈国锋. 基于机器学习的电子束选区熔化成形件密度预测，机械工程学报](https://kns.cnki.net/KCMS/detail/11.2187.TH.20190622.1357.010.html)
+
 # 2018
 - [Wan, H. Y., Chen, G. F., Li, C. P., Qi, X. B., & Zhang, G. P. (2018). Data-driven evaluation of fatigue performance of additive manufactured parts using miniature specimens. Journal of Materials Science & Technology. (IF: 3.609)](https://www.sciencedirect.com/science/article/pii/S1005030218303426)
 
