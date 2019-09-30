@@ -5,6 +5,14 @@ categories: computational material science
 date: 2019-8-31
 ---
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+更新日志：
+2019-9-30 更新：
+增加了ImageJ和ImagePy两种UI加载方式的对比
+
+以下为正文
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 ImagePy的主界面就是名为ImagePy的类，这一部分详解主界面是如何渲染出来的。
 
 # 父类初始化
@@ -143,6 +151,29 @@ else: self.load_ijui()
 self.load_document()
 self.Fit()
 ```
+两种样式的相同点和不同点在于：
+（1）相同点：都有菜单栏和工具栏，其中菜单栏已经在上面创建，工具栏的创建如下：
+```python
+self.auimgr.AddPane(self.toolbar, aui.AuiPaneInfo() .Left()  .PinButton( True )
+            .CaptionVisible( True ).Dock().Resizable().FloatingSize( wx.DefaultSize ).MaxSize(wx.Size( 32,-1 ))
+            . BottomDockable( True ).TopDockable( False ).Layer( 10 ) )
+```
+（2）不同点：ImagePy会显示navigator、histogram等组件。（ImageJ也会加载这些组件，但是隐藏显示）
+首先扫描widgets文件夹下的组件，其扫描方式与plugins、tools相同。
+```python
+self.widgets = widgetsloader.build_widgets(self, 'widgets', 'plugins')
+```
+即调用了widgetsloader的build_widgets函数，其中该函数中又接着调用了loader类下的build_widgets函数：
+```python
+datas = loader.build_widgets(toolspath)
+print("widgets = ", datas)
+```
+因为widgets有两个组件：navigator和histogram，其中histogram又细分为histogram和curve两个组件，因为这一步输出的结果为：
+```python
+widgets =  (<module 'imagepy.widgets' from 'D:\\imagepy-master\\imagepy\\widgets\\__init__.py'>, [(<module 'imagepy.widgets.histogram' from 'D:\\imagepy-master\\imagepy\\widgets\\histogram\\__init__.py'>, [<class 'imagepy.widgets.histogram.histogram_wgt.Plugin'>, <class 'imagepy.widgets.histogram.curve_wgt.Plugin'>]), (<module 'imagepy.widgets.navigator' from 'D:\\imagepy-master\\imagepy\\widgets\\navigator\\__init__.py'>, [<class 'imagepy.widgets.navigator.navigator_wgt.Plugin'>])])
+```
+注意，仍然是(pg, subtree)这样的返回格式。UI上使用了wxPython的Choicebook来在同一个组件类的不同插件间进行选择。navigator、histogram和curve这三个组件也都是在wxPython的Panel基础上进行定制，高级，见识了~~
+
 # 创建底部状态栏
 ```python
 self.stapanel = stapanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
