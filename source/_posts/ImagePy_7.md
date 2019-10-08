@@ -5,6 +5,10 @@ categories: computational material science
 date: 2019-9-30
 ---
 
+%%%%%%%%%%%% 更新日志 %%%%%%%%%%%%%
+2019-10-4 更新：增加参数对话框ParaDiglog部分的解析
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 参考文献：
 [Demo Plugin](https://github.com/Image-Py/demoplugin/blob/master/READMECN.md)
 [ImagePy开发文档 —— 自由引擎](https://zhuanlan.zhihu.com/p/25483752)
@@ -80,6 +84,10 @@ def buildItem(parent, root, item):
 
 ## run()方法
 核心函数，para 将作为参数传入，在这里做你想要做的。
+
+## load()方法
+如果return结果为False，插件将中止执行。默认返回True，如有必要，可以对其进行重载，进行一系列条件检验，如不满足，IPy.alert弹出提示，并返回False。
+
 ## start()方法
 启动函数。之所以会启动，就是因为之前在创建菜单时的按键绑定：
 ```python
@@ -103,7 +111,7 @@ def start(self, para=None, callback=None):
         else:
             self.runasyn(para, callback)
 ```
-首先判断self.load()，从前面代码可以看出，这条语句不会执行。继续往下，判断para是否不为None或者self.show()是否为True，如果两者有其一满足，则继续往下走，然后就会以新开一个线程或在这个线程下直接运行self.runasyn()，这个函数就会继续调用self.run()方法。
+首先判断self.load()，如果特定插件有重载这个函数，那么就会执行。继续往下，判断para是否不为None或者self.show()是否为True，如果两者有其一满足，则继续往下走，然后就会以新开一个线程或在这个线程下直接运行self.runasyn()，这个函数就会继续调用self.run()方法。
 
 下面通过三个基于Free引擎的三个事例插件详细探究。 
 
@@ -148,7 +156,96 @@ class Plugin(Free):
     def run(self, para=None):
         IPy.alert('Name:\t%s\r\nAge:\t%d'%(para['name'], para['age']))
 ```
-注意此时设置了para和view都不为None，那么在start()方法中，就会因为view有值而进入交互模式，弹出一个对话框，这个对话框也是定制的，基类是wxPython的Diglog类。para是接收的具体参数，view来控制这个对话框的显示样式。这个插件也是重写了run()函数，将之前对话框中输入的数值显示出来。
+注意此时设置了para和view都不为None，那么在start()方法中，就会因为view有值而进入交互模式，弹出一个对话框，这个对话框也是定制的，基类是wxPython的Diglog类。para是接收的具体参数，view来控制这个对话框的显示样式。
+
+那么这个对话框是如何自定义接收参数的界面并传递参数的呢，一切要从free引擎的show()方法入手：
+```python
+def show(self):
+    if self.view==None:
+        return True
+    with ParaDialog(WindowsManager.get(), self.title) as dialog:
+        dialog.init_view(self.view, self.para, False, True)
+        return dialog.ShowModal() == wx.ID_OK
+```
+ParaDialog就是那个定制的基于wxPython Dialog类的对话框类，它负责解析“你是谁”插件中的para和view参数。
+首先看它的入口函数：
+```python
+def init_view(self, items, para, preview=False, modal = True):
+    print("*********Enter init_view ********")
+    print("para = ", para)
+    print("items = ", items)
+    self.para = para
+
+    for item in items:
+        print("item = ", item)
+        print("Ctrl = ", widgets[item[0]])
+        print("key = ", item[1])
+        print("pre/postfix = ", item[2:])
+        self.add_ctrl_(widgets[item[0]], item[1], item[2:])
+```
+
+针对于“你是谁”插件，上面的一系列print输出就是：
+```python
+*********Enter init_view ********
+para =  {'name': '', 'age': 0} 
+items =  [(<class 'str'>, 'name', 'name', 'please'), (<class 'int'>, 'age', (0, 120), 0, 'age', 'years old')]
+item =  (<class 'str'>, 'name', 'name', 'please')
+Ctrl =  <class 'imagepy.ui.widgets.normal.TextCtrl'>
+key =  name
+pre/postfix =  ('name', 'please')
+item =  (<class 'int'>, 'age', (0, 120), 0, 'age', 'years old')
+Ctrl =  <class 'imagepy.ui.widgets.normal.NumCtrl'>
+key =  age
+pre/postfix =  ((0, 120), 0, 'age', 'years old')
+```
+可以看出，它将view的每个元组的第一项都解析成了它自定义的类，比如imagepy.ui.widgets.normal.TextCtrl和imagepy.ui.widgets.normal.NumCtrl，具体的解析关系就是在panelconfig.py的最上面的：
+```python
+widgets = { 'ctrl':None, 'slide':FloatSlider, int:NumCtrl,
+            float:NumCtrl, 'lab':Label, bool:Check, str:TextCtrl,
+            list:Choice, 'img':ImageList, 'tab':TableList, 'color':ColorCtrl,
+            'any':AnyType, 'chos':Choices, 'fields':TableFields,
+            'field':TableField, 'hist':HistCanvas, 'cmap':ColorMap}
+```
+它是一个字典，因此很容易就将key-value对应起来。
+注意，这个地方在接收输入参数时，还有一个特别灵巧的地方：
+```python
+def add_ctrl_(self, Ctrl, key, p):
+    ctrl = Ctrl(self, *p)
+    if not p[0] is None:
+        self.ctrl_dic[key] = ctrl
+```
+因为不同类型的输入框需要不同数目的参数，比如接收字符串文本时，需要有名称和单位这样的提示语，那么就需要定义prefix和suffix，如果接收数值，还需要定义数值范围、精度等信息，因此参数的数目是不固定的，这里就运用了Python的可变参数的功能，这里使用一个星号来接收不定长度的元组参数（还可以用两个星号来接收不同长度的字典参数）。关于可变长参数，如下是一篇很好的教程：
+[Python 优雅的使用参数 - 可变参数（*args & **kwargs)](https://n3xtchen.github.io/n3xtchen/python/2014/08/08/python-args-and-kwargs)
+同时add_ctrl_()的接下来一句话将不同的组件与key相联系起来，key参数是view与para联系的纽带，如reset()方法中所示：
+```python
+def reset(self, para=None):
+    if para!=None:self.para = para
+    #print(para, '====')
+    for p in list(self.para.keys()):
+        if p in self.ctrl_dic:
+            self.ctrl_dic[p].SetValue(self.para[p])
+```
+通过查看是否两者都有相同的key，来读取para中的value大小并赋值给相应的对话框。
+再总结一下“你是谁”插件中view的写法：
+str：用于接收文本字符串，view中的用法为：(str, key, prefix, suffix)，key是para中的key，prefix和suffix分别是输入框前后的提示内容，如title和unit；
+int：用于接收整型数值，view中的用法为：(int, key, (lim1, lim2), accu, 'prefix', 'suffix')，其中key是para中的key，limit用于限定输入数值的范围，accu限定小数点位数，prefix和suffix用作输入框前后的提示内容。
+另外，还有一点需要注意，仔细查看ImagePy自定义的TextCtrl和NumCtrl可以看到这样的事件绑定：
+```python
+    self.ctrl.Bind(wx.EVT_KEY_UP, self.ontext)
+def Bind(self, z, f):self.f = f  
+def ontext(self, event):
+    self.f(event)
+```
+这个地方的运行原理是这样的：TextCtrl等输入框都绑定了按键弹起EVT_KEY_UP这个事件，即任何一个键弹起时，都会触发ontext()方法，这个方法又调用了self.f()方法，那么self.f()方法是怎样的？其实就是上面的Bind()函数，它在ParaDiglog类中是这样执行的：
+```python
+def add_ctrl_(self, Ctrl, key, p):
+    ctrl = Ctrl(self, *p)
+    if not p[0] is None:
+        self.ctrl_dic[key] = ctrl
+    if hasattr(ctrl, 'Bind'):
+        ctrl.Bind(None, self.para_changed)
+```
+即如果添加的输入框有Bind()函数，那么就执行输入框的Bind()函数，将ParaDialog的para_changed()方法传入，即将它赋值给了TextCtrl的self.f()方法，所以，上面的ontext就是实际执行了para_changed()方法。所以，千万不要将ImagePy自定义的TextCtrl中的Bind()方法理解成wxPython的Bind()方法，后者可以绑定鼠标事件、键盘事件等，但前者只是自定义的方法，只是一个普通的用户函数，但是名字很容易让人迷惑。
 
 # 问卷调查
 这个插件详细说明了怎样设置参数和定制对话框样式。
