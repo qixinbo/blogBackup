@@ -10,7 +10,8 @@ date: 2016-01-12 22:40:47
 # Self-Introduction:
 
 Xin Bo Qi (亓欣波) 
-- 2017.9 - Now, Postdoc in Department of Mechanical Engineering, Tsinghua University
+- 2019.9 - Now, Research Scientist in Corporate Technology, Siemens Ltd. China
+- 2017.9 - 2019.9, Postdoc in Department of Mechanical Engineering, Tsinghua University
 - 2011.9 - 2017.6, PhD in Materials Process Modeling Division of Institute of Metal Research, Chinese Academy of Sciences
 - 2007.9 - 2011.6, Bachelor in Shandong University
 

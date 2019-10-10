@@ -136,19 +136,55 @@ else:
 然后就判断show()方法是该取反插件自己的还是Filter基类的，因为取反插件没有定义show()，所以它就默认调用的是Filter的show，因此实际就执行的else情形的代码。
 插一句，关于__class__的用法，见：
 [python中的__class__](https://luobuda.github.io/2015/01/16/python-class/)
-那么，就看ok()方法干了啥。其实ok()的主要作用就是根据不同情形决定调用process_one()还是process_stack()，即处理单张图像，还是一个图像栈。注意，ips.snap作为这两个函数的src参数，防止对源图像进行污染。
-因为这里是一张图像，所以是调用了process_one()方法，那么看这个方法又调用了process_channels()方法，即对通道进行处理：
+那么，就看ok()方法干了啥。其实ok()的主要作用就是根据不同情形决定调用process_one()还是process_stack()，即处理单张图像，还是一个图像栈。
+查看一下这两者的不同。先看两者的原始声明：
 ```python
-def process_channels(plg, ips, src, des, para):
-    if ips.channels>1 and not 'not_channel' in plg.note:
-        for i in range(ips.channels):
-            rst = plg.run(ips, src if src is None else src[:,:,i], des[:,:,i], para)
-            if not rst is des and not rst is None:
-                des[:,:,i] = rst
-    else:
-        rst = plg.run(ips, src, des, para)
-        if not rst is des and not rst is None:
-            des[:] = rst
-    return des
+def process_one(plg, ips, src, img, para, callafter=None)
+def process_stack(plg, ips, src, imgs, para, callafter=None)
 ```
-可以看出，在这里调用了插件的run()方法。
+再看它们实际调用时：
+```python
+process_one(self, ips, ips.snap, ips.img, para, callafter)
+process_stack(self, ips, ips.snap, ips.imgs, para, callafter)
+```
+分析一下实参和形参的对应关系：
+（1）self就是当前插件的指针，传给了它们俩的plg形参，因此可以在plg中调用插件的各个属性和方法；
+（2）ips作为整个图像的封装，传给了ips形参，注意ips与下面的src和img的关系，ips是一个统一封装，src和img仅是它的一部分；
+（3）ips.snap就是对图像的快照，如前所述，如果在note中设置了auto_snap，则提前就将图像copy一份到snap中，它传给了src形参；
+（4）ips.img或ips.imgs充分反映了两个函数的不同点：如果是处理一张图像，则传入ips.img，如前所述，这是调用了ImagePlus的img属性，它与当前的游标self.cur有关；如果是处理一个图像栈，则传入ips.imgs。将它们传给了img或imgs形参。注意src与img的区别，src是图像在处理前的一个copy，在代码中也是使用的copy()函数，所以src创建了一个新的对象，与源图像已没有关系；而img或imgs还是原来对象的引用。这里插一句，拷贝有深拷贝和浅拷贝的区别，同时python的拷贝与numpy的拷贝也有不同（这里查看snapshot()源码可知，snapshot是作用于单张图像上，所以是numpy的copy()，而不是python的copy包的copy()）：
+[Python numpy 中的 copy 问题详解](https://blog.csdn.net/u010099080/article/details/59111207)
+[理解 Python 引用、浅拷贝和深拷贝](http://wsfdl.com/python/2013/08/16/%E7%90%86%E8%A7%A3Python%E7%9A%84%E6%B7%B1%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B5%85%E6%8B%B7%E8%B4%9D.html)
+（5）para就是参数，注意它与self.para的区别，将它传给了para形参；
+（6）callafter：目前看就是默认None，没有对它进行改变，也是正常传给了para形参。
+
+这两个函数又都调用了process_channels()方法，即对通道进行处理。
+先来看该方法的声明：
+```python
+def process_channels(plg, ips, src, des, para)
+```
+再来看process_one()和process_stack()调用它时：
+```python
+# 对于一张图像
+rst = process_channels(plg, ips, src, buf if transint or transfloat else img, para)
+# 对于一个图像栈
+rst = process_channels(plg, ips, src, buf if transint or transfloat else i, para)
+```
+这样的实参与形参对应时，需要注意的就是buf实参与des形参的对应，如果note中表明了2int或2float，即需要转成int型或float型，就要先调用numpy的astype转换一下数据格式。然后实际process_channels中的des就是之前的self.img或self.imgs。
+
+再来看取反插件中的run()是怎样与Filter引擎进行对应的。对于取反插件：
+```python
+def run(self, ips, snap, img, para = None):
+    return 255-snap
+```
+在Filter引擎中（以单通道为例）：
+```python
+rst = plg.run(ips, src, des, para)
+```
+对应关系就是ips传给ips，src传给snap，des传给img，para传给para。
+经过上面分析，这四个实参：ips是通过IPy调用ImageManager获得的，src和des都是ips中的属性，para追根溯源是从取反插件的para属性中传入的，即下面这个赋值语句（即如果是菜单点击的话，在插件中直接将para=None就是将插件的para属性传给了run()方法）：
+```python
+def ok(self, ips, para=None, callafter=None):
+    if para == None:
+        para = self.para
+```
+所以对于插件的编写，只需要在重载run()方法时正确地写上这些参数，不需要考虑怎样给它们赋值，而是只定义逻辑操作即可，比如这里的直接用255减去snap的值。
