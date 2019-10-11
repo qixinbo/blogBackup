@@ -1,9 +1,13 @@
 ---
-title: ImagePy解析：8 -- 由新建图像谈起（引出IPy、ImagePlus、Canvas）
+title: ImagePy解析：8 -- 由新建图像谈起（引出IPy、ImagePlus、Canvas、ImageManager）
 tags: [ImagePy]
 categories: computational material science 
 date: 2019-10-5
 ---
+%%%%% 更新日志 %%%%%
+2019-10-11更新：增加ImageManager管理器解析
+%%%%%%%%%%%%%%%%%%%%
+
 
 参考文献：
 [创建图像](https://github.com/Image-Py/demoplugin/blob/master/doc/chinese/free.md#创建图像)
@@ -61,7 +65,6 @@ def show_img(imgs, title):
 可以看出，该方法又通过Publisher/Subscriber机制调用了showimg()方法，这里就引出了ImagePlus封装类：
 ```python
 ips = ImagePlus(imgs, title)
-showips(ips)
 ```
 ImagePlus接收imgs和title，组装成了ImagePlus类型的ips。
 
@@ -161,6 +164,8 @@ def img(self):return self.imgs[self.cur]
 # Canvas画布
 继续回到IPy，可以看出构造了ImagePlus类型的ips后，就继续调用IPy的showips()函数：
 ```python
+showips(ips)
+
 def showips(ips):
     if uimode()=='ipy':
         from .ui.canvasframe import CanvasPanel
@@ -188,3 +193,129 @@ def bindEvents(self):
 ```
 即当窗口绘制时，就会调用on_size()函数，然后就会执行一系列的绘图等操作。
 ImagePy的Canvas是个定制的wxPython Panel，它显示图像的基本原理是利用wxPython的GDI接口，具体是wxPython的BufferedDC，以及其DrawBitmap()函数。
+
+当创建Canvas对象后，接着就是将图像传入其中，即：
+```python
+# CanvasPanel设置ips
+canvasp.set_ips(ips)
+
+# CanvasFrame设置ips，实际也是调用的CanvasPanel
+frame.set_ips(ips)
+```
+然后就是将这些Panel显示出来：
+```python
+# imagepy风格的Panel显示
+curapp.canvasnb.add_page( canvasp, ips)
+curapp.auimgr.Update()
+
+# imagej风格的Panel显示
+frame.Show()
+```
+以imagej风格为例（因为它相对简单，直接Show()出来，没有标签页那些东西需要分析），当Show()方法（这是wxPython的每个frame显示时都要调用的方法）被调用时，就会产生“激活”事件（wx.ActivateEvent），即：
+```python
+self.Bind(wx.EVT_ACTIVATE, self.on_valid)
+def on_valid(self, event):
+    if event.GetActive():
+        ImageManager.add(self.canvaspanel.ips)
+        WindowsManager.add(self.canvaspanel)
+```
+一旦被激活，可以看出，此时接着就会将当前的ips和当前的panel加入到ImageManager管理器和WindowsManager管理器中。
+下面就以ImageManager为例详细分析一下管理器的运行路径。
+
+# ImageManager管理器
+管理器是 ImagePy 里很重要的一个概念，作为插件系统，各个部件都是松散耦合。而管理器的作用就是全局协调。（语出上面的参考文献）
+先来看一下ImageManager的全貌：
+```python
+class ImageManager:
+    imgs = []
+    @classmethod
+    def add(cls, ips):
+        …       
+    @classmethod
+    def remove(cls, ips):
+        …           
+    @classmethod
+    def get(cls, title=None):
+        …         
+    @classmethod
+    def get_titles(cls):
+        …       
+    @classmethod
+    def name(cls, name):
+        …
+```
+首先注意到这个类与之前类的定义的一个很大不同就是每个方法前面都加了classmethod修饰符，这样的好处是调用这些方法时不需要实例化，不需要 self 参数，但第一个参数需要是表示自身类的 cls 参数，可以来调用类的属性，类的方法，实例化对象等。参考资料有：
+[Python classmethod 修饰符](http://www.runoob.com/python/python-func-classmethod.html)
+[飘逸的python - @staticmethod和@classmethod的作用与区别](https://blog.csdn.net/handsomekang/article/details/9615239)
+[正确理解Python中的 @staticmethod@classmethod方法](https://zhuanlan.zhihu.com/p/28010894)
+
+然后具体看一下add()方法：
+```python
+@classmethod
+def add(cls, ips):
+    print("ips in add() = ", ips)
+    cls.remove(ips)
+    callback = lambda a: cls.remove(a())
+    def callback(a):
+        cls.remove(a())
+    print('~~~ ~~~ image add!')
+    cls.imgs.insert(0, weakref.ref(ips, callback))
+    print("~~~ ~~~ ImageManager = ", cls.imgs)
+
+@classmethod
+def remove(cls, ips):
+    for i in cls.imgs:
+        if i() == ips:
+            print("ips in remove() = ", ips)
+            print("~~~ ~~~ !!! remove imgs !!!")
+            cls.imgs.remove(i)
+```
+add()首先就调用了该类的remove()方法，在这个方法里会判断该图像ips是否在ImageManager的imgs列表中，如果有则删除。
+插一句，这个remove方法不只是在add()中调用，在关闭某张图像时，也会调用，因为：
+```python
+self.Bind(wx.EVT_CLOSE, self.on_close)
+def on_close(self, event):
+    WindowsManager.remove(self.canvaspanel)
+    ImageManager.remove(self.canvaspanel.ips)
+    self.canvaspanel.ips = None
+    self.canvaspanel.back = None
+    event.Skip()
+```
+然后定义了一个lambda表达式，虽然它是匿名函数，但是这里还是给它取了个名字callback，那其实这里有个问题需要后续研究一下，即这个lambda表达式与下面接着的显式定义的callback()函数有何不同。。。这个地方没明白，留作后续详细解读。。
+插一句lambda表达式的知识点，见：
+[什么时候使用Lambda函数？](https://foofish.net/lambda.html)
+
+然后就是将当前图像ips插入到imgs列表中，这里用到了weakref弱引用，参考资料见：
+[weakref --- 弱引用](https://docs.python.org/zh-cn/3/library/weakref.html)
+[python中的weakref(弱引用)](https://xrlin.github.io/python中的weakref(弱引用)/)
+[3.9. weakref — 实现对象的弱引用](https://learnku.com/docs/pymotw/weakref-a-weak-reference-to-an-object/3372)
+引用上面资料中对weakref的用途：
+>  python使用weakref模块可以实现对象的弱引用，python中的垃圾回收机制是通过对象的引用计数来触发的，当对象间有相互引用时，垃圾回收会失败，这时可以使用weakref模块实现对象的弱引用，给对象设置弱引用并不会增加对象的引用计数，所以不会影响内存的回收，同时也正是因为弱引用不会增加对象的 引用计数，弱引用并不能保证原对象存在，弱引用的初衷是为了在进行大对象处理时实现缓存机制，比如从而节省资源占用，比如当你需要处理大量的二进制图片文件对象时，为了方便读写，我们需要进行一个图片名称到图片对象的映射，如果使用字典进行存储对象和名称的映射的存储，那么在程序运行期间，所有的图片对象都不会被销毁，因为此时对象已经作为dict对象中的key或者value，这就造成了过多的资源消耗，若此时使用weakref模块的WeakKeyDictionary和WeakValueDictionary类对对象进行弱引用，则可以减少资源占用，方便进行内存回收。
+
+> 回调函数callback的用途：在引用 「死亡」 并且没有其他引用指向原始对象的时候将引用对象作为参数传递给回调函数。这个功能的一种应用方法是从缓存中删除弱引用对象。
+
+有一点需要额外注意的是，使用weakref.ref()获得对象引用后，下面调用时需要加上括号才能获得原对象，如果是使用weakref.proxy()获得引用，则调用时不需要加上括号。
+
+下面做一个测试，看看上面的代码中的print信息都有啥。
+具体操作是这样的：先新建一个图像，名为Undefined，然后再新建一个图像，名为Undefined-1，然后关闭Undefined-1。
+操作下来，print的信息如下：
+```python
+ips in add() =  <imagepy.core.wraper.imageplus.ImagePlus object at 0x000002914889F5C0>
+~~~ ~~~ image add!
+~~~ ~~~ ImageManager =  [<weakref at 0x0000029148895548; to 'ImagePlus' at 0x000002914889F5C0>]
+
+ips in add() =  <imagepy.core.wraper.imageplus.ImagePlus object at 0x0000029148883198>
+~~~ ~~~ image add!
+~~~ ~~~ ImageManager =  [<weakref at 0x00000291447469A8; to 'ImagePlus' at 0x0000029148883198>, <weakref at 0x0000029148895548; to 'ImagePlus' at 0x000002914889F5C0>]
+ 
+ips in remove() =  <imagepy.core.wraper.imageplus.ImagePlus object at 0x0000029148883198>
+~~~ ~~~ !!! remove imgs !!!
+ips in add() =  <imagepy.core.wraper.imageplus.ImagePlus object at 0x000002914889F5C0>
+ips in remove() =  <imagepy.core.wraper.imageplus.ImagePlus object at 0x000002914889F5C0>
+~~~ ~~~ !!! remove imgs !!!
+~~~ ~~~ image add!
+~~~ ~~~ ImageManager =  [<weakref at 0x0000029148895548; to 'ImagePlus' at 0x000002914889F5C0>]
+```
+从打印信息就可以一目了然地知道运行路径，即先add一张图像，然后再add另一张图像，这样ImageManager中就有两张图像引用，然后再remove第二张图像，这里注意，其实remove掉第二张照片后，第一张照片又会被add一下，然后再被remove，然后再insert到列表中，就像最后几行所示。原因就是因为第二张图像被删掉后，第一张图像的Canvas组件又被activated激活了，然后就会再调用add()方法。
+其实不光是删掉图像后会激活另一张图像，也可以通过点击另一张图像来激活它，就会发现上面的过程又会重复一遍，即先删除图像，再添加它，这样带来的效果就是当前被激活的图像始终在ImageManager的imgs列表的第一个。
+设计巧妙啊！
