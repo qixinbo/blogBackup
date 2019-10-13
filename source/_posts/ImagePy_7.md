@@ -6,6 +6,7 @@ date: 2019-9-30
 ---
 
 %%%%%%%%%%%% 更新日志 %%%%%%%%%%%%%
+2019-10-13 更新：修正之前关于自定义控件的Bind()函数的解释、增加对GUI界面绘制的理解
 2019-10-4 更新：增加参数对话框ParaDiglog部分的解析
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -229,14 +230,18 @@ def reset(self, para=None):
 再总结一下“你是谁”插件中view的写法：
 str：用于接收文本字符串，view中的用法为：(str, key, prefix, suffix)，key是para中的key，prefix和suffix分别是输入框前后的提示内容，如title和unit；
 int：用于接收整型数值，view中的用法为：(int, key, (lim1, lim2), accu, 'prefix', 'suffix')，其中key是para中的key，limit用于限定输入数值的范围，accu限定小数点位数，prefix和suffix用作输入框前后的提示内容。
-另外，还有一点需要注意，仔细查看ImagePy自定义的TextCtrl和NumCtrl可以看到这样的事件绑定：
+
+以下部分的解析之前有误，感谢霄龙哥的讲解~~
+
+ImagePy自定义的比如TextCtrl、NumCtrl等都是在wxPython标准组件上的组合。比如，自定义的TextCtrl是StaticText、标准组件TextCtrl和另外一个StaticText的组合。查看这个自定义的TextCtrl，可以发现有两个Bind()绑定：
 ```python
     self.ctrl.Bind(wx.EVT_KEY_UP, self.ontext)
 def Bind(self, z, f):self.f = f  
 def ontext(self, event):
     self.f(event)
 ```
-这个地方的运行原理是这样的：TextCtrl等输入框都绑定了按键弹起EVT_KEY_UP这个事件，即任何一个键弹起时，都会触发ontext()方法，这个方法又调用了self.f()方法，那么self.f()方法是怎样的？其实就是上面的Bind()函数，它在ParaDiglog类中是这样执行的：
+第一个Bind是对该自定义的TextCtrl中的标准TextCtrl组件的绑定，第二个是对该自定义的TextCtrl自身的绑定。
+这个地方的运行原理是这样的：标准TextCtrl等输入框都绑定了按键弹起EVT_KEY_UP这个事件，即任何一个键弹起时，都会触发ontext()方法，这个方法又调用了self.f()方法，那么self.f()方法是怎样的？其实就是第二行的Bind()函数，它在ParaDiglog类中是这样执行的：
 ```python
 def add_ctrl_(self, Ctrl, key, p):
     ctrl = Ctrl(self, *p)
@@ -245,7 +250,24 @@ def add_ctrl_(self, Ctrl, key, p):
     if hasattr(ctrl, 'Bind'):
         ctrl.Bind(None, self.para_changed)
 ```
-即如果添加的输入框有Bind()函数，那么就执行输入框的Bind()函数，将ParaDialog的para_changed()方法传入，即将它赋值给了TextCtrl的self.f()方法，所以，上面的ontext就是实际执行了para_changed()方法。所以，千万不要将ImagePy自定义的TextCtrl中的Bind()方法理解成wxPython的Bind()方法，后者可以绑定鼠标事件、键盘事件等，但前者只是自定义的方法，只是一个普通的用户函数，但是名字很容易让人迷惑。
+即如果该面板中添加的组件有Bind()函数，那么就调用它的Bind()函数，将ParaDialog的para_changed()方法传入，即将它赋值给了自定义TextCtrl的self.f()方法，所以，上面的ontext就是实际执行了para_changed()方法。
+因为自定义的TextCtrl基于wxPython的Panel类，其实仔细查看Panel类的继承关系就知道，wx.Panel继承自wx.Window，wx.Window又继承自wx.EventHandler，而wx.EventHandler中有Bind()函数，其定义为
+
+```python
+Bind(self, event, handler, source=None, id=wx.ID_ANY, id2=wx.ID_ANY)
+```
+因此，自定义TextCtrl中的这个Bind()方法就是对它的重载：
+```python
+def Bind(self, z, f):self.f = f
+```
+即z就是个事件event，f就是句柄或称事件处理函数handler。因此，调用Bind()的时候就是给定两个参数，一个是event，一个是handler。
+
+这个地方龙哥又延伸了一下：
+> 其实所有的控件，本质上都是GDI draw出来的（查看ImagePy的Histgram的panel就知道都是调用了GDI绘图），包括按钮、选项卡和文本框等等。
+> 所有的控件本质上都是一个panel，可以draw自己（根据数据进行draw），也可以响应事件（基础事件也只有鼠标点击和键盘，具体是哪个键则是操作系统维护的）。所以，控件的核心就是数据关联，然后draw和Bind。
+> 举个例子：ImagePy的表格控件，也只是一个panel，要做的事情就是关联数据、维护表格行列宽度、绘制滚动条，然后计算显示的范围、绘制行列分割线、绘制每个单元格的值。然后重载鼠标单击事件，对外暴露成一个Bind，关联一个特殊的标识符，比如叫wx.EVT_Cell_Clicked，然后根据鼠标点击的x和y，计算出对应的单元格，然后高亮绘制，看起来就像是选中了。
+> 没有现成的控件，就要从panel开始重载（自己动手、丰衣足食）。
+
 
 # 问卷调查
 这个插件详细说明了怎样设置参数和定制对话框样式。
