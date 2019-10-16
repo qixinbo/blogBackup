@@ -8,7 +8,7 @@ date: 2019-10-13
 参考文献：
 [Python 的 import 机制](https://loggerhead.me/posts/python-de-import-ji-zhi.html)
 [Python 相对导入与绝对导入](http://blog.konghy.cn/2016/07/21/python-import-relative-and-absolute/)
-[python: $__main__$ is not a package](https://blog.csdn.net/junbujianwpl/article/details/79324814)
+[python: __main__ is not a package](https://blog.csdn.net/junbujianwpl/article/details/79324814)
 
 # Python import的搜索路径
 import的搜索路径为：

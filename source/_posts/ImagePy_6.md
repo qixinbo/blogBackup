@@ -23,7 +23,7 @@ GDI是图形设备接口Graphics Device Interface的缩写，主要任务是负�
 在绘图之前，需要先创建一个设备上下文Device Context对象。在wxPython中，称为wx.DC，但它不能直接调用，需要使用它的一系列的派生类才行。比如：
 （1）wx.ScreenPC：可以在屏幕的任意位置绘图；
 （2）wx.ClientDC：用来在窗口的工作区绘图，即去除窗口的标题和边框；
-（3）wx.PaintDC：也在窗口的工作区绘图，但与ClientDC的不同点在于：PaintDC仅能在wx.PaintEvent中使用，而ClientDC不能在wx.PaintEvent中不能；
+（3）wx.PaintDC：也在窗口的工作区绘图，但与ClientDC的不同点在于：PaintDC仅能在wx.PaintEvent中使用，而ClientDC不能在wx.PaintEvent中使用；
 （4）wx.MemoryDC：用来在位图上绘图；
 （5）wx.PostScriptDC：用于输出PostScript文件；
 

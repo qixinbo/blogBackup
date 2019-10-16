@@ -3,17 +3,13 @@ title: about
 date: 2016-01-12 22:40:47
 ---
 
-# Here is my detailed CV:
-- [Resume](https://www.jianguoyun.com/p/DS_c0l0Q5NH7Bhj3gXs)
-- [简历](https://www.jianguoyun.com/p/DfaLAzcQ5NH7Bhj9gXs)
-
 # Self-Introduction:
 
 Xin Bo Qi (亓欣波) 
-- 2019.9 - Now, Research Scientist in Corporate Technology, Siemens Ltd. China
+- 2019.9 - Present, Research Scientist in Corporate Technology, Siemens Ltd. China
 - 2017.9 - 2019.9, Postdoc in Department of Mechanical Engineering, Tsinghua University
-- 2011.9 - 2017.6, PhD in Materials Process Modeling Division of Institute of Metal Research, Chinese Academy of Sciences
-- 2007.9 - 2011.6, Bachelor in Shandong University
+- 2011.9 - 2017.6, PhD in Division of Materials Processing Modeling, Institute of Metal Research, Chinese Academy of Sciences
+- 2007.9 - 2011.6, Bachelor in School of Materials Science & Engineering, Shandong University
 
 # Skills:
 - Programming languages: C/C++, Mathematica, Python
