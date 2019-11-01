@@ -71,6 +71,7 @@ date: 2016-01-13 10:37:25
 - [YouTube 1080p downloader | ClipConverter](https://www.clipconverter.cc/)
 - [Make PDF easy | smallpdf.com](http://smallpdf.com/)
 - [在线图片、pdf压缩 | 压缩比很高](https://docsmall.com/)
+- [图像文件在线编辑](https://www.iloveimg.com/zh-cn)
 - [免费在线OCR | Online OCR](http://www.onlineocr.net/)
 - [File type converter | convertfiles.com](http://www.convertfiles.com)
 - [Word cloud art | Tagul](https://tagul.com/)
