@@ -10,9 +10,9 @@ date: 2019-11-17
 
 # 图像准备
 首先创建一张10 pixels乘以10 pixels的背底黑色、中间白色的图像，如下图所示（下图仅是为了显示，实际图像是100个像素的面积大小，这样是为了后面显示像素矩阵时更方便）：
-![](https://img02.sogoucdn.com/app/a/100520146/18187374630a59bd87ccdd12312d59e0)
+![](https://user-images.githubusercontent.com/6218739/69029452-e91cfe00-0a0f-11ea-9e7f-b13dec002fc2.png)
 然后上面这张图像不能直接传入findmax脚本中，实际用到的是它的距离变换图（注意将这张图的显示范围调整为0-3，因为面积很小，所以距离很近，如果正常0-255显示则就是一片黑色）：
-![](https://img04.sogoucdn.com/app/a/100520146/04762e586c7e679dac12b558bdd653f3)
+![](https://user-images.githubusercontent.com/6218739/69029482-04880900-0a10-11ea-80a9-496a538fabd5.png)
 这张图像的像素矩阵就是：
 ```python
 [[0 0 0 0 0 0 0 0 0 0]

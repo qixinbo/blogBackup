@@ -526,8 +526,7 @@ def lookup(img, lut, out, mode='set'):
 ## 仿射变换
 [使用python对2D坐标点进行仿射变换](https://sparkydogx.github.io/2018/09/03/affine-with-python/)
 仿射变换就是对原图进行缩放、旋转、平移等操作，其示意图如下图（取自上面的文献）：
-![](https://img04.sogoucdn.com/app/a/100520146/866b111c86d5ad7bc45c48c4f482f5b4)
- 
+![](https://user-images.githubusercontent.com/6218739/69029568-54ff6680-0a10-11ea-879e-e1df857d0df2.jpg) 
 可以通过下面的代码进行探究：
 ```python
 import numpy as np
