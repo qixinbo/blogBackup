@@ -1,5 +1,5 @@
 ---
-title: Kaggle钢铁赛：基于PyTorch/Unet算法的钢材表面缺陷检测——（1）数据集分析和可视化
+title: Kaggle钢铁赛：基于PyTorch/UNet算法的钢材表面缺陷检测——（1）数据集分析和可视化
 tags: [Machine Learning, PyTorch]
 categories: programming
 date: 2020-2-15
@@ -10,7 +10,7 @@ Kaggle上有一个[钢材表面缺陷检测的竞赛](https://www.kaggle.com/c/s
 
 这次解析分为两部分：
 （1）第一部分，即本文，是一个预备性工作，即对该竞赛的数据集的分析和可视化，参考的是这个notebook——[clear mask visualization and simple eda](https://www.kaggle.com/go1dfish/clear-mask-visualization-and-simple-eda)。感谢GoldFish的分享。
-（2）第二部分，参见另一篇文章，即算法分析，参考的是Rishabh Agrahari的[使用PyTorch框架及Unet算法的notebook](https://www.kaggle.com/rishabhiitbhu/unet-starter-kernel-pytorch-lb-0-88)。
+（2）第二部分，参见[另一篇文章](https://qixinbo.info/2020/02/16/kaggle-steel-2/)，即算法分析，参考的是Rishabh Agrahari的[使用PyTorch框架及UNet算法的notebook](https://www.kaggle.com/rishabhiitbhu/unet-starter-kernel-pytorch-lb-0-88)。
 
 其他参考文献：
 - [kaggle数据挖掘比赛基本流程](https://kakack.github.io/2017/09/%E8%BD%AC-Kaggle%E6%95%B0%E6%8D%AE%E6%8C%96%E6%8E%98%E6%AF%94%E8%B5%9B%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B/)

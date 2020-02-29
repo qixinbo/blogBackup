@@ -1,5 +1,5 @@
 ---
-title: Kaggle钢铁赛：基于PyTorch/Unet算法的钢材表面缺陷检测——（2）算法分析
+title: Kaggle钢铁赛：基于PyTorch/UNet算法的钢材表面缺陷检测——（2）算法分析
 tags: [Machine Learning, PyTorch]
 categories: programming
 date: 2020-2-16
@@ -11,9 +11,9 @@ Kaggle上有一个[钢材表面缺陷检测的竞赛](https://www.kaggle.com/c/s
 
 这次解析分为两部分：
 
-（1）第一部分，即上面一篇文章，是一个预备性工作，即对该竞赛的数据集的分析和可视化，参考的是这个notebook[clear mask visualization and simple eda](https://www.kaggle.com/go1dfish/clear-mask-visualization-and-simple-eda)。感谢GoldFish的分享。
+（1）第一部分，即[上一篇文章](https://qixinbo.info/2020/02/15/kaggle-steel/)，是一个预备性工作，即对该竞赛的数据集的分析和可视化，参考的是这个notebook[clear mask visualization and simple eda](https://www.kaggle.com/go1dfish/clear-mask-visualization-and-simple-eda)。感谢GoldFish的分享。
 
-（2）第二部分，即本文，参考的是Rishabh Agrahari的[使用PyTorch框架及Unet算法的notebook](https://www.kaggle.com/rishabhiitbhu/unet-starter-kernel-pytorch-lb-0-88)，中间穿插了很多背景知识介绍。
+（2）第二部分，即本文，参考的是Rishabh Agrahari的[使用PyTorch框架及UNet算法的notebook](https://www.kaggle.com/rishabhiitbhu/unet-starter-kernel-pytorch-lb-0-88)，中间穿插了很多背景知识介绍。
 
 再次声明一下，本次训练是在Google Colab上进行，所以有的命令行命令有些许不同，比如sh命令都加上了叹号，不过不影响理解。
 
@@ -29,7 +29,7 @@ Kaggle上有一个[钢材表面缺陷检测的竞赛](https://www.kaggle.com/c/s
 -[UNet以ResNet34为backbone in keras](https://blog.csdn.net/m0_37477175/article/details/83861678)
 -[一大波PyTorch图像分割模型来袭，俄罗斯程序员出品新model zoo](https://www.qbitai.com/2019/05/2157.html)
 
-这个notebook没有用Unet传统的编码器和解码器，而是用的预训练的resnet18网络作为编码器，再在此基础上，构建相应的解码器。这个带预训练resnet18的Unet是借用了这个开源库[segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)。该库目前提供了5种模型结构，每个架构有46种可用的编码器，且所有的编码器都具有预训练权重，因此广受好评。以上内容的具体原理可以参见上面的参考文献的描述。
+这个notebook没有用UNet传统的编码器和解码器，而是用的预训练的resnet18网络作为编码器，再在此基础上，构建相应的解码器。这个带预训练resnet18的UNet是借用了这个开源库[segmentation_models.pytorch](https://github.com/qubvel/segmentation_models.pytorch)。该库目前提供了5种模型结构，每个架构有46种可用的编码器，且所有的编码器都具有预训练权重，因此广受好评。以上内容的具体原理可以参见上面的参考文献的描述。
 
 在原notebook中，Rishabh Agrahari在Kaggle的kernel中没有正确通过pip安装这个库，所以他把整个库下载下来然后传到kaggle数据集中了，但实测在Colab中可以通过pip成功安装，如下：
 
@@ -300,7 +300,7 @@ def compute_iou_batch(outputs, labels, classes=None):
 import segmentation_models_pytorch as smp
 model = smp.Unet("resnet18", encoder_weights="imagenet", classes=4, activation=None)
 ```
-对Unet网络设定具体的参数，如backbone选择resnet18，预训练权重为imagenet，四分类，无激活函数等。
+对UNet网络设定具体的参数，如backbone选择resnet18，预训练权重为imagenet，四分类，无激活函数等。
 可以具体看一下该模型：
 ```python
 model
