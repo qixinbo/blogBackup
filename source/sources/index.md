@@ -47,15 +47,15 @@ date: 2016-01-13 10:37:25
 - [GraphPipe by Oracle: Machine Learning Model Deployment Made Simple](https://github.com/oracle/graphpipe)
 
 # Search:
-- [电子书下载](http://cn.epubee.com/books/)
+- [全国图书馆参考咨询联盟](http://www.ucdrs.superlib.net)
+- [ePUBee电子书](http://cn.epubee.com/books/)
+- [鸠摩搜索- 文档搜索引擎](https://www.jiumodiary.com/)
 - [大木虫学术导航](http://www.4243.net/)
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
+- [SOCKBOOM 科学上网](https://sockboom.vip)
+- [iKuuu 科学上网](https://ikuuu.co)
+- [Jiasu.im 科学上网](http://i.jiasu.im/app.js)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
-- [u9un](http://cp.u9un.com)
-- [ssr在线解析](https://xiaohutong.org/)
-- [看世界穿越服务](https://www.ssbeer.info/) 
-- [依米](https://pro.eimi.me/)
-- [Puff云服务](https://www.puffss.me)
 - [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/)
 
 
