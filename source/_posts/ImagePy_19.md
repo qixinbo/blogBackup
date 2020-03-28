@@ -9,7 +9,7 @@ ImagePy/sciwx有个Mark模式，即在图像上面可以再绘制其他图形，
 本文是对该Mark模式的解析。
 
 # demo
-先给出一个小的demo，重要就是为了看Mark模式的输入输出，方便后面在此基础上二次开发。
+先给出一个小的demo，主要就是为了看Mark模式的输入输出，方便后面在此基础上二次开发。
 ```python
 from sciwx.mark.mark import GeometryMark
 
