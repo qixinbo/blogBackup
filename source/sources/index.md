@@ -17,6 +17,7 @@ date: 2016-01-13 10:37:25
 
 
 # Widgets:
+- [基于Web的语义分割标注工具](https://github.com/Hitachi-Automotive-And-Industry-Lab/semantic-segmentation-editor)
 - [OpenAPI/RestAPI工具集合](https://openapi.tools)
 - [网络视频下载器](https://www.tubeninja.net/zh-hans/)
 - [视频解析下载器](https://www.urlgot.com/zh_CN/)
