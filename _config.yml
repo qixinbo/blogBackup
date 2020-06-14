@@ -77,6 +77,6 @@ deploy:
   type: git
   repo: 
        github: git@github.com:qixinbo/qixinbo.github.io.git
-       coding: git@git.coding.net:qixinbo/qixinbo.git
+#       coding: git@git.coding.net:qixinbo/qixinbo.git
   branch: master
 
