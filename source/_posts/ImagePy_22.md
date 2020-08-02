@@ -2,7 +2,7 @@
 title: ImagePy解析：22 -- 从零搭建一个图像处理软件
 tags: [ImagePy]
 categories: computational material science 
-date: 2020-6-19
+date: 2020-6-20
 ---
 
 ImagePy经过一次大的重构后，软件架构有了很大改变，将前端UI和后端数据结构进行了解耦：

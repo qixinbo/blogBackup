@@ -5,6 +5,10 @@ categories: computational material science
 date: 2019-12-20
 ---
 
+%%%%%%%%%%%%%%
+2020-8-2更新：增加寻找邻居标识的过程解析
+%%%%%%%%%%%%%%
+
 参考文献：
 [OpenCV分水岭Watershed算法的前因后果](http://qixinbo.info/2019/07/20/opencv-watershed/)
 [The Watershed Transformation](http://www.cmm.mines-paristech.fr/~beucher/wtshed.html)
@@ -316,8 +320,103 @@ array([[4294967295, 4294967295, 4294967295, 4294967295, 4294967295, 4294967295, 
 nbs = neighbors(img.shape, conn)
 ```
 该步是计算某个像素的邻居点的标识，比如它左侧的邻居像素标识就是-1，右侧的邻居标识就是1。neighbors函数的具体写法之所以看着繁琐，是为了适配任意维度，保证程序的鲁棒性。
-另外，这里用到了整个分水岭算法的第四个参数conn，即Full Connectivity，实测该参数是控制计算四邻域还是八邻域。
-默认full connectivity是False，那么在此例中，nbs就是：
+另外，这里用到了整个分水岭算法的第四个参数conn，即Full Connectivity，实测该参数是控制计算四邻域还是八邻域。默认full connectivity是False。
+寻找邻居标识的具体过程为：
+```python
+    block = generate_binary_structure(dim, conn)
+```
+即先生成一个二元的结构单元，这个结构单元的大小和内容由维度和连通性来决定。如果连通性为1，即寻找的是4邻域，另外，若dim为2，即图像的shape有二维，那么该结构单元为：
+```python
+[[False  True False]
+[ True  True  True]
+[False  True False]]
+```
+若dim为3，且连通性仍为1，则：
+```python
+[[[False False False]
+  [False  True False]
+  [False False False]]
+[[False  True False]
+  [ True  True  True]
+  [False  True False]]
+[[False False False]
+  [False  True False]
+  [False False False]]]
+```
+这里可以将其联想成一个3乘3的魔方，二维时候的4邻域就变成了三维时的6邻域，此时中心像素与邻居的距离都是1个棋盘距离；同理，二维时的8邻域就变成了三维时的18邻域，这时中心像素与邻居的距离都是2个棋盘距离以内；同时，三维时还有魔方的八个角点也作为邻居时的情形，此时中心像素与邻居的距离都是3个棋盘距离以内，即此时三维的邻域就是26邻域。
+
+下面的解析都以二维且4邻域为例：
+```python
+block[tuple([1]*dim)] = 0
+```
+这一步是将中心像素的标识置为0，因此，此时block变为：
+```python
+[[False  True False]
+[ True  Flase  True]
+[False  True False]]
+```
+接下来取得这些邻居所在的索引指标：
+```python
+idx = np.where(block>0)
+```
+idx的输出为：
+```python
+idx =  (array([0, 1, 1, 2], dtype=int64), array([1, 0, 2, 1], dtype=int64))
+```
+因此idx的行标号和列标号是分离的，还需要将它们组合起来：
+```python
+idx = np.array(idx, dtype=np.uint8).T
+```
+一个简单的转置操作即可实现，此时idx为：
+```python
+idx =  [[0 1]
+[1 0]
+[1 2]
+[2 1]]
+```
+然后：
+```python
+idx = np.array(idx-[1]*dim)
+```
+这一步是取得邻居与中心像素的相对距离，此时idx变为：
+```python
+idx =  [[-1  0]
+[ 0 -1]
+[ 0  1]
+[ 1  0]]
+```
+注意，此时这个相对距离还是以“图像”为载体，即是一个矩阵上的行列的相对距离，实际在使用时，是将图像压平为一个很长的一维链，所以下一步是根据图像的宽度将这里的相对距离转换为一维链上的相对距离：
+```python
+acc = np.cumprod((1,)+shape[::-1][:-1])
+```
+这一步是最重要的一步：
+（1）对shape的操作是先将它翻转，比如原来是(10, 110)，先翻转为(110, 10)，然后排除掉最后一个元素，即只取110，这是因为在一维链上的相对位置与图像宽度有关，而与高度无关；如果shape是(10, 110, 3)，即是一个三通道图像，那么排除最后一个元素后，就是(3, 110)。
+（2）接着是另一个精髓的操作，将(1,)这个元组与shape截取后的元组相加，注意元组相加其实是组合效果，即比如(1,)+(110, )等于(1, 110)，以及(1, )+(3, 110)等于(1, 3, 110)，这里之所以用(1,)相加，是为了对应与中心像素相同高度上的邻居。
+（3）最后是另一个神来之笔，即用numpy的累乘，这一步是用来将通道考虑进去。
+
+经过一系列操作，如果是二维的shape(10, 110)，那么acc为：
+```python
+acc =  [1 110]
+```
+如果是三维的shape(10, 110, 3)，那么acc为：
+```python
+acc =  [1  3 330]
+```
+至此，就知道了在一维链上邻居点相对中心像素的绝对距离，那么，针对于具体的邻居点，得到其具体的绝对距离：
+```python
+np.dot(idx, acc[::-1])
+```
+比如二维时结果为：
+```python
+array([-110,   -1,    1,  110])
+```
+三维时结果为：
+```python
+array([-330,   -3,   -1,    1,    3,  330])
+```
+以上就是寻找邻居标识的全部过程。
+
+在此例中，nbs就是：
 ```python
 array([-17,  -1,   1,  17])
 ```
