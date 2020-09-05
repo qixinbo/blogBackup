@@ -95,6 +95,9 @@ $$
 ![20200807152900_1](https://user-images.githubusercontent.com/6218739/89623622-80d8ba00-d8c7-11ea-9520-728ae9fc1f88.jpg)
 
 一些参考文章：
+[主成分分析（PCA）原理详解](https://zhuanlan.zhihu.com/p/37777074)
+[PCA算法 | 数据集特征数量太多怎么办？用这个算法对它降维打击！](https://juejin.im/post/6847902219635785741)
+[主成分分析（PCA）简明教程（翻译）](http://commanber.com/2017/04/05/pca-translation/)
 [深度学习的预处理：从协方差矩阵到图像白化](https://zhuanlan.zhihu.com/p/45140262)
 [PCA （主成分分析）详解 （写给初学者）](https://my.oschina.net/gujianhan/blog/225241#OSC_h2_1)
 [图像空间域分析之图像统计特征](https://cggos.github.io/computervision/image-process-moments.html)

@@ -5,6 +5,12 @@ categories: computational material science
 date: 2019-10-29
 ---
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+2020-9-5 更新：
+加入draw_image()和mix_img()方法的详解
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 前面系列文已经提到，ImagePy的画布Canvas类已经被抽象出来，可以被单独使用。
 本节就对该类做一个详细解析：因为Canvas类又调用了同一路径下的boxutil和imutil，所以本文的思路是先整体介绍它的运行机理，然后具体到某一功能时可以再详细查看下方的详细解释，这样不至于迷失在代码中。。
 
@@ -251,6 +257,11 @@ def draw_image(self, dc, img, back, mode):
 ```
 
 首先通过cross()方法取得了winbox和conbox这两个矩形框重叠的部分csbox（仍然见下方解析），然后计算csbox的宽度和高度，形成shape这个元组，这个大小是真正要作图的区域，而不是winbox和conbox这两个的大小。
+这里根据shape的大小，会创建几个变量：
+self.outimg：大小为shape、值全为0、类型为img.dtype
+self.outrgb：大小为shape+3通道（注意，是3通道）、值全为0、类型为np.uint8
+self.outint：大小为shape（注意，是单通道）、值全为0、类型为np.uint8
+然后就会调用两次图像混合。
 通过mat()方法得到偏移量和缩放因子，这两个参数都是后面仿射变换的重要参数。
 可以看出mix_img()方法调用了两次，分别是为了设置背景图和设置前景图。两者的顺序不能调换，因为第一次的调用返回的self.outrgb是作为背景图在第二次调用时进行图像混合。
 
@@ -498,30 +509,126 @@ def mix_img(img, m, o, shp, buf, rgb, byt, rg=(0,255), lut=None, cns=0, mode='se
 第九个是cns，通道标识；
 第十个是mode，混合模式。
 
-mix_img()方法主要操作就是仿射变换。关于仿射变换的具体细节见下面一小节。
-判断条件主要分两种情形：一是如果是用来显示RGB彩色图，那么就是使用set模式，然后直接做了仿射变换；二是如果是用来显示单一的某个通道的图像，即cns是一个整数，那么就会有很多模式可以设定，包括set、min、max、msk和浮点数等。具体看blend()一节。
-当cns是一个整数时，即只显示某个通道的图像时，这个地方有点绕，详细分析一下：
-（1）先通过仿射变换将img的特定通道投射到buf上：
+具体看一下mix_img的操作：
 ```python
-affine_transform(img[:,:,cns], m, o, shp, buf, 0, 'nearest')
+def mix_img(img, m, o, shp, buf, rgb, byt, rg=(0,255), lut=None, log=True, cns=0, mode='set'):
+    if img is None: return
+    img = img.reshape((img.shape[0], img.shape[1], -1))
 ```
-（2）再将buf传给byt：
+首先是对img进行一下reshape，这里是将img的格式统一一下，将原来的两维或三维数组统一为三维数组。
 ```python
-stretch(buf, byt, rg[cns])
+    if isinstance(rg, tuple): rg = [rg]*img.shape[2]
 ```
-（3）再混合图像：
+这里也是对范围range进行一下统一，如果rg为元组，则将其转化为与img的通道数相匹配的形式，比如原来rg是(0, 255)，若图像是三通道的，则经过转换后，rg变为：
 ```python
-lookup(byt, lut, rgb, mode)
+[(0, 255), (0, 255), (0, 255)]
 ```
-截止这个地方，需要分析一下这几个参数：
-byt就是某个通道的图像，lut就是查找表，rgb就是3通道的图像，mode就是某个模式。
-然后lookup()又调用了blend()：
+接下来是对通道的处理：
+如果cns是一个数，比如就选了一张彩色图中的一个通道显示，或者直接就是一张灰度图，那么：
 ```python
-def lookup(img, lut, out, mode='set'):
-    blend(lut[img], out, img, mode")
+    if isinstance(cns, int):
+        if np.iscomplexobj(buf):
+            affine_transform(img[:,:,0].real, m, o, shp, buf.real, 0, prefilter=False)
+            affine_transform(img[:,:,0].imag, m, o, shp, buf.imag, 0, prefilter=False)
+            buf = complex_norm(buf, buf.real, buf.imag, buf.real)
+        else:
+            affine_transform(img[:,:,cns], m, o, shp, buf, 0, prefilter=False)
+        stretch(buf, byt, rg[cns], log)
+        return lookup(byt, lut, rgb, mode)
 ```
-注意这里的函数原型与上面实际调用时的实参和形参的对比。
-即在实际调用blend()混合时，rgb作为混合的背景out，byt既是掩膜msk，同时lut[byt]作为掩膜经过查找表映射后的彩色图像，与前面的rgb进行混合。
+（1）首先判断一下buf是不是复数，这里应该是支持傅里叶变换的图像显示，暂且不分析；
+（2）否则，就对该图像（灰度图或彩图的某一通道）进行仿射变换，输出到buf中，接着通过stretch转移到byt中，然后再调用lookup，根据上面的分析，lookup实际调用了blend，只是中间转了一下，输入到blend中的是lut(byt)，即将原图用lut转一下，然后再图像混合到rgb，即此种情况下rgb中的颜色是原图在查找表lut中的值。
+
+如果通道标识cns是一个元组形式传入的，则：
+```python
+    for i,v in enumerate(cns):
+        if v==-1: rgb[:,:,i] = 0
+        elif mode=='set' and img.dtype==np.uint8 and rg[v]==(0,255) and not log:
+            affine_transform(img[:,:,v], m, o, shp, rgb[:,:,i], 0, prefilter=False)
+        else:
+            affine_transform(img[:,:,v], m, o, shp, buf, 0, prefilter=False)
+            stretch(buf, byt, rg[v], log)
+            blend(byt, rgb[:,:,i], byt, mode)
+```
+对通道标识cns进行遍历，这里有多个判断条件：
+（1）如果某个标识为-1，则将rgb中的相应通道置为0，
+（2）否则，如果mode为set，且满足dtype、rg的相应条件，则进行仿射变换，注意此时改变的是rgb的相应通道，即将img的相应通道的值经过放射变换赋值给rgb的相应通道。这种情况就是用来显示RGB彩色图；
+（3）若上述条件都不满足，则进行以下操作，这种情形就是用来显示彩色图的某些通道，但又与单独显示某通道不同：
+（3.1）仿射变换：注意这里的output是buf，因为buf是单一通道，所以这里直接就是对其本身进行作用；
+（3.2）stretch：目前这里的测试效果就是将buf的值同样赋值给byt，即byt也是img的仿射变换
+（3.3）blend：这里是混合模式的设置，注意这里是将byt和rgb的相应通道进行混合，改变的是rgb的值，注意，后面画布绘制出的也是基于self.rgb。
+
+经过上面对于通道标识cns的分析，就可以知道以下两者的不同：
+```python
+    image.cn = (0, -1, -1)
+    image.cn = 0
+```
+假设图像是一张RGB彩色图，前者是将绿色通道和蓝色通道都置为0，红色通道照常处理，最终呈现的还是三者的综合；而后者是仅选了红色通道，即将红色通道单独摘出来作为一张灰度图显示。
+
+mix_img()方法主要操作就是仿射变换和图像混合。关于仿射变换的具体细节见下面一小节。
+
+以下面的代码为例，看看具体是怎么搞的：
+```python
+    image = Image()
+    msk = np.zeros(astronaut().shape[:2], dtype=np.uint8)
+    msk[100:200,100:200] = 1
+    msk[200:300,200:300] = 2
+    msk[300:400,300:400] = 3
+
+    image.img = msk
+ 
+    bak = Image([astronaut()])
+    bak.cn = (0, 1, 2)
+
+    image.back = bak
+    image.mode = 'msk'
+
+    canvas.images.append(image)
+```
+注意，前景图是一个有个别位置不为0的掩膜，背景图是宇航员图，前景图的混合模式是msk。
+
+第一次调用“图像混合”方法时：
+```python
+            mix_img(back.img, m, o, shp, self.outbak,
+                self.outrgb, self.outint, back.rg, back.lut,
+                back.log, cns=back.cn, mode='set')
+```
+以宇航员astronaut()图像为例，传入的这些参数实际值是：
+back.img的shape是(512, 512, 3)，
+m是(4.0, 4.0)，这个值（包括下面的o和shp）不是固定的，与具体操作有关，这里不是绝对值，
+o是(0.0, 0.0)，
+shp是(128, 128)，
+self.outbak对应形参中的buf，即缓冲，是shape为(128, 128)的全为0的数组，
+self.outrgb对应形参中的rgb，即彩色图，是shape为(128, 128, 3)的全为0的数组，
+self.outint对应形参中的byt，即灰度图，是shape为(128, 128)的全为0的数组，
+back.rg是(0, 255)，即数值范围，
+back.lut是查找表，这里默认的是shape为(256, 3)的数组，由以下语句构建：
+```python
+default_lut = np.arange(256*3, dtype=np.uint8).reshape((3,-1)).T
+```
+具体的值为：
+```python
+array([[  0,   0,   0],
+       [  1,   1,   1],
+       [  2,   2,   2],
+       [  3,   3,   3],
+…
+       [ 254,  254,  254],
+       [ 255,  255,  255],
+```
+back.log是False，
+back.cn是通道标识，这里是(0, 1, 2)，
+mode为'set'。
+经过这一步的mix_img，改变的只有self.outrgb，其大小仍是(128, 128, 3)，但数值已经变成了img经过仿射变换后的数值。
+
+第二次调用“图像混合”方法时：
+```python
+        mix_img(img.img, m, o, shp, self.outimg,
+            self.outrgb, self.outint, img.rg, img.lut,
+            img.log, cns=img.cn, mode=img.mode)
+```
+注意，这一次是基于img.img，即前景图，相应的buf、rg、lut、log也都是前景图的属性，值得注意的是这一次仍然调用了self.outrgb，它的值经过了前面背景图的处理，已经变成了背景图的仿射变换。
+然后，这里因为是msk模式，先是将掩膜（再次强调掩膜是这里的前景图）仿射变换到buf，然后将buf和rgb进行混合，在掩膜不为0的地方，会将rgb的值置为掩膜的值，比如某些位置置为掩膜中的1，然后在显示时，就会去寻找lut中位置为1的颜色。
 
 ## 仿射变换
 [使用python对2D坐标点进行仿射变换](https://sparkydogx.github.io/2018/09/03/affine-with-python/)
