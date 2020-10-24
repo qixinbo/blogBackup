@@ -1,0 +1,174 @@
+---
+title: 胞状物体通用分割算法Cellpose解析：使用篇
+tags: [cellpose]
+categories: computational material science 
+date: 2020-10-24
+---
+
+Cellpose是一个对于胞状物体（比如细胞、晶粒、核、砖块等）进行分割的非常优秀的通用算法，其体现了深度学习在分割这类物体时的强大能力，同时其泛化效果也远超过传统图像处理算法，展现了数据驱动的深度学习所特有的“暴力美学”。
+
+# 试用
+Cellpose的源代码见[这里](https://github.com/MouseLand/cellpose)。
+同时开发者还搭建了网站来方便用户试用Cellpose：
+[Cellpose快速体验网站](http://www.cellpose.org/)：用户可以直接上传自己的图像来直接调用Cellpose，第一时间获得Cellpose的处理效果。
+如果用户觉得好，那么可以接着往下深度体验或钻研Cellpose了。
+
+# 安装
+Cellpose的安装有多种方式：
+
+## Google Colab在线运行
+开发者提供了一个运行在Google Colab上的运行示例脚本，用户可以直接拷贝一份这个脚本到自己的Colab上，然后在线运行。
+这种方式的优缺点如下：
+优点：可以白嫖Google的算力，不用自己费劲在本地搭建环境及购买硬件；
+缺点：Colab有运行时间和资源，且其不支持运行Cellpose的图形交互界面。
+
+## 可直接执行的二进制程序
+开发者使用PyInstaller在Intel处理器上对源代码进行了打包，形成了一个可执行的二进制程序（有Intel MKL加速，但没有GPU支持）。
+适用于Windows 10操作系统的程序从[这里](http://www.cellpose.org/windows)下载。下载后的程序就是传统的exe程序，可以双击运行它来启动GUI。也有命令行模式：
+
+```python
+cellpose.exe --dir Pictures/ --chan 2 --save_png
+```
+这种方式的优缺点如下：
+优点：直接运行开发者打包好的程序，无需自己配置本地环境；
+缺点：无法调用GPU计算，计算速度受限；程序启动速度慢；无法自己训练模型，只能使用已有算法模型。
+
+## pip包安装
+开发者也在pip仓库中上传了Cellpose代码，因此可以使用pip包管理方式来直接安装Cellpose包。
+这里还有四种不同的安装方式：分别取决于是否安装GUI、是否支持GPU计算。
+
+第一种：使用CPU计算且无GUI，则：
+```python
+pip install cellpose
+```
+
+第二种：使用CPU计算且有GUI，则：
+```python
+pip install cellpose[gui]
+```
+第三种和第四种都是使用GPU计算，因此需要提前配置好GPU环境，即三步走：安装最新GPU驱动、安装CUDA、安装cuDNN，这三步对于深度学习框架都是通用的，可以从搜索引擎上直接搜索教程。
+以上依赖安装时注意CUDA版本一定要与mxnet对应好，所以最好是先确定mxnet所需的CUDA版本，然后再具体安装CUDA和cuDNN。
+配置好GPU环境后，再安装mxnet的GPU版本：
+```python
+pip install mxnet-cu102
+```
+最后按上面第一种或第二种的pip命令来安装cellpose的无GUI版或有GUI版。
+
+## 源码安装
+最自由的方式就是直接从源码安装（虽然从pip包中实质也能获得源码，但pip包有可能不是最新的）。
+首先还是配置环境，根据是否要支持GPU，选择是否安装GPU驱动、CUDA和cuDNN。
+然后将github源码克隆一下：
+```python
+git clone https://github.com/MouseLand/cellpose.git
+```
+进入cellpose文件夹，运行：
+```python
+python -m cellpose
+```
+这种方式拥有最大的自由度和灵活性，能训练、能推理、也能自定义代码来满足自己的定制化需求。
+
+# 上手
+## 上手前准备
+对于深度学习来说，它的三大要素是算法、算力和数据。对于Cellpose，关于这三方面：
+算力：经过上面的安装过程，算力已经确定，可以是Google Colab的免费算力，也可以是本地环境的CPU或者GPU；
+算法：Cellpose的算法模型的基础框架是UNet，具体算法在源码中可以查阅；Cellpose的开发者还提供了其在大量图像上进行训练的预训练模型，该模型会在第一次运行Cellpose时自动从开发者服务器上进行下载；
+数据：开发者没有提供其训练数据集，不过提供了16张测试图片，可以从该[Google Drive网盘](https://drive.google.com/open?id=18syVlaix8cIlrnNF20pEWKMWUsKx9R9z)上下载。
+
+## GUI模式
+终端输入：
+```python
+python -m cellpose
+```
+启动GUI。
+（1）在GUI中加载图像（拖入图像或从File菜单中加载）；
+（2）设置模型：Cellpose中有两个模型，cytoplasm和nuclei，即细胞质模型和细胞核模型。比如下面这种图：
+![cyto-nuclei](https://user-images.githubusercontent.com/6218739/95010065-1ccd3a80-0659-11eb-9847-b4255b058238.png)
+根据生物课本上的知识，绿色部分就是细胞质，红色部分是细胞核，根据这两种物质，Cellpose分别有cyto和nuclei两种名称的模型来识别。用户自己的图像有可能不是这种生物图片，但可以根据相似性，来选择用细胞质（细胞质模型其实就是细胞cell模型，即将细胞核也纳入到整个细胞中）还是细胞核模型来分割。
+（3）设置通道：选择要分割的图像通道，比如上图中，如果想分割细胞质，即选择green通道；如果想分割细胞核，则选择red通道。如果是分割细胞质，且图中还有细胞核，则将chan设置为细胞质所在通道，而chan2通道设置为细胞核所在通道；如果分割细胞质但里面没有细胞核，则只设置chan即可，chan2设为None；
+（4）点击calibrate按钮来预估图中物体的尺寸；也可以手动输入cell diameter来设置。该预估的尺寸会通过左下方的红色圆盘体现；
+（5）点击run segmentation来运行模型。当进度条为100%时，模型预测完毕，可以通过是否勾选MASKS ON来调节是否显示分割后的掩膜。
+对于上面这张图，如果是分割细胞质/细胞，那么结果为：
+![cyto](https://user-images.githubusercontent.com/6218739/95039137-8b1a0780-0702-11eb-9ee0-260f64e3b548.png)
+如果是分割细胞核，那么结果为：
+![nuclei](https://user-images.githubusercontent.com/6218739/95039218-bef52d00-0702-11eb-92ae-d077946cd115.png)
+
+## 命令行模式
+上面GUI界面中的参数输入同样可以通过命令行模式来实现：
+比如：
+```python
+python -m cellpose --dir ~/images_cyto/test/ --pretrained_model cyto --chan 2 --chan2 3 --save_png
+```
+还有其他参数可以设置，比如：
+dir：图像所在路径；
+img_filter：文件名最后的字符（除了扩展名）作为过滤器；
+chan：要处理的通道，0是灰度通道，1是red通道，2是green通道，3是blue通道；
+chan2：在要处理cyto、同时图中有nuclei时设置，其为nuclei所在通道，0代表None，代表不设置，其他数值所代表的意思同上；
+pretrained_model：cyto是细胞质分割模型，nuclei是细胞核分割模型；
+diameter：图中物体的平均直径，默认是30；如果设为0，则Cellpose会自动估计；
+use_gpu：使用GPU，如果不添加该参数，则使用CPU；
+save_png：将分割掩膜存为png，轮廓存为ImageJ所使用的text文件；
+save_tif：将分割掩膜存为tif，轮廓存为ImageJ所使用的text文件；
+fast_model：通过关闭数据增强以及平均化4 networks来加速代码运行；
+all_channels：在所有图像通道上都运行Cellpose，仅用于自定义模型；
+no_npy：不存储_seg.npy文件；
+batch_size：批处理尺寸。
+
+所有的参数可以通过help参数来查看：
+```python
+python -m cellpose -h
+```
+
+## 代码模式
+与上面两种方式类似，也可以在Python代码中直接调用Cellpose进行编程：
+```python
+from cellpose import models
+import skimage.io
+
+model = models.Cellpose(gpu=False, model_type='cyto')
+
+files = ['img0.tif', 'img1.tif']
+
+imgs = [skimage.io.imread(f) for f in files]
+
+masks, flows, styles, diams = model.eval(imgs, diameter=None, channels=[0,0],
+                                         threshold=0.4, do_3D=False)
+```
+可以看出，使用代码调用Cellpose也非常简单，主要就是两步：配置模型models.Cellpose和使用模型进行推理model.eval。
+
+# 制作数据集
+Cellpose的GUI界面不仅能像上面那样用于运行模型，更重要的是可以利用它来制作数据集，从而基于自己的数据来训练模型。
+制作数据集的步骤也非常简单：
+（1）打开GUI，手动标注物体：右键点击开始标注，再次右键点击或者鼠标回到开始时的圆圈位置则结束标注；（标注时一定将图像中的物体全部都标注完，否则算法会将未标注的物体视为另一类，则会将算法弄晕）
+（2）存储标注图像：选择File菜单下的Save masks as PNG，则会将标注图像存为文件；（这个地方有一个坑：此处存储的masks数据格式为np.uint16，如果使用opencv的imread函数读入并显示，会都显示为0；而需要使用skimage的imread函数才能正确读入）
+（3）对文件进行组织：将原始图像和标注图像放到一个文件夹内，两者的匹配还需要遵循一定的命名规则，默认为：例如，原始图像名为wells_000.tif，则标注图像需要命名为wells_000_masks.tif。（也可以通过img_filter和mask_filter这两个参数来修改该默认规则）
+
+# 训练模型
+上一步制作好自己的数据集后，可以训练针对该数据集的Cellpose模型。
+（在开始训练之前，有一参数需要特别注意，即diameter参数：开发者提供的Cellpose预训练模型中将所有图像进行了resize，使得图像中物体的中位直径都为30像素（细胞质模型）或17像素（细胞核模型）；因此如果想训练快速且结果准确，就需要提前将图像resize成其中物体的中位直径约为30像素或17像素；或使用--diameter参数指定图像中大约的中位直径为多少像素。）
+训练Cellpose模型可以有两种方式：
+（1）在预训练模型基础上进行训练：
+这种方式又可以分为两种：
+一种是在开发者提供的预训练模型上进行训练：
+```python
+python -m cellpose --train --dir ~/images_cyto/train/ --test_dir ~/images_cyto/test/ --pretrained_model cyto --chan 2 --chan2 1
+```
+可以看出，相比于之前的只运行模型，多了--train这个参数及训练集和测试集数据所在路径。
+另外一种是在某一给定的预训练模型上进行训练：
+```python
+python -m cellpose --dir ~/images_cyto/test/ --pretrained_model ~/images_cyto/test/model/cellpose_35_0 --save_png
+```
+（2）从头训练模型：
+```python
+python -m cellpose --train --dir ~/images_nuclei/train/ --pretrained_model None
+```
+即，将参数pretrained_model置为None。
+
+# 贡献标注数据
+上面两步介绍了制作自己的数据集及自己训练模型，实际上开发者还提供了一个额外功能：上传自己的标注数据到开发者服务器上，用于再次训练模型。这样的好处有：（1）对于用户：用户可以不必自己训练模型，等开发者根据用户上传的数据再次训练好模型后，用户就可以直接使用；（2）对于开发者：通过用户“投喂”更多类别的图像，就可以形成更大的数据集来训练Cellpose，从而使得Cellpose的泛化能力和精度都得以提高。
+这里有几点注意事项：
+（1）先测试一下现有的Cellpose模型在自己的数据上的效果，期间可以尝试更改一下diameter，可能结果会有一点不同；
+（2）如果测试效果挺好，即错误较少，那么就没有必要上传这些数据了，因为再次训练的模型性能提高也不大；
+（3）如果测试效果很差，那么极有可能自己的数据与Cellpose的训练集中的数据差别很大，那么此时再次基于这些数据的再次训练就有可能有很大提高；
+（4）对于上传的数据，物体直径至少有10像素，每张图像上至少有数十个物体：如果图像太小，可以考虑将多张图像拼接起来；如果图像太大，可以考虑将它裁剪成小图，另外，如果图像中有大量非感兴趣的物体，可以将它们直接裁掉；
+（5）手动标注时，将物体的边界轮廓勾画出来（对于细胞结构，务必使得轮廓将细胞膜、细胞质和细胞核都包裹进去，这是为了与Cellpose开发者的标注方法一致）；
+（6）不要直接使用模型预测的结果来上传数据，这会造成“误差”的恶性循环。
