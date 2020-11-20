@@ -20,6 +20,3 @@ Xin Bo Qi (亓欣波)
 
 - E-mail: qixinbo@gmail.com
 
-# Ingo Steinbach & me at CSSCR2016
-
-![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjlby1erxj31w02iob29.jpg)
