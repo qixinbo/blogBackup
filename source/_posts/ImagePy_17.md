@@ -1,17 +1,143 @@
 ---
-title: ImagePy解析：17 -- 重构版ImagePy/sciwx解析
+title: ImagePy解析：17 -- 重构版ImagePy解析
 tags: [ImagePy]
 categories: computational material science 
 date: 2020-2-26
 ---
 
+%%%%%%%%
+2021.2.14更新:增加了sciapp和sciwx的介绍
+%%%%%%%%
+
 新版ImagePy有如下特点：
 （1）将原版ImagePy非常特色的可视化组件完全解耦，比如画布、表格、对话框等组件，将其重构为sciwx库，这样第三方开发人员就可以更加方便地使用这些组件而构建自己的特定应用；
-（2）新版ImagePy在sciwx库的基础上进行再集成开发，提供一整套完善的管理系统和丰富的插件，从而实现复杂的图像处理功能。
+（2）创建了一套适用于图像处理的接口标准sciapp，其中定义了图像类Image、表格类Table、几何矢量类Shape，并实现了对这些类的常用操作，即sciapp作为后端支持；
+（2）新版ImagePy在sciwx库和sciapp库的基础上进行再集成开发，即底层符合sciapp标准、前端使用sciwx显示，然后提供一整套完善的管理系统和丰富的插件库，从而实现复杂的图像处理功能。
 
-因此，sciwx等价于napari等库，着重于可视化；ImagePy等价于ImageJ等库，着重于图像处理。而这两者因为是“一母双生”，架构思路一脉相承，集成更加自然契合，因此，ImagePy/Sciwx无论是对底层开发人员还是图像处理小白都有着无可比拟的优势：小到开发一个图像处理小工具，大到作为一个大型软件“开箱即用”，都可以轻松应对。
+因此，sciwx等价于napari等库，着重于可视化；sciapp等价于ImageJ等库，着重于通用数据接口，ImagePy则是基于两者的插件库。新版ImagePy架构思路清晰，集成更加自然契合，因此，ImagePy/sciapp/sciwx无论是对底层开发人员还是图像处理小白都有着无可比拟的优势：小到开发一个图像处理小工具，大到作为一个大型软件“开箱即用”，都可以轻松应对。
 
 多说一句题外话，多谢龙哥的精辟的总结：对于图像处理问题，图像+矢量+图论三条腿走路。
+
+# 总览
+特别地，对sciapp和sciwx包进行一个更为详细的介绍。
+如上所述，sciapp负责后端数据操作，sciwx负责前端组件。
+
+## sciapp
+sciapp包的介绍主要引用了[官方的介绍](https://github.com/Image-Py/imagepy/blob/master/sciapp/doc/cn_readme.md)。
+sciapp包主要有三个重要的模块：Object模块、App模块和Action模块。
+
+### Object模块
+Object模块定义了科学计算中常用的基础数据结构封装类，当然，如果仅仅为了计算，绝大多数时候，Numpy，Pandas等数据类型已经可以胜任，这里的封装，主要是面向交互与展示的，例如Image对象是图像数据，里面带了一个lut成员，用于在展示时映射成伪彩色。
+（1）Image：多维图像，基于Numpy
+（2）Table：表格，基于DataFrame
+（3）Shape: 点线面，任意多边形，可与GeoJson，Shapely互转
+（4）Surface：三维表面
+
+### App模块
+App模块是一个科学容器，里面包含若干管理器managers，用于管理App所持有的上面各类对象object，这里的管理功能包括增加、删除、查询等，即对象object的生命周期都在App管理器中。以图像对象Image为例，App管理器有如下功能：
+（1）show_img(self, img, title=None): 展示一个Image对象，并添加到app.img_manager管理器中；
+（2）get_img(self, title=None): 根据title获取Image，如果缺省则返回管理器中的第一个Image；
+（3）img_names(self): 返回当前app持有的Image对象名称列表；
+（4）active_img(self, title=None): 将指定名称的Image对象置顶，以便于get_img可以优先获得；
+（5）close_img(self, title=None): 关闭指定图像，并从app.img_manager管理器中移除。
+
+除了这些特定于某种对象的功能，还有一些与用户交互的功能，比如：
+（1）alert(self, info, title='sciapp'): 弹出一个提示框，需要用户确认；
+（2）yes_no(self, info, title='sciapp'): 要求用户输入True/False；
+（3）show_txt(self, cont, title='sciapp'): 对用户进行文字提示；
+（4）show_md(self, cont, title='sciapp'): 以MarkDown语法书写，向用户弹出格式化文档；
+（5）show_para(self, title, para, view, on_handle=None, on_ok=None, on_cancel=None, on_help=None, preview=False, modal=True): 展示交互对话框，para是参数字典，view指定了交互方式。
+
+但是，需要特别注意的是，这里的App中的这些交互功能，都只是在命令行中print信息，具体使用时需要在子类中用UI框架（比如sciwx）重载这些方法。
+
+### Action模块
+Action模块是对App所管理的对象的操作，比如对图像做滤波等。因此，该模块也是后面自定义开发时打交道最多的模块。
+该模块与App的交互只需通过它的start函数即可，即将App类的实例app传入即可：
+```python
+class SciAction:
+    '''base action, just has a start method, alert a hello'''
+    name = 'SciAction'
+
+    def start(self, app, para=None):
+        self.app = app
+        app.alert('Hello, I am SciAction!\n')
+
+app = App()
+SciAction().start(app)
+```
+SciAction是所有Action的基类，它定义了最基本的功能，同时，sciapp提供了更高级的模板，供开发者的自定义action用于继承，比如：
+（1）ImgAction：用于处理图像，自动获取当前图像，需要重载para、view进行交互，重载run进行图像处理；
+（2）Tool：工具，用于在某种控件上的鼠标交互，同时其派生出了图像工具ImageTool、表格工具TableTool、矢量编辑工具ShapeTool（如点线面绘制）。
+
+另外，Advanced目录下有一些高级模板（如支持图像多通道、批量操作、多线程支持等），供扩展插件时使用；Plugins目录下也有一些带有具体功能的、开箱即用的Action。
+
+## sciwx
+sciwx提供了一系列基于wxPython的前端可视化组件，其中最重要的就是可视化2D图像的画布功能。
+### Canvas画布
+Canvas画布是定制化的wxPython的Panel，其详细解析可见[该文](https://qixinbo.info/2019/10/29/imagepy_12/)。
+
+### ICanvas画布、MCanvas组件、CanvasNoteBook组件、CanvasFrame应用和CanvasNoteFrame应用
+ICanvas是在Canvas基础上对于位图的展示提供进一步的接口支持，比如默认绑定ImageTool这种Action，提供set_img设置图像、set_rg设置数值范围、set_lut设置快速查找表、set_cn设置通道、set_tool设置工具等接口。
+MCanvas是对ICanvas的进一步包装，比如在顶部添加显示图像信息的信息条、在底部增加可以切换某一通道、某一slice的滑动条。
+CanvasNoteBook组件是对MCanvas的多标签页管理，即每一个标签页都可以添加一个MCanvas。
+以上几个组件实际都是深度定制的前端组件，而接下来的CanvasFrame和CanvasNoteFrame是同时拥有前端和后端的功能，它们的父类同时是wx.Frame和上面的sciapp的App类，应该可以说这两个是可以独立运行的开箱即用的应用。
+CanvasFrame是对MCanvas的封装，可以使用上面MCanvas的设置接口，同时还可以增加菜单栏、工具栏以及显示对话框等。
+CanvasNoteFrame是对CanvasNoteBook的封装，即增加了标签页管理。
+
+### VCanvas画布、SCanvas组件、VectorNoteBook组件、VectorFrame应用和VectorNoteFrame应用
+VCanvas是在Canvas基础上对于矢量形状的展示提供进一步的接口支持，比如默认绑定ShapeTool这种Action，提供set_shp设置形状、set_tool设置工具等接口。
+Scanvas是对VCanvas的进一步包装，比如在顶部添加显示形状信息的信息条。
+VectorNoteBook组件时对VCanvas的多标签页管理。
+同上，VectorFrame和VectorNoteFrame也都是兼具后端和前端功能的应用。
+
+## 前端和后端耦合
+如上所述，sciapp负责后端，sciwx负责前端，两者联动的机理如下：
+（1）通过sciapp的dataio模块来控制输入输出，将图像等对象添加进App管理器；
+（2）将App管理器传入其他action模块的start()入口函数，即可实现对图像等对象的操作；
+（3）sciwx前端组件通过set_img()等接口接收App管理器，并将之可视化。
+其中，第二步可以通过代码执行，比如：
+```python
+Gaussian().start(app)
+```
+但也可以通过前端交互，比如通过菜单命令和工具栏的鼠标操作。那么菜单栏和工具栏又是怎样识别这些命令的呢？
+对于菜单栏：
+```python
+class MenuBar(wx.MenuBar):
+    def __init__(self, app):
+        wx.MenuBar.__init__(self)
+        self.app = app
+        app.SetMenuBar(self)
+....
+....
+            f = lambda e, p=vs: p().start(self.app)
+            self.Bind(wx.EVT_MENU, f, item)
+```
+注意两个地方：
+一个是MenuBar的初始化函数，需要传入app实例；第二是在添加菜单项时，其功能通过lambda函数调用了命令的start()函数。
+对于工具栏：
+```python
+class ToolBar(wx.Panel):
+    def __init__(self, parent, vertical=False):
+        self.app = parent
+
+        btn.Bind( wx.EVT_LEFT_DOWN, lambda e, obj=obj: self.on_tool(e, obj))
+
+    def on_tool(self, evt, tol):
+        tol.start(self.app)
+```
+仍然是两个地方：ToolBar的初始化函数也传入parent了，它实际也是app实例；第二也是鼠标按下操作绑定了工具命令的start()函数。
+
+这个作为后端服务的app实例可以额外创建，但是通常做法是将前端和后端联合起来，创建一个组合体，即：
+```python
+class ImageApp(wx.Frame, App):
+    def __init__( self, parent ):
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = 'ImageApp',
+                            size = wx.Size(800,600), pos = wx.DefaultPosition,
+                            style = wx.RESIZE_BORDER|wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+        App.__init__(self)
+```
+因此，添加菜单栏和工具栏时，传入的都是self，即自身，因为其自身就有App管理器的能力。
+
 
 下面是对ImagePy所基于的sciwx库各个组件的demo进行逐步解析（最好是直接运行一下，以获得直观感受）。
 

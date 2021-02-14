@@ -5,6 +5,10 @@ categories: computational material science
 date: 2020-8-2
 ---
 
+%%%%%%%%
+2021.2.14更新：增加了ICanvas绘制ROI的原理介绍。
+%%%%%%%%
+
 前面有两篇文章介绍了ImagePy/sciwx的[Mark模式](https://qixinbo.info/2020/03/28/imagepy_19/)和[几何矢量](https://qixinbo.info/2020/06/14/imagepy_20/)，这两个的结合就是图像处理中经典的ROI(Region Of Interest)操作，即选定一个范围（矩形、圆形、自由区域），然后对该区域进行进一步的操作。
 这个过程说起来非常简单，但实际实现起来却是非常不容易，因为这里面涉及到了图像这一位图格式和几何这一矢量格式的统一。
 这一篇文章就着重剖析一下ImagePy/sciwx是怎样实现的。
@@ -74,12 +78,66 @@ class ICanvas(Canvas):
 当然这里所说的画布是具有常规用途的对位图的图像处理，如果纯粹是对矢量图的画布，则是对最底层的VCanvas的封装（具体可以见sciwx关于shape的各种demo），该类绑定的Tool则是ShapeTool：
 ```python
 class VCanvas(Canvas):
-   def __init__(self, parent, autofit=False, ingrade=True, up=True):
+    def __init__(self, parent, autofit=False, ingrade=True, up=True):
         Canvas.__init__(self, parent, autofit, ingrade, up)
 
     def get_obj_tol(self):
         return self.shape, ShapeTool.default
+
+    def set_shp(self, shp):
+        self.marks['shape'] = shp
+        self.update()
+
+    def set_tool(self, tool): self.tool = tool
+
+    @property
+    def shape(self):
+        if not 'shape' in self.marks: return None
+        return self.marks['shape']
 ```
+可以看出，对于VCanvas，其obj就是返回的self.shape，而self.shape属性就是对self.marks这一字典中shape这一键值的调用。而这个shape键又是通过set_shp方法设定的。
+
+看到这里，需要进一步深入的思考一下，VCanvas是矢量图的画布，而ICanvas实际是位图的画布，其归根结底是位图，即它get_obj得到的obj是image，那它又是怎样显示这些ROI的呢。
+奥秘就在于ICanvas中的以下方法：
+```python
+class ICanvas(Canvas):
+    def __init__(self, parent, autofit=False):
+        Canvas.__init__(self, parent, autofit)
+        self.images.append(Image())
+        self.Bind(wx.EVT_IDLE, self.on_idle)
+
+    def get_obj_tol(self):
+        return self.image, ImageTool.default
+
+    def on_idle(self, event):
+        if self.image.unit == (1, 'pix'):
+            if 'unit' in self.marks: del self.marks['unit']
+        else: self.marks['unit'] = self.draw_ruler
+        if self.image.roi is None:
+            if 'roi' in self.marks: del self.marks['roi']
+        else: self.marks['roi'] = self.image.roi
+        if self.image.mark is None:
+            if 'mark' in self.marks: del self.marks['mark']
+        elif self.image.mark.dtype=='layers':
+            if self.image.cur in self.image.mark.body:
+                self.marks['mark'] = self.image.mark.body[self.image.cur]
+            elif 'mark' in self.marks: del self.marks['mark']
+        else: self.marks['mark'] = self.image.mark
+        self.tool = self.image.tool
+        Canvas.on_idle(self, event)
+```
+在ICanvas的空闲鼠标事件中，它会监视它的image中的属性（注意这里是image的属性），比如unit、roi、mark属性，如果这些属性中有了数值，则在Canvas的marks属性（注意这里是Canvas的属性）中增加相应的键，比如unit、mark、roi等键，然后在Canvas的update方法中：
+```python
+        for i in self.marks.values():
+            if i is None: continue
+            if callable(i):
+                i(dc, self.to_panel_coor, k=self.scale, cur=0,
+                    winbox=self.winbox, oribox=self.oribox, conbox=self.conbox)
+            else:
+                drawmark(dc, self.to_panel_coor, i, k=self.scale, cur=0,
+                    winbox=self.winbox, oribox=self.oribox, conbox=self.conbox)
+```
+会对self.marks的值进行绘制。
 
 说回BaseROI，可以看出其在初始化函数中需要传入base，比如它的子类RectangleROI在初始化时给它传入的RectangleEditor。
 

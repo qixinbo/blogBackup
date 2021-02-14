@@ -1,6 +1,6 @@
 ---
 title: Kaggle细胞赛：基于PyTorch/UNet算法的细胞核识别
-tags: [Machine Learning, PyTorch]
+tags: [kaggle]
 categories: programming
 date: 2020-2-29
 ---

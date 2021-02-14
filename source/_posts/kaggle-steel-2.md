@@ -1,6 +1,6 @@
 ---
 title: Kaggle钢铁赛：基于PyTorch/UNet算法的钢材表面缺陷检测——（2）算法分析
-tags: [Machine Learning, PyTorch]
+tags: [kaggle]
 categories: programming
 date: 2020-2-16
 ---
