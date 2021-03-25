@@ -116,17 +116,17 @@ darkmode: false
 # When running the site in a subdirectory (e.g. yoursite.com/blog), remove the leading slash from link value (/archives -> archives).
 # External url should start with http:// or https://
 menu:
-  home: / || home
-  categories: /categories/ || th
-  archives: /archives/ || archive
-  tags: /tags/ || tags
-  scholar: /scholar/ || bar-chart
-  sources: /sources/ || rss
-  gallery: /gallery/ || file-image-o
-  about: /about/ || user
+  home: / || fa fa-home
+  categories: /categories/ || fa fa-th
+  archives: /archives/ || fa fa-archive
+  tags: /tags/ || fa fa-tags
+  scholar: /scholar/ || fa fa-chart-bar
+  sources: /sources/ || fa fa-rss
+  gallery: /gallery/ || fa fa-file-image
+  about: /about/ || fa fa-user
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
-  commonweal: /404.html || heartbeat
+  commonweal: /404.html || fa fa-heartbeat
 
 # Enable / Disable menu icons / item badges.
 menu_settings:
@@ -184,12 +184,13 @@ social:
   E-Mail: mailto:qixinbo@gmail.com || envelope
   #Weibo: https://weibo.com/yourname || fab fa-weibo
   #Google: https://plus.google.com/yourname || fab fa-google
-  #Twitter: https://twitter.com/yourname || fab fa-twitter
+  Twitter: https://twitter.com/qixinbo || fab fa-twitter
   #FB Page: https://www.facebook.com/yourname || fab fa-facebook
   #StackOverflow: https://stackoverflow.com/yourname || fab fa-stack-overflow
   #YouTube: https://youtube.com/yourname || fab fa-youtube
   #Instagram: https://instagram.com/yourname || fab fa-instagram
   #Skype: skype:yourname?call|chat || fab fa-skype
+  RSS: /atom.xml || fas fa-rss
 
 social_icons:
   enable: true
@@ -241,6 +242,10 @@ chat:
 # Automatically excerpt description in homepage as preamble text.
 excerpt_description: true
 
+auto_excerpt:
+  enable: true
+  length: 150
+
 # Read more button
 # If true, the read more button will be displayed in excerpt section.
 read_more_btn: true
@@ -278,13 +283,19 @@ reward:
   #paypal: /images/paypal.png
   #bitcoin: /images/bitcoin.png
 
+#订阅RSS
+feed:
+  type: atom
+  path: atom.xml
+  limit: false
+
 # Subscribe through Telegram Channel, Twitter, etc.
 # Usage: `Key: permalink || icon` (Font Awesome)
 follow_me:
-  #Twitter: https://twitter.com/username || fab fa-twitter
+  Twitter: https://twitter.com/qixinbo || fab fa-twitter
   #Telegram: https://t.me/channel_name || fab fa-telegram
   #WeChat: /images/wechat_channel.jpg || fab fa-weixin
-  #RSS: /atom.xml || fa fa-rss
+  RSS: /atom.xml || fa fa-rss
 
 # Related popular posts
 # Dependencies: https://github.com/tea3/hexo-related-popular-posts
