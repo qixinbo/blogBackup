@@ -30,6 +30,7 @@ date: 2016-01-13 08:41:43
 # Tools
 - [中国科学院文献情报中心-OAuth-所友邮箱登录](https://webvpn.las.ac.cn)
 - [iData知识检索-cnki下载](https://www.cn-ki.net)
+- [论文驿站 - 师大云端图书馆下载站，一站式论文、专利下载平台](https://www.lunwenyizhan.com/)
 - 期刊缩写查询 [JournalAbbr.com](http://www.journalabbr.com/),  [Berkeley Library](https://guides.lib.berkeley.edu/bioscience-journal-abbreviations)
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
 - [论文配色方案 | ColorBrewer](http://colorbrewer2.org/)

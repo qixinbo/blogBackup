@@ -12,6 +12,8 @@ date: 2016-01-13 10:37:25
 - [SOCKBOOM 科学上网](https://sockboom.vip)
 - [iKuuu 科学上网](https://ikuuu.co)
 - [Jiasu.im 科学上网](http://i.jiasu.im/app.js)
+- [CordCloud](https://www.cordcloud.site/auth/register1?code=pfeoniCxO2mAJoy5CrwtKFPvYwEn5rDj)
+- [加速度](https://jsdcloud.xyz/auth/register)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
 - [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/)
 
@@ -32,6 +34,7 @@ date: 2016-01-13 10:37:25
 - [YouTube 1080p downloader | ClipConverter](https://www.clipconverter.cc/)
 - [Make PDF easy | smallpdf.com](http://smallpdf.com/)
 - [在线图片、pdf压缩 | 压缩比很高](https://docsmall.com/)
+- [Gif编辑、压缩、裁剪](https://gifsuper.com/)
 - [图像文件在线编辑](https://www.iloveimg.com/zh-cn)
 - [免费在线OCR | Online OCR](http://www.onlineocr.net/)
 - [File type converter | convertfiles.com](http://www.convertfiles.com)

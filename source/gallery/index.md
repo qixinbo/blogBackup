@@ -5,11 +5,15 @@ date: 2016-09-08 21:21:42
 
 <meta name="referrer" content="no-referrer" />
 
-- Polycrystalline growth considering only diffusion
-![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl7iu35vg30yy0ozhdu.gif)
+- Grain analysis software
+![grain-tool-cut](https://user-images.githubusercontent.com/6218739/112569127-92eb7680-8e1e-11eb-91f0-17b523fb5f97.gif)
+
+- Microstrucuture Segmentation
+![seg](https://user-images.githubusercontent.com/6218739/112566386-d8f20b80-8e19-11eb-8b65-a2f53ff949fe.png)
+
 - Polycrystalline growth considering liquid convection
-![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl8asvreg30yy0ozb2b.gif)
+![static-crystal-growth](https://user-images.githubusercontent.com/6218739/112565432-0047d900-8e18-11eb-89c8-b02c7c44564f.gif)
+
 - Polycrystalline growth considering both liquid convection and solid motion
-![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvjl8yx09ng30yy0oz4qr.gif)
-- 3D dendritic growth
-![](https://ws1.sinaimg.cn/large/0072Lfvtly1fvji1ln258g30hs0f2n4t.gif)
+![crystal-motion](https://user-images.githubusercontent.com/6218739/112565532-2ec5b400-8e18-11eb-81ec-6a34e65a259f.gif)
+
