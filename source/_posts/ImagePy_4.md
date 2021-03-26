@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：4 -- 主界面渲染
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-8-31
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：5 -- wxPython多线程编程
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-9-1
 ---
 

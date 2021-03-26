@@ -1,7 +1,7 @@
 ---
 title: ImageJ的Python脚本编程
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-15
 ---
 

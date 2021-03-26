@@ -1,7 +1,7 @@
 ---
 title: 用Mathematica抓取《美国队长3》的剧照 
 tags: [mathematica]
-categories: programming
+categories: coding 
 date: 2016-5-4
 ---
 

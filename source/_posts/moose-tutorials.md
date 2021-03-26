@@ -1,7 +1,7 @@
 ---
 title: 多物理场面向对象模拟环境MOOSE学习手册
 tags: [MOOSE]
-categories: computational material science
+categories: simulation
 date: 2017-1-15
 ---
 

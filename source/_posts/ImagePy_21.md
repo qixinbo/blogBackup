@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：21 -- 管理器
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-6-19
 ---
 

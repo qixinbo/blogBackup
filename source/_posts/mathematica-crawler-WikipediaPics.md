@@ -1,7 +1,7 @@
 ---
 title: 用Mathematica抓取历年Wikipedia年度照片 
 tags: [mathematica]
-categories: programming
+categories: coding
 date: 2016-5-23
 ---
 

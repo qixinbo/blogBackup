@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：1 -- 简介、安装和启动
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision
 date: 2019-3-17
 ---
 # ImagePy简介

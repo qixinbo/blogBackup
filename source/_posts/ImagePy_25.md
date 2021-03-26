@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析： 25 -- 智能画笔
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2021-3-26
 ---
 

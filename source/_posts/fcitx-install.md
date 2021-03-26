@@ -1,7 +1,7 @@
 ---
 title: linux系统安装fcitx框架和搜狗输入法
 tags: [fcitx,linux]
-categories: linux
+categories: coding 
 date: 2018-1-19
 ---
 2018-1-19更新：加入自动安装fcitx，以及安装搜狗输入法。

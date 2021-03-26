@@ -1,7 +1,7 @@
 ---
 title: 开源计算相图软件OpenCalphad四个算例
 tags: [opencalphad]
-categories: computational material science
+categories: simulation
 date: 2016-3-5
 ---
 # 纯铁在不同条件下的平衡态计算

@@ -1,7 +1,7 @@
 ---
 title: PRISMS-PF v1.0 学习手册——Cahn-Hilliard和Allen-Cahn方程耦合求解
 tags: [deal.II, prisms]
-categories: computational material science
+categories: simulation 
 date: 2016-12-16
 ---
 

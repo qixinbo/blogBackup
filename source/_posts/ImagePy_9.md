@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：9 -- Filter引擎及其衍生的图像取反插件
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-10-6
 ---
 

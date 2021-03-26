@@ -1,8 +1,7 @@
-
 ---
 title: PyQt4教程系列三：扩展功能
 tags: [PyQt]
-categories: programming 
+categories: coding 
 date: 2017-12-5
 ---
 本文是对[TutorialsPoint](https://www.tutorialspoint.com/pyqt/)上的教程的翻译。

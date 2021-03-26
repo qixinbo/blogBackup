@@ -1,7 +1,7 @@
 ---
 title:  hexo博客在不同电脑间迁移记录
 tags: [blog]
-categories: programming
+categories: coding
 date: 2021-3-25
 ---
 

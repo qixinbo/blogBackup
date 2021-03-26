@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 9. 菜单栏之Analyze
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-9
 ---
 

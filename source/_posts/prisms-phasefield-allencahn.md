@@ -1,7 +1,7 @@
 ---
 title: PRISMS-PF学习手册——AllenCahn方程求解
 tags: [deal.II, prisms]
-categories: computational material science
+categories: simulation 
 date: 2016-12-1
 ---
 

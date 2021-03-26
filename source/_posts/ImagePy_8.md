@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：8 -- 由新建图像谈起（引出IPy、ImagePlus、Canvas、ImageManager）
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-10-5
 ---
 %%%%% 更新日志 %%%%%

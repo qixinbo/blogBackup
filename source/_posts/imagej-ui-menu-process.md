@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 8. 菜单栏之Process
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-8
 ---
 

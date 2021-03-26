@@ -1,7 +1,7 @@
 ---
 title: 利用Mathematica进行有限元编程(三)：三角形单元分析
 tags: [mathematica]
-categories: programming
+categories: simulation
 date: 2016-8-19
 ---
 

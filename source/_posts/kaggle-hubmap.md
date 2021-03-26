@@ -1,7 +1,7 @@
 ---
 title: Kaggle肾小球图像分割比赛全解析
 tags: [kaggle]
-categories: programming
+categories: machine learning 
 date: 2021-2-14
 ---
 

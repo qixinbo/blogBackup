@@ -1,7 +1,7 @@
 ---
 title: C++默认构造函数——深入理解 (转载)
 tags: [c++]
-categories: programming
+categories: coding 
 date: 2017-7-11
 ---
 本文转载自[这里](http://blog.csdn.net/hankai1024/article/details/7947989)，修正了一些格式和文字错误。

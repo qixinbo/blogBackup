@@ -2,7 +2,7 @@
 title: OpenPhase实例学习系列：VTK文件格式详解
 date: 2016-2-22
 tags: [openphase]
-categories: computational material science
+categories: simulation 
 ---
 # VTK文件格式概况
 VTK，全称为Visualization Toolkit，即“可视化工具箱”，制订了一个统一的文件输入输出格式，这样就可在不同的软件间方便通信。

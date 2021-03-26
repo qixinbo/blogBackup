@@ -1,7 +1,7 @@
 ---
 title: 《重构：数字化转型的逻辑》读书笔记
 tags: [IIoT]
-categories: IIoT
+categories: digitalization
 date: 2020-4-9
 ---
 

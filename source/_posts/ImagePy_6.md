@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：6 -- wxPython GDI绘图和FloatCanvas
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-9-7
 ---
 

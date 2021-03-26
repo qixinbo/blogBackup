@@ -1,7 +1,7 @@
 ---
 title: 枝晶生长的宏微观模型
 tags: [dendrite, model]
-categories: computational material science
+categories: simulation
 date: 2016-3-8
 ---
 

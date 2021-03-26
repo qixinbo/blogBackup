@@ -1,7 +1,7 @@
 ---
 title: ImageJ的插件开发
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-10-6
 ---
 

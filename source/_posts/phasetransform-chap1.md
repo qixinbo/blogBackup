@@ -2,7 +2,7 @@
 title: 相变的一般特征
 date: 2016-3-1
 tags: [phasetransform]
-categories: computational material science
+categories: simulation 
 ---
 本文是对徐祖耀老师所著的《相变原理》(科学出版社2000年出版)第一章的读书笔记。
 

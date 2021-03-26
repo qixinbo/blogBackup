@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：11 -- 使用wxPython设备上下文绘图
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-10-16
 ---
 

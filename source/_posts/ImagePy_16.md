@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：16 -- 细胞分析Cell Analysis
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-2-10
 ---
 

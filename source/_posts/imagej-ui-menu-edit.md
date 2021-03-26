@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 6. 菜单栏之Edit
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-4
 ---
 

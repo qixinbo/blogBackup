@@ -1,7 +1,7 @@
 ---
 title: 自适应有限元包AFEPack安装过程
 tags: [AFEPack,linux]
-categories: programming
+categories: simulation
 date: 2016-3-5
 ---
 

@@ -3,7 +3,7 @@ title: gdb调试c++程序知识点
 tags:
   - gdb
   - c++
-categories: programming
+categories: coding
 date: 2016-03-29 10:41:28
 ---
 

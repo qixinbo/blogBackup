@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：10 -- Tool引擎及其衍生的画笔工具
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-10-10
 ---
 

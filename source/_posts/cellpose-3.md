@@ -1,7 +1,7 @@
 ---
 title: Cellpose后处理加速算法解析
 tags: [cellpose]
-categories: computational material science 
+categories: machine learning 
 date: 2021-3-3
 ---
 # 简介

@@ -1,7 +1,7 @@
 ---
 title: 命令行终端设置代理上网（pac文件）
 tags: [Proxy]
-categories: programming
+categories: coding
 date: 2019-7-20
 ---
 

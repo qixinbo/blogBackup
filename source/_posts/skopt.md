@@ -1,7 +1,7 @@
 ---
 title: 使用skopt贝叶斯搜索寻找scikit-learn中算法的最优超参数
 tags: [Machine Learning]
-categories: programming
+categories: algorithm 
 date: 2018-9-18
 ---
 # 介绍

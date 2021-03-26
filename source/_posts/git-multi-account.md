@@ -1,7 +1,7 @@
 ---
 title: Git配置单机器多账号配置
 tags: [git,linux]
-categories: linux
+categories: coding 
 date: 2019-8-30
 ---
 

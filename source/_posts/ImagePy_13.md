@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：13 -- Macros引擎及宏录制
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-11-4
 ---
 

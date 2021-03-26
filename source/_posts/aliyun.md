@@ -1,7 +1,7 @@
 ---
 title: 阿里云服务器：购买、连接和部署
 tags: [Aliyun]
-categories: programming
+categories: coding 
 date: 2019-5-8
 ---
 这是记录一下第一次跟阿里云服务器打交道的过程。。

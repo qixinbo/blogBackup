@@ -1,7 +1,7 @@
 ---
 title: 多相材料的相场模型
 tags: [phasefield]
-categories: computational material science
+categories: simulation
 date: 2016-2-27
 ---
 # 传统Ginzburg-Landau自由能泛函形式

@@ -1,7 +1,7 @@
 ---
 title: 手动安装特定版本的gcc编译器
 tags: [gcc,linux]
-categories: programming
+categories: coding
 date: 2016-3-23
 ---
 

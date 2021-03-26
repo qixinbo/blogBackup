@@ -1,7 +1,7 @@
 ---
 title: 晶体塑性有限元开源软件DAMASK安装过程记录 
 tags: [abaqus,CPFEM,linux]
-categories: computational material science 
+categories: simulation
 date: 2018-1-12
 ---
 2018-1-12更新：

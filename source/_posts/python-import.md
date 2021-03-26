@@ -1,7 +1,7 @@
 ---
 title: Python3的Import理解
 tags: [python]
-categories: programming
+categories: coding
 date: 2019-10-13
 ---
 

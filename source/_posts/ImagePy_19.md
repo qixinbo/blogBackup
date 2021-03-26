@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：19 -- Mark模式
 tags: [ImagePy]
-categories: computational material science
+categories: computer vision
 date: 2020-3-28
 ---
 

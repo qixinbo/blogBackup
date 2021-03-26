@@ -1,7 +1,7 @@
 ---
 title: Numpy的广播Broadcasting和奇妙索引Fancy Indexing
 tags: [python]
-categories: programming
+categories: coding 
 date: 2019-10-20
 ---
 

@@ -2,7 +2,7 @@
 title: 形核、生长和粗化同时进行的数值处理方法——KWN模型
 tags: [KWN, phasetransform, model]
 date: 2016-4-5
-categories: computational material science
+categories: simulation 
 ---
 
 # 析出反应

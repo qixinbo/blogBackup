@@ -1,7 +1,7 @@
 ---
 title: 变分自编码器的原理和程序解析
 tags: [Machine Learning]
-categories: programming
+categories: algorithm 
 date: 2018-7-24
 ---
 

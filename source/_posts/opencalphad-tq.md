@@ -1,7 +1,7 @@
 ---
 title: OpenCalphad的TQ库编译及链接
 tags: [opencalphad]
-categories: computational material science
+categories: simulation
 date: 2016-1-13
 ---
 TQ库的基本库文件有boceq.a、liboceqplus.mod、liboctq.o、liboctq.mod。

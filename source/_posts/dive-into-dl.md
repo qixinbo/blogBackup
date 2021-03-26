@@ -1,7 +1,7 @@
 ---
 title: 《动手学深度学习》PyTorch版学习笔记
-tags: [Machine Learning, PyTorch]
-categories: programming
+tags: [PyTorch]
+categories: machine learning 
 date: 2020-3-8
 ---
 

@@ -1,7 +1,7 @@
 ---
 title:  linux系统abaqus安装过程及子程序编译器设置
 tags: [abaqus,linux]
-categories: linux
+categories: simulation
 date: 2018-1-12
 ---
 2018-5-2更新：

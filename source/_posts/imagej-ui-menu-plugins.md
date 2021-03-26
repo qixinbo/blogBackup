@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 10. 菜单栏之Plugins
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-10
 ---
 

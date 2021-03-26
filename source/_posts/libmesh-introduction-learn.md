@@ -1,7 +1,7 @@
 ---
 title: libMesh的5个Introduction教学例子学习 
 tags: [libmesh,linux]
-categories: programming
+categories: simulation 
 date: 2017-6-18
 ---
 

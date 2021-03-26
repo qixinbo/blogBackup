@@ -1,7 +1,7 @@
 ---
 title: MOOSE运行过程再分析
 tags: [MOOSE]
-categories: computational material science
+categories: simulation
 date: 2017-7-28
 ---
 本文是对[前文](http://qixinbo.info/2017/02/14/moose-run/)的一个再次探索。

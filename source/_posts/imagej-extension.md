@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 3. 扩展：宏、插件和脚本
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-2
 ---
 

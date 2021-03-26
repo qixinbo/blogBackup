@@ -1,7 +1,7 @@
 ---
 title: (转载)Harris角点检测原理
 tags: [Image]
-categories: computational material science 
+categories: algorithm 
 date: 2020-8-5
 ---
 

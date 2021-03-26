@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：15 -- 分水岭Watershed算法
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-12-20
 ---
 

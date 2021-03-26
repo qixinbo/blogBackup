@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 2. 基本概念
 tags: [ImageJ]
-categories: programming
+categories: computer vision 
 date: 2018-9-1
 ---
 

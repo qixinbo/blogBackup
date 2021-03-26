@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：18 -- 参数对话框ParaDialog详解
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-3-24
 ---
 

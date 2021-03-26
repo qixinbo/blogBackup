@@ -1,7 +1,7 @@
 ---
 title: wxPython知识点
 tags: [Image, GUI]
-categories: computational material science 
+categories: coding 
 date: 2020-9-26
 ---
 

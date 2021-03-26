@@ -1,7 +1,7 @@
 ---
 title: 胞状物体通用分割算法Cellpose解析：开发篇
 tags: [cellpose]
-categories: computational material science 
+categories: machine learning
 date: 2020-10-24
 ---
 

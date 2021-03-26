@@ -1,7 +1,7 @@
 ---
 title: OpenCV分水岭Watershed算法的前因后果[转载]
 tags: [OpenCV]
-categories: programming
+categories: algorithm 
 date: 2019-7-20
 ---
 在学习OpenCV的分水岭算法时，找到Xuhui Zhao小朋友的一篇总结文章，把分水岭算法所需要的预处理和背景知识都讲解得非常透彻细致，特向他申请了转载权限，致谢～

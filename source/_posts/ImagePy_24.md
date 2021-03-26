@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：24 -- 骨架图转图论sknw解析
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-11-20
 ---
 

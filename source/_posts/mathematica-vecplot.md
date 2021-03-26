@@ -1,7 +1,7 @@
 ---
 title: Mathematica VectorPlot函数用法详解 
 tags: [mathematica]
-categories: programming
+categories: simulation 
 date: 2016-1-13
 ---
 

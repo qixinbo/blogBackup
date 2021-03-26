@@ -1,7 +1,7 @@
 ---
 title: 用Mathematica统计区域所占面积比
 tags: [mathematica]
-categories: programming
+categories: computer vision 
 date: 2016-4-24
 ---
 本文参考了百度Mathematica吧的[这个帖子](http://tieba.baidu.com/p/2222457786)。

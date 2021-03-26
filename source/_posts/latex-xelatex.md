@@ -1,7 +1,7 @@
 ---
 title: Latex中文排版——XeLatex的用法
 tags: [Latex]
-categories: linux
+categories: coding 
 date: 2016-1-13
 ---
 本文参考了以下三个网址：

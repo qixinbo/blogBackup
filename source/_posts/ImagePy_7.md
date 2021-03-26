@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：7 -- ImagePy插件运行解析
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-9-30
 ---
 

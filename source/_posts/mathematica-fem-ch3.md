@@ -1,7 +1,7 @@
 ---
 title: 利用Mathematica进行有限元编程(二)：桁架元分析
 tags: [mathematica]
-categories: programming
+categories: simulation 
 date: 2016-8-18
 ---
 

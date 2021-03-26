@@ -1,7 +1,7 @@
 ---
 title: PRISMS-PF v1.0 学习手册——自适应网格
 tags: [deal.II, prisms]
-categories: computational material science
+categories: simulation 
 date: 2016-12-20
 ---
 

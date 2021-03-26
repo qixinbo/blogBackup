@@ -2,7 +2,7 @@
 title: 求解偏微分方程开源有限元软件deal.II学习--Step 3
 tags: [deal.II, c++]
 date: 2016-8-25
-categories: computational material science
+categories: simulation
 ---
 
 # 引子

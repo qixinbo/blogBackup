@@ -1,7 +1,7 @@
 ---
 title: (转载)Python星号变量的特殊用法
 tags: [python]
-categories: programming
+categories: coding 
 date: 2019-10-15
 ---
 

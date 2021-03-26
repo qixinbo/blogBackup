@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：17 -- 重构版ImagePy解析
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-2-26
 ---
 

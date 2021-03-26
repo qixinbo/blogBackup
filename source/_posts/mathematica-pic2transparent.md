@@ -1,7 +1,7 @@
 ---
 title: 用Mathematica将图片背底变成透明
 tags: [mathematica]
-categories: programming
+categories: computer vision 
 date: 2016-4-26
 ---
 

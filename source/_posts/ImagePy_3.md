@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：3 -- 工具条加载详解
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-8-29
 ---
 

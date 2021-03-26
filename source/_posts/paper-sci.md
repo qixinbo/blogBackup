@@ -1,7 +1,7 @@
 ---
 title: 如何查找论文是否被SCI、EI、CSCD等收录
 tags: [scholar]
-categories: scholar
+categories: coding 
 date: 2016-1-30
 ---
 参考了以下网站：

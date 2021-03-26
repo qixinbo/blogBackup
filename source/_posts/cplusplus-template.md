@@ -1,7 +1,7 @@
 ---
 title: C++模板深度解析 (转载)
 tags: [c++]
-categories: programming
+categories: coding 
 date: 2017-7-9
 ---
 本文转载自[这里](http://www.cnblogs.com/L-hq815/archive/2012/08/01/2619135.html)，修正了一些格式和文字错误。

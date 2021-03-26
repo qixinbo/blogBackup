@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：20 -- 几何矢量Shape
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-6-14
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Mathematica版GetData——用Mathematica提取图片中的数据点
 tags: [mathematica]
-categories: programming
+categories: computer vision
 date: 2016-6-12
 ---
 

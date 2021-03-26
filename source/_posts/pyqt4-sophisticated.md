@@ -2,7 +2,7 @@
 ---
 title: PyQt4教程系列四：高阶功能
 tags: [PyQt]
-categories: programming 
+categories: coding
 date: 2017-12-6
 ---
 本文是对[TutorialsPoint](https://www.tutorialspoint.com/pyqt/)上的教程的翻译。

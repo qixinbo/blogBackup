@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：22 -- 从零搭建一个图像处理软件
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-6-20
 ---
 

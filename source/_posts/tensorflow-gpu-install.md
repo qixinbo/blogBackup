@@ -1,7 +1,7 @@
 ---
 title:  linux系统Tensorflow GPU版安装过程记录
 tags: [linux, tensorflow]
-categories: linux
+categories: machine learning 
 date: 2019-7-26
 ---
 

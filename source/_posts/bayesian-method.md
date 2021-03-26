@@ -1,7 +1,7 @@
 ---
 title: 贝叶斯公式、先验概率、最大似然估计、最大后验概率估计
-tags: [Machine Learning]
-categories: programming
+tags: [bayes]
+categories: algorithm
 date: 2018-7-30
 ---
 

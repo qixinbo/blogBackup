@@ -1,7 +1,7 @@
 ---
 title: 求解偏微分方程开源有限元软件deal.II学习--Step 48
 tags: [deal.II]
-categories: computational material science
+categories: simulation
 date: 2016-11-29
 ---
 

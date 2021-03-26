@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：23 -- ROI操作
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2020-8-2
 ---
 

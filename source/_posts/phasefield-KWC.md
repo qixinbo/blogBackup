@@ -1,7 +1,7 @@
 ---
 title: KWC多晶相场模型解析
 tags: [phasefield]
-categories: computational material science
+categories: simulation 
 date: 2016-1-25
 ---
 # 概况

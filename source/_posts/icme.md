@@ -1,7 +1,7 @@
 ---
 title: 对ICME的理解 
 tags: [ICME]
-categories: computational material science 
+categories: digitalization 
 date: 2017-11-29
 ---
 

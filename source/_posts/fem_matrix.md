@@ -1,7 +1,7 @@
 ---
 title: 结构力学有限元刚度矩阵的性质
 tags: [fem]
-categories: computational material science
+categories: simulation
 date: 2016-10-08
 ---
 

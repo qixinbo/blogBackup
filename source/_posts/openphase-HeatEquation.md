@@ -2,7 +2,7 @@
 title: OpenPhase实例学习系列：HeatEquation算例全解析
 tags:
   - openphase
-categories: computational material science
+categories: simulation 
 date: 2016-03-30 22:00:48
 ---
 

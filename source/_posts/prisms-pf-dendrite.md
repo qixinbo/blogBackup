@@ -1,7 +1,7 @@
 ---
 title: 使用PRISMS-PF模拟二维和三维枝晶生长
 tags: [deal.II, prisms]
-categories: computational material science
+categories: simulation 
 date: 2016-12-16
 ---
 

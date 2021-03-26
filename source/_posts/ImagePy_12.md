@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：12 -- 画布Canvas类详解
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-10-29
 ---
 

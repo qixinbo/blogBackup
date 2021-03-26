@@ -1,7 +1,7 @@
 ---
 title: ImageJ 用户指南 -- 1. 简介和安装
 tags: [ImageJ]
-categories: programming
+categories: computer vision
 date: 2018-9-1
 ---
 

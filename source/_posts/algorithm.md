@@ -1,7 +1,7 @@
 ---
 title: 数据结构与算法笔记
 tags: [algorithm]
-categories: programming
+categories: algorithm
 date: 2020-12-26
 ---
 

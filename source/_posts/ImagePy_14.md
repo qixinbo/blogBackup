@@ -1,7 +1,7 @@
 ---
 title: ImagePy解析：14 -- 寻找局部极值（Find Maximum和Find Minimum）
 tags: [ImagePy]
-categories: computational material science 
+categories: computer vision 
 date: 2019-11-17
 ---
 

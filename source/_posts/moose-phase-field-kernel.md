@@ -1,7 +1,7 @@
 ---
 title: MOOSE相场模块的内核模型
 tags: [MOOSE, phasefield]
-categories: computational material science
+categories: simulation 
 date: 2017-1-11
 ---
 

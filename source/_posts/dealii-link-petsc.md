@@ -1,7 +1,7 @@
 ---
 title: deal.II链接PETSc过程记录
 tags: [deal.II]
-categories: computational material science
+categories: simulation
 date: 2016-9-29
 ---
 
