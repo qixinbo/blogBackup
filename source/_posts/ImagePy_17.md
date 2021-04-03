@@ -155,8 +155,8 @@ class ImageApp(wx.Frame, App):
     def show_img(self, img, title=None):
         wx.CallAfter(self._show_img, img, title)
 
-    self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_active_img)
-    self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_img)
+    # self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_active_img)
+    # self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_img)
 
     def on_active_img(self, event):
         self.active_img(self.canvasnb.canvas().image.name)
