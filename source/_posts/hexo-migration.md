@@ -120,6 +120,19 @@ dns4.p04.nsone.net
 ```
 改完后无论是境内还是境外，速度飞起~~
 
+## 连接不上github
+在执行
+```python
+hexo d -g
+```
+出现了一次连接不上github的问题，但在该终端下直接：
+```python
+git push
+```
+却是可以的，这可能跟wifi有关。。也可能跟代理有关。
+反正是换了一个wifi，关闭代理，就神奇地好了。。
+[这篇博客](https://java4all.cn/2020/01/24/github%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91/)也遇到了这个问题。
+
 # 参考文献
 [超详细Hexo+Github博客搭建小白教程](https://zhuanlan.zhihu.com/p/35668237)
 [GitHub+Hexo 搭建个人网站详细教程](https://zhuanlan.zhihu.com/p/26625249)
