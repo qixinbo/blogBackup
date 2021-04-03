@@ -6,6 +6,7 @@ date: 2020-2-26
 ---
 
 %%%%%%%%
+2021.4.3更新：增加了image在sciapp的App和sciwx的canvas中的关系介绍
 2021.2.14更新:增加了sciapp和sciwx的介绍
 %%%%%%%%
 
@@ -94,7 +95,9 @@ VectorNoteBook组件时对VCanvas的多标签页管理。
 如上所述，sciapp负责后端，sciwx负责前端，两者联动的机理如下：
 （1）通过sciapp的dataio模块来控制输入输出，将图像等对象添加进App管理器；
 （2）将App管理器传入其他action模块的start()入口函数，即可实现对图像等对象的操作；
-（3）sciwx前端组件通过set_img()等接口接收App管理器，并将之可视化。
+（3）sciwx前端组件通过set_img()等接口接收图像等对象，并将之可视化。
+
+
 其中，第二步可以通过代码执行，比如：
 ```python
 Gaussian().start(app)
@@ -137,6 +140,35 @@ class ImageApp(wx.Frame, App):
         App.__init__(self)
 ```
 因此，添加菜单栏和工具栏时，传入的都是self，即自身，因为其自身就有App管理器的能力。
+
+上面介绍了App在前后端中的串联，那么具体地，对于一个显示对象，如图像Image，它是怎样在前端和后端中进行关联的？
+其实Image在前端和后端中是彼此独立的，比如前端sciwx可以通过set_img()方法直接接收Image，后端sciapp的App类也可以通过show_img()方法将Image添加到管理器中。这样设计的好处就是前后端分离，可以彼此独立使用。
+那么Image是怎样在前端和后端中关联的呢？答案可以从ImagePy的以下函数中得到：
+```python
+    def _show_img(self, img, title=None):
+        canvas = self.canvasnb.add_canvas()
+        if not isinstance(img, Image): 
+            img = Image(img, title)
+        App.show_img(self, img, img.title)
+        canvas.set_img(img)
+
+    def show_img(self, img, title=None):
+        wx.CallAfter(self._show_img, img, title)
+
+    self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_active_img)
+    self.canvasnb.Bind( wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_img)
+
+    def on_active_img(self, event):
+        self.active_img(self.canvasnb.canvas().image.name)
+        #self.add_img_win(self.canvasnb.canvas())
+
+    def on_close_img(self, event):
+        canvas = event.GetEventObject().GetPage(event.GetSelection())
+        #self.remove_img_win(canvas)
+        App.close_img(self, canvas.image.title)
+```
+当整个软件打开一个图像或者对图像做了处理、需要新建一个图像时，就会调用show_img()方法，然后可以看出来，在_show_img中，首先App会通过show_img将Image添加到后端管理器中，然后新增的canvas前端也会通过set_img将Image添加到该canvas.images的属性中。如果打开了很多图像，即有很多标签页，那么当用户点击某个标签页时，软件会通过on_activate_img方法将该canvas中的image.name传给self.active_img，该方法属于App类的一个方法，因此，前端会显示这个canvas，同时后端也会将相应的image进行激活，将它放在最前面。同理对于关闭一个标签页，前端会将这个canvas销毁，同时也会调用App.close_img将该Image从管理器中移除。
+一言以蔽之，前端和后端都独立地对Image进行管理，但两者又是可以同步地对一个Image进行管理。
 
 
 下面是对ImagePy所基于的sciwx库各个组件的demo进行逐步解析（最好是直接运行一下，以获得直观感受）。
