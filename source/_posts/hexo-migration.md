@@ -102,6 +102,36 @@ auto_excerpt:
   length: 150
 ```
 
+## LaTeX公式渲染
+首先卸载原有的渲染器，然后安装下面的其中一个（实测pandoc不行，而应该安装kramed）：
+```python
+npm uninstall hexo-renderer-marked
+npm install hexo-renderer-pandoc # 或者 hexo-renderer-kramed
+```
+然后在next主题的配置文件中，进行配置：
+```python
+# Math Formulas Render Support
+math:
+  # Default (true) will load mathjax / katex script on demand.
+  # That is it only render those page which has `mathjax: true` in Front-matter.
+  # If you set it to false, it will load mathjax / katex srcipt EVERY PAGE.
+  per_page: false # 这个per_page非常重要，如果为True，那么就只渲染带`mathjax: true`的页面，设为False则渲染所有页面，所以可能速度会慢。
+
+  # hexo-renderer-pandoc (or hexo-renderer-kramed) required for full MathJax support.
+  mathjax:
+    enable: true
+    cdn: //cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+    # See: https://mhchem.github.io/MathJax-mhchem/
+    mhchem: false
+
+  # hexo-renderer-markdown-it-plus (or hexo-renderer-markdown-it with markdown-it-katex plugin) required for full Katex support.
+  katex:
+    enable: false
+    cdn: //cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css
+    # See: https://github.com/KaTeX/KaTeX/tree/master/contrib/copy-tex
+    copy_tex: false
+```
+
 ## 修改dns服务器
 将hexo博客部署在netlify上，可以充分利用netlify的cdn加速。这里需要将dns解析服务器由原来的dnspod改为netlify。
 首先需要在netlify上对域名开启netlify的dns服务，这一步在网页上可以很方便的操作。
