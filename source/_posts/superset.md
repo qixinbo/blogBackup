@@ -5,6 +5,10 @@ categories: digitalization
 date: 2021-8-28
 ---
 
+%%%%%2021-9-2更新%%%%%%
+更新使用docker安装连接宿主机的数据库
+
+
 # 介绍
 Apache Superset是一个现代的、企业级的商业智能（Business Intelligence）网络应用程序，它使得用户可以使用无代码可视化构建器和SQL编辑器来轻松探索和可视化自己的数据。
 其最初由Airbnb开源，后来由Apache进行孵化，并且于今年（2021年）1 月 21 日宣布毕业并成为 Apache 软件基金会（ASF）的顶级项目（Top-Level Project），截止到现在（2021年8月25日）已经在GitHub上收获了超过4万颗star。
@@ -16,7 +20,7 @@ Apache Superset是一个现代的、企业级的商业智能（Business Intellig
 有多种方式安装superset，比如使用docker、使用pip安装等方式。
 使用docker安装是最简单的一种方式，因为它已经将相关依赖都做成了一个镜像，同时其包含了github上的源码，有最大的自由度可供开发。
 使用pip安装也较为方便，但是pip包本质上是一个已经编译好的包，没法修改源码，尤其是没法修改前端ui相关的代码。
-下面会介绍两种安装方式，这两种方式都试验过，能正常运行。因为我对docker命令不太熟悉，后面的操作（比如配置数据库等）都是基于pip安装方式。
+下面介绍两种安装方式。
 ## docker安装
 ### 安装docker软件
 可以参考此处的[教程](https://www.runoob.com/docker/windows-docker-install.html)。
@@ -53,6 +57,40 @@ docker exec -it superset superset init
 ```python
 http://localhost:8080/login/ 
 ```
+### 连接宿主机的数据库
+（具体怎样连接数据库是在下面一节，但是因为docker安装方式会有一点不同，这里先说明一下，后面具体连接时注意这点即可）
+如果数据库也是安装在同一个docker容器中，就没有如下特殊操作；
+而如果数据库是在本地宿主机中，而superset安装在docker容器中，这样直接使用localhost是不能连接到宿主机的。还需要进行如下配置才可以。
+（1）设置宿主机的数据库可外部访问
+（1.1）修改postgresql.conf
+确保数据库可以接受来自任意IP的连接：
+```python
+listen_addresses = '*'
+```
+（1.2）修改pg_hba.conf
+默认pg只允许本机通过密码认证登录，修改为以下内容后即可以对任意IP访问进行密码验证：
+```python
+host  all  all 0.0.0.0/0 md5
+```
+（1.3）重启PostgreSQL服务
+在windows的services中重启服务。
+
+（2）连接数据库时主机名更改
+如上所述，连接数据库时主机名不能使用localhost，而需要使用特定名称。
+对于Mac和Windows系统，docker有一个自动的解析，使用：
+```python
+host.docker.internal
+```
+作为主机名即可。
+对于Linux，可以先尝试：
+```python
+172.18.0.1
+```
+作为主机名。如果这个不行，可以用以下命令：
+```python
+docker inspect <container-id-or-name> | grep Gateway
+```
+查看一下docker容器指向的宿主机的ip地址。
 
 ## pip安装
 ### 创建虚拟环境
