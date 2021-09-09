@@ -198,6 +198,21 @@ This dashboard is currently force refreshing ....
 以下是Youtube上一个演讲，使用Kafaka消息队列+Druid数据存储+Superset可视化的方案：
 [Interactive real-time dashboards on data streams using Kafka, Druid, and Superset](https://www.youtube.com/watch?v=HOk7WtxBMzM)
 
+# 查看stl模型文件
+stl文件是一种常用的描述三维物体的文件格式。superset没法直接展示这种文件格式，不过这里可以采用iframe的方式嵌入外部的stl阅读器来实现。
+找了一圈后，发现viewstl这个网站提供优雅的渲染stl文件的功能，同时能免费嵌入其他网页中。网址见：
+[View 3D STL files directly in your browser - no software installation is required](https://www.viewstl.com/)
+具体的嵌入功能见：
+[https://www.viewstl.com/embed/](https://www.viewstl.com/embed/)
+进行一番配置后，复制其产生的代码即可，比如：
+```python
+<iframe id="vs_iframe" src="https://www.viewstl.com/?embedded" style="border:0;margin:0;width:100%;height:100%;"></iframe>
+```
+其中的stl文件可以由本地手动选择、本地服务托管、外部文件加载等多种方式。
+本地服务托管就是本地建一个服务器放置stl文件，然后把内网地址作为参数传入即可，这样可以解决有时文件不能传到外网上这种问题。
+外部文件加载需要提供文件URL地址，测试了几个网盘，比如google drive、百度网盘等，都有这样那样的问题无法解析，这里推荐使用阿里云的OSS存储服务。
+
+
 # deck.gl
 deck.gl是由uber开发并开源出来的基于WebGL的大数据可视化框架。它具有提供不同类型可视化图层、GPU渲染的高性能，React和Mapbox GL集成展示地理信息数据（GPS）等特点。
 
