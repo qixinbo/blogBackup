@@ -5,6 +5,11 @@ categories: digitalization
 date: 2021-9-6
 ---
 
+
+%%%%% 2021-9-13 update %%%%%
+更新了地图部分和行业模板
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+
 [上一篇](https://qixinbo.info/2021/08/28/superset/)介绍了怎样搭建和运行superset，这一篇着重于怎样对superset进行特殊配置和二次开发。
 
 # 更新并重新编译前端代码
@@ -213,17 +218,31 @@ stl文件是一种常用的描述三维物体的文件格式。superset没法直
 外部文件加载需要提供文件URL地址，测试了几个网盘，比如google drive、百度网盘等，都有这样那样的问题无法解析，这里推荐使用阿里云的OSS存储服务。
 
 
-# deck.gl
-deck.gl是由uber开发并开源出来的基于WebGL的大数据可视化框架。它具有提供不同类型可视化图层、GPU渲染的高性能，React和Mapbox GL集成展示地理信息数据（GPS）等特点。
 
-# Mapbox
+
+# 地图
+## deck.gl
+deck.gl是由uber开发并开源出来的基于WebGL的大数据可视化框架。它具有提供不同类型可视化图层、GPU渲染的高性能，集成Mapbox展示地理信息数据（GIS）等特点。
+## Mapbox
 Mapbox是一个开源的地图制作系统，superset也与其进行了良好的集成，只需一个token，就可在superset中进行地图相关的操作。
 获取token只需在Mapbox官网上注册一个账号，然后在superset的配置文件中设置环境变量即可（或者自己export或set该环境变量）：
 ```python
 MAPBOX_API_KEY = "your token"
 ```
 
-# 内置地图
+## GeoJson
+deck.gl中的polygon图形需要使用某个区域的经纬度信息，它接收的可以是JSON格式的多边形数据，这种数据就是GeoJson数据。
+获取GeoJson数据，可以使用在线的地图编辑器来获取，比如：
+[http://geojson.io](http://geojson.io)
+
+关于GeoJson，其他有用的一些资源如下：
+[地图工匠秘籍，其中的实战部分非常有用](https://echarts-maps.github.io/echarts-geomapping-book-zh/)
+[上面这个网站的github](https://github.com/echarts-maps/echarts-geomapping-book-zh)
+[echarts-maps，上面这个网站的资源所在](https://github.com/echarts-maps)
+[awesome geojson](https://asmcn.icopy.site/awesome/awesome-geojson/)
+[高德的地图选择器，可以到区县级别](https://datav.aliyun.com/tools/atlas/index.html)
+
+## 内置地图
 superset也内置了两种地图：
 （1）World Map：可以显示各个国家相关数据，国家代码可以有四种形式，比如Full name、code International Olympics Committee、code ISO 3166-1 alpha-2和code ISO 3166-1 alpha-3；
 （2）Country Map：可以显示某个具体国家的省市的相关数据，具体省市的代码需要遵循ISO 3166-2标准。
@@ -244,3 +263,11 @@ Markdown组件可以允许添加Markdown语法的资源，以及html格式的资
 ````python
 http://localhost:5000/superset/dashboard/al-lca/?standalone=2
 ```
+
+# 行业模板
+做看板是一门艺术，怎样提供数据洞察的同时又能做得好看，就是一门手艺活。
+可以通过观摩和学习其他人的作品来提高自己的制作水平。
+BAT三家互联网大厂都提供了自己的数据可视化低代码制作服务，里面也有很多的行业模板可供参考，是一个不错的学习地方：
+[阿里云——DataV数据可视化](https://cn.aliyun.com/product/bigdata/datav)
+[百度云——数据可视化Sugar](https://cloud.baidu.com/product/sugar.html)
+[腾讯云——腾讯云图](https://cloud.tencent.com/product/tcv)
