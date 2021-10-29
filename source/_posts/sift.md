@@ -1,5 +1,5 @@
 ---
-title: 经典图像特征SIFT算法详解 
+title: 经典图像特征点提取SIFT算法详解 
 tags: [Image]
 categories: computer vision 
 date: 2021-10-26
