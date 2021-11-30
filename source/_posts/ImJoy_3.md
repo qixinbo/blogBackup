@@ -37,7 +37,6 @@ Plugin Engine 通过 websockets 与 ImJoy Web App 连接， 并与一个基于 [
 
 # 什么是ImJoy插件
 简而言之，ImJoy插件是一个脚本，它生成一组可以被ImJoy内核或其他插件调用的服务函数（又名插件 API 函数）。
-在加载插件时，一个包含所有 ImJoy API 函数的 `api` 对象将被传递给插件，然后插件可以构建服务函数并通过调用 `api.export(...)` 函数来注册它们。
 目前有 4 种常见的插件类型：`window`、`web-worker`、`web-python`、`native-python`。
 （1）Web 插件直接在浏览器中运行，支持如下三种类型：
 - Window (HTML/CSS/JS)(`type=window`) 插件，用于使用 HTML5/CSS 和 JavaScript 构建丰富的交互式用户界面；
@@ -61,31 +60,15 @@ Web Python插件可以完全在浏览器中运行 python 代码和科学库。Im
 
 ## Native Python插件
 Native Python插件用于运行原生 Python 代码以完全访问电脑硬件（例如 GPU、NVLINK）和软件（例如 CUDA 和 CUDNN）环境。这需要在使用插件之前安装并启动**Python Plugin Engine**。
-与 Web Worker 插件类似，Native Python 插件无法访问 html dom，但可以使用 `ImJoy API` 与 ​​ImJoy 的图形界面或其他可以触发用户界面更改的插件进行交互。
+与 Web Worker 插件类似，Native Python 插件无法访问 html dom，但可以使用 `ImJoy API` 与ImJoy 的图形界面或其他可以触发用户界面更改的插件进行交互。
 
+## 更多插件类型
 插件类型可以通过插件进一步扩展。例如，作者新创建一个新的插件类型来执行Fiji/Scijava脚本，参见 [这篇文章](https://forum.image.sc/t/making-imjoy-plugins-with-fiji-scripts-for-running-remotely/39503)。
 
-大多数插件至少会暴露两个特殊函数：`setup`（用于初始化）和`run`（当用户点击插件菜单按钮时调用）。
-比如以下插件中定义了 3 个 API 函数：一个空的 `setup` 函数，一个 `choosePokemon` 函数，以及一个可供调用的 `run` 函数（由 ImJoy内核调用或用户点击插件菜单时）：
-```js
-class ImJoyPlugin{
-    async setup(){
-    }
-    async choosePokemon(){
-        const pokemon = await api.prompt("What is your favorite Pokémon?", "Pikachu")
-        await api.showMessage("Your have chose " + pokemon + " as your Pokémon.")
-    }
-    async run(ctx){
-        await this.choosePokemon()
-    }
-}
-api.export(new ImJoyPlugin())
-```
-
-## ImJoy App和Plugin Engine
+## ImJoy App和Plugin Engine与插件的关系
 使用 ImJoy App 的推荐方式是通过 [https://imjoy.io](https://imjoy.io)。现代浏览器（例如 Google Chrome）越来越支持运行和使用称为渐进式 Web 应用 (PWA) 的 Web 应用程序的新方法。
 例如，在 Chrome 中，用户可以将 ImJoy 安装到 [chrome://apps/](chrome://apps/) 并从 ImJoy App 仪表板启动。一旦安装，ImJoy 就可以在独立的浏览器窗口中运行（没有地址栏）。 ImJoy 的内核部分也支持离线，但插件目前还不支持（作者说后面将支持）。
-可以使用 ImJoy App 运行所有web插件（`web-worker`、`window`、`web-python`），但是，对于本机插件（`native-python`），需要连接到插件引擎在本地或远程运行。
+可以使用ImJoy App运行所有web插件（`web-worker`、`window`、`web-python`），但是，对于本机插件（`native-python`），需要连接到插件引擎在本地或远程运行。
 以下是安装插件引擎的两个选项：
 如需使用插件引擎运行插件，请下载并安装 Anaconda 或 Miniconda with Python3，然后运行`pip install imjoy`。然后可以通过 `imjoy --jupyter` 命令启动插件引擎。更多详细信息可在 [此处](https://github.com/imjoy-team/imjoy-engine/) 获得。
 
@@ -101,7 +84,26 @@ ImJoy提供了一个内置的代码编辑器供编写插件。结合浏览器提
 
 # ImJoy插件文件格式
 ImJoy插件通常是一个扩展名为`*.imjoy.html`的文本文件。其中使用HTML/XML标签，例如 `<config>`、`<script>`、`<window>` 来存储代码块。
-大多数插件类型至少需要两个代码块：`<config>` 和`<script>`，例如`web-worker`、`web-python` 和`native-python`。对于`window` 插件，代码中需要额外一个`<window>` 块，以及一个可选`<style>` 块用于CSS定义。关于 ImJoy 插件文件的详细说明可以在这里找到：[插件文件格式](https://imjoy.io/docs/#/development?id=plugin-file-format)。
+大多数插件类型至少需要两个代码块：`<config>` 和`<script>`，例如`web-worker`、`web-python` 和`native-python`。对于`window` 插件，代码中需要额外一个`<window>` 块，以及一个可选`<style>` 块用于CSS定义。
+
+对于`<script>`代码块，大多数插件至少会暴露两个特殊函数：`setup`（用于初始化）和`run`（当用户点击插件菜单按钮时调用）。在加载插件时，一个包含所有ImJoy API函数的`api`对象将被传递给插件，然后插件可以构建服务函数并通过调用 `api.export(...)` 函数来注册它们。
+
+比如以下插件中定义了 3 个 API 函数：一个空的 `setup` 函数，一个 `choosePokemon` 函数，以及一个可供调用的 `run` 函数（由 ImJoy内核调用或用户点击插件菜单时）：
+```js
+class ImJoyPlugin{
+    async setup(){
+    }
+    async choosePokemon(){
+        const pokemon = await api.prompt("What is your favorite Pokémon?", "Pikachu")
+        await api.showMessage("Your have chose " + pokemon + " as your Pokémon.")
+    }
+    async run(ctx){
+        await this.choosePokemon()
+    }
+}
+api.export(new ImJoyPlugin())
+```
+关于 ImJoy 插件文件的详细说明可以在这里找到：[插件文件格式](https://imjoy.io/docs/#/development?id=plugin-file-format)。
 
 # ImJoy的Hello World插件
 要制作第一个 ImJoy 插件，即ImJoy的Hello World，可以单击`+ PLUGINS`，然后从`+ CREATE A NEW PLUGIN`下拉菜单中选择默认模板`Default template`。
