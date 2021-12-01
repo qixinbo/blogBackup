@@ -1,5 +1,5 @@
 ---
-title: 开源深度学习计算平台ImJoy解析：3 -- 插件原理及上手
+title: 开源深度学习计算平台ImJoy解析：3 -- 插件概览
 tags: [ImJoy]
 categories: computer vision 
 date: 2021-12-1
@@ -66,11 +66,13 @@ Native Python插件用于运行原生 Python 代码以完全访问电脑硬件�
 插件类型可以通过插件进一步扩展。例如，作者新创建一个新的插件类型来执行Fiji/Scijava脚本，参见 [这篇文章](https://forum.image.sc/t/making-imjoy-plugins-with-fiji-scripts-for-running-remotely/39503)。
 
 ## ImJoy App和Plugin Engine与插件的关系
-使用 ImJoy App 的推荐方式是通过 [https://imjoy.io](https://imjoy.io)。现代浏览器（例如 Google Chrome）越来越支持运行和使用称为渐进式 Web 应用 (PWA) 的 Web 应用程序的新方法。
-例如，在 Chrome 中，用户可以将 ImJoy 安装到 [chrome://apps/](chrome://apps/) 并从 ImJoy App 仪表板启动。一旦安装，ImJoy 就可以在独立的浏览器窗口中运行（没有地址栏）。 ImJoy 的内核部分也支持离线，但插件目前还不支持（作者说后面将支持）。
+使用 ImJoy App 的推荐方式是通过 [https://imjoy.io](https://imjoy.io)。
+不过ImJoy还不是普通的web应用，它是采用了称为渐进式 Web 应用 (PWA) 的新方法。例如，在 Chrome 中，用户可以将 ImJoy 安装到 [chrome://apps/](chrome://apps/) 并从这个仪表板中启动ImJoy（同时生成桌面快捷方式）。一旦安装，ImJoy 就可以在独立的浏览器窗口中运行（没有地址栏）。 ImJoy 的内核部分支持离线，但插件目前还不支持（作者说后面将支持）。
 可以使用ImJoy App运行所有web插件（`web-worker`、`window`、`web-python`），但是，对于本机插件（`native-python`），需要连接到插件引擎在本地或远程运行。
 以下是安装插件引擎的两个选项：
-如需使用插件引擎运行插件，请下载并安装 Anaconda 或 Miniconda with Python3，然后运行`pip install imjoy`。然后可以通过 `imjoy --jupyter` 命令启动插件引擎。更多详细信息可在 [此处](https://github.com/imjoy-team/imjoy-engine/) 获得。
+（1）本地安装：下载并安装 Anaconda 或 Miniconda with Python3，然后运行`pip install imjoy`。然后可以通过 `imjoy --jupyter` 命令启动插件引擎。更多详细信息可在 [此处](https://github.com/imjoy-team/imjoy-engine/) 获得。
+（2）使用Jupyter托管服务：使用[binder](https://mybinder.org/)提供的免费Jupyter服务器，该服务是远程的，所以不需要额外安装。然而，其提供的算力也有限（比如1GB内存、无GPU支持等）。
+![engines](https://user-images.githubusercontent.com/6218739/144159316-243a6048-fb9e-4201-965c-fa11db4c9ded.png)
 
 # ImJoy代码编辑器和开发人员工具
 ImJoy提供了一个内置的代码编辑器供编写插件。结合浏览器提供的调试工具（例如：Google Chrome 开发者工具），不需要额外的 IDE 或工具。
@@ -86,7 +88,7 @@ ImJoy提供了一个内置的代码编辑器供编写插件。结合浏览器提
 ImJoy插件通常是一个扩展名为`*.imjoy.html`的文本文件。其中使用HTML/XML标签，例如 `<config>`、`<script>`、`<window>` 来存储代码块。
 大多数插件类型至少需要两个代码块：`<config>` 和`<script>`，例如`web-worker`、`web-python` 和`native-python`。对于`window` 插件，代码中需要额外一个`<window>` 块，以及一个可选`<style>` 块用于CSS定义。
 
-对于`<script>`代码块，大多数插件至少会暴露两个特殊函数：`setup`（用于初始化）和`run`（当用户点击插件菜单按钮时调用）。在加载插件时，一个包含所有ImJoy API函数的`api`对象将被传递给插件，然后插件可以构建服务函数并通过调用 `api.export(...)` 函数来注册它们。
+对于`<script>`代码块，大多数插件至少会暴露两个特殊函数：`setup`（用于初始化）和`run`（当用户点击插件菜单按钮时调用）。在加载插件时，一个包含所有ImJoyAPI函数的`api`对象将被传递给插件，然后插件可以构建服务函数并通过调用 `api.export(...)` 函数来注册它们。
 
 比如以下插件中定义了 3 个 API 函数：一个空的 `setup` 函数，一个 `choosePokemon` 函数，以及一个可供调用的 `run` 函数（由 ImJoy内核调用或用户点击插件菜单时）：
 ```js
