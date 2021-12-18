@@ -46,15 +46,71 @@ api.alert("Hello from ImJoy!")
 
 可以在 [此处](https://imjoy.io/docs/#/api) 中找到所有 ImJoy API 功能的详细说明。同样，后面会对这些API详细解析。
 
-# ImJoy 中的远程过程调用
+# 远程过程调用RPC
+首先来看一下什么是远程过程调用**Remote Procedure Calls (RPC)**。
+洪春涛的[这个知乎回答](https://www.zhihu.com/question/25536695/answer/221638079)非常言简意赅。以下是对该回答的摘引。
+
+## 本地过程调用
+RPC就是要像调用本地的函数一样去调远程函数。在研究RPC前，我们先看看本地调用是怎么调的。假设我们要调用函数Multiply来计算`lvalue * rvalue`的结果:
+```python
+1 int Multiply(int l, int r) {
+2    int y = l * r;
+3    return y;
+4 }
+5 
+6 int lvalue = 10;
+7 int rvalue = 20;
+8 int l_times_r = Multiply(lvalue, rvalue);
+```
+那么在第8行时，我们实际上执行了以下操作：
+（1）将lvalue和rvalue的值压栈
+（2）进入Multiply函数，取出栈中的值10和20，将其赋予l和r
+（3）执行第2行代码，计算`l*r`，并将结果存在y
+（4）将y的值压栈，然后从Multiply返回
+（5）第8行，从栈中取出返回值200 ，并赋值给`l_times_r`
+以上5步就是执行本地调用的过程。（20190116注：以上步骤只是为了说明原理。事实上编译器经常会做优化，对于参数和返回值少的情况会直接将其存放在寄存器，而不需要压栈弹栈的过程，甚至都不需要调用call，而直接做inline操作。仅就原理来说，这5步是没有问题的。）
+
+## 远程过程调用带来的新问题
+在远程调用时，我们需要执行的函数体是在远程的机器上的，也就是说，Multiply是在另一个进程中执行的。这就带来了几个新问题：
+（1）Call ID映射。我们怎么告诉远程机器我们要调用Multiply，而不是Add或者FooBar呢？在本地调用中，函数体是直接通过函数指针来指定的，我们调用Multiply，编译器就自动帮我们调用它相应的函数指针。但是在远程调用中，函数指针是不行的，因为两个进程的地址空间是完全不一样的。所以，在RPC中，所有的函数都必须有自己的一个ID。这个ID在所有进程中都是唯一确定的。客户端在做远程过程调用时，必须附上这个ID。然后我们还需要在客户端和服务端分别维护一个`{函数 <--> Call ID}`的对应表。两者的表不一定需要完全相同，但相同的函数对应的Call ID必须相同。当客户端需要进行远程调用时，它就查一下这个表，找出相应的Call ID，然后把它传给服务端，服务端也通过查表，来确定客户端需要调用的函数，然后执行相应函数的代码。
+（2）序列化和反序列化。客户端怎么把参数值传给远程的函数呢？在本地调用中，我们只需要把参数压到栈里，然后让函数自己去栈里读就行。但是在远程过程调用时，客户端跟服务端是不同的进程，不能通过内存来传递参数。甚至有时候客户端和服务端使用的都不是同一种语言（比如服务端用C++，客户端用Java或者Python）。这时候就需要客户端把参数先转成一个字节流，传给服务端后，再把字节流转成自己能读取的格式。这个过程叫序列化和反序列化。同理，从服务端返回的值也需要序列化反序列化的过程。
+（3）网络传输。远程调用往往用在网络上，客户端和服务端是通过网络连接的。所有的数据都需要通过网络传输，因此就需要有一个网络传输层。网络传输层需要把Call ID和序列化后的参数字节流传给服务端，然后再把序列化后的调用结果传回客户端。只要能完成这两者的，都可以作为传输层使用。因此，它所使用的协议其实是不限的，能完成传输就行。尽管大部分RPC框架都使用TCP协议，但其实UDP也可以，而gRPC干脆就用了HTTP2。Java的Netty也属于这层的东西。
+
+## RPC的实现
+```python
+// Client端 
+//    int l_times_r = Call(ServerAddr, Multiply, lvalue, rvalue)
+1. 将这个调用映射为Call ID。这里假设用最简单的字符串当Call ID的方法
+2. 将Call ID，lvalue和rvalue序列化。可以直接将它们的值以二进制形式打包
+3. 把2中得到的数据包发送给ServerAddr，这需要使用网络传输层
+4. 等待服务器返回结果
+5. 如果服务器调用成功，那么就将结果反序列化，并赋给l_times_r
+
+// Server端
+1. 在本地维护一个Call ID到函数指针的映射call_id_map，可以用std::map<std::string, std::function<>>
+2. 等待请求
+3. 得到一个请求后，将其数据包反序列化，得到Call ID
+4. 通过在call_id_map中查找，得到相应的函数指针
+5. 将lvalue和rvalue反序列化后，在本地调用Multiply函数，得到结果
+6. 将结果序列化后通过网络返回给Client
+```
+所以要实现一个RPC框架，其实只需要按以上流程实现就基本完成了。
+
+其中：
+（1）Call ID映射可以直接使用函数字符串，也可以使用整数ID。映射表一般就是一个哈希表。
+（2）序列化反序列化可以自己写，也可以使用Protobuf或者FlatBuffers之类的。
+（3）网络传输库可以自己写socket，或者用asio，ZeroMQ，Netty之类。
+
+
+## ImJoy中的远程过程调用
 尽管调用 `alert()` 和 `api.alert()` 会产生相同的结果（都是弹出消息），但要注意的是其底层过程是不同的。当调用`alert()`时，直接从插件启动弹出对话框，而调用`api.alert()`会从ImJoy内核（ImJoy core）中启动弹出对话框。
 需要时刻注意的是，ImJoy 是在独立或沙盒环境（即sandboxed iframe、webworker、conda 虚拟环境或 docker 容器）中运行每个插件。简而言之，这意味着默认情况下，函数和变量不会在插件之间或插件与ImJoy内核之间进行共享。
 当从插件中调用 ImJoy API 函数时，该函数将在 ImJoy 内核中执行。由于插件运行在不同的环境中，所以ImJoy内核中定义的所有功能都是“远程”功能。相比之下，同一个插件中定义的所有函数都是“本地”的。
-因此，调用 ImJoy API 函数意味着执行远程过程调用 **Remote Procedure Calls (RPC)**。
-（ImJoy 支持双向 RPC，不仅在插件和 ImJoy 内核之间，而且在插件之间也是如此。RPC可以在不同编程语言和不同主机之间统一地使用）
-比如，当一个在远程服务器上运行的 Python 插件进行调用`api.alert()` 时，弹出对话框则是由用户浏览器中的 ImJoy 内核（用 Javascript 实现）来启动的。
-RPC 允许将任务分发到以不同语言和不同位置运行的不同插件。例如，我们可以使用强大的 UI 库（例如 [D3](https://d3js.org/) 和 [ITK/VTK Viewer](https://kitware.github. io/itk-vtk-viewer/) )来构建用户界面，并用[Tensorflow. js](https://www.tensorflow.org/js)中的[Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) 来运行深度学习模型 。对于使用 GPU 来训练模型这种重型计算任务，可以在本地或远程（例如在 GPU 集群或实验室工作站上）的 Jupyter 笔记本服务器（即ImJoy插件引擎 Plugin Engine）上编写Python 插件来实现。
-这篇博文 ([RPCs, Life and All](http://tomerfiliba.com/blog/RPCs-Life-And-All/)) 解释了用于Python 远程过程调用的库 ([RPyC](https://rpyc.readthedocs.io/en/latest/))背后的想法 ，该库与 ImJoy 中提供的类似。
+因此，调用ImJoy API函数意味着执行远程过程调用。
+（ImJoy支持双向RPC，不仅在插件和 ImJoy内核之间，而且在插件之间也是如此。RPC可以在不同编程语言和不同主机之间统一地使用）
+比如，当一个在远程服务器上运行的Python插件进行调用`api.alert()`时，弹出对话框则是由用户浏览器中的ImJoy内核（用Javascript实现）来启动的。
+RPC允许将任务分发到以不同语言和不同位置运行的不同插件。例如，我们可以使用强大的UI库（例如[D3](https://d3js.org/) 和 [ITK/VTK Viewer](https://kitware.github.io/itk-vtk-viewer/))来构建用户界面，并用[Tensorflow. js](https://www.tensorflow.org/js)中的[Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) 来运行深度学习模型 。对于使用GPU来训练模型这种重型计算任务，可以在本地或远程（例如在GPU 集群或实验室工作站上）的Jupyter笔记本服务器（即ImJoy插件引擎 Plugin Engine）上编写Python 插件来实现。
+这篇博文([RPCs, Life and All](http://tomerfiliba.com/blog/RPCs-Life-And-All/)) 解释了用于Python远程过程调用的库([RPyC](https://rpyc.readthedocs.io/en/latest/))背后的想法 ，该库与ImJoy中提供的类似。
 
 
 # 异步编程
