@@ -1,5 +1,5 @@
 ---
-title: 开源深度学习计算平台ImJoy解析：7 -- 构建基于Web的图像分析插件
+title: 开源深度学习计算平台ImJoy解析：7 -- 构建基于Web的图像分析插件（JavaScript实现）
 tags: [ImJoy]
 categories: computer vision 
 date: 2021-12-17
