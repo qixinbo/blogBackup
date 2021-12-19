@@ -459,5 +459,4 @@ api.export(ImJoyPlugin())
 # 使用python深度学习库
 如上，我们使用了opencv-python进行了简单的图像处理，验证了native python插件的可行性。
 而除了opencv-python，python背后还有着更为广阔的深度学习生态，如tensorflow、pytorch、mxnet、paddlepaddle等深度学习框架，以及这些框架可调用的GPU资源，因此可以说整个python计算生态都可以被ImJoy的native python插件所调用，这就提供了非常广阔的应用空间。
-该部分不再介绍native python怎样调用python深度学习库，而是在后面的具体应用中详细介绍。
-敬请期待~~
+该部分不再介绍native python怎样调用python深度学习库，而是在后面的具体应用中详细解析。
