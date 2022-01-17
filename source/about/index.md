@@ -18,6 +18,6 @@ Xin Bo Qi (亓欣波)
 
 # Contact details
 
-- E-mail: qixinbo@gmail.com
+- E-mail: qixinbo#gmail.com (请把#改成@)
 - WeChat:
 ![wechat](https://user-images.githubusercontent.com/6218739/107872337-a1bc4080-6ee4-11eb-9481-49cb21891f16.png)
