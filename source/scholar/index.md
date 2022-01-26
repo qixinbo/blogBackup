@@ -28,6 +28,7 @@ date: 2016-01-13 08:41:43
 - [Y. Chen, D.Z. Li, B. Billia, H. Nguyen-Thi, X.B. Qi, N.M. Xiao. Quantitative phase-field simulation of dendritic equiaxed growth and comparison with in situ observation on Al-4wt.% Cu alloy by means of synchrotron X-ray radiography, ISIJ Int. 54 (2014) 445-451. (IF: 0.96)](https://www.jstage.jst.go.jp/article/isijinternational/54/2/54_445/_article)
 
 # Tools
+- [库问搜索-千万级文献免费下载](http://www.koovin.com/)
 - [中国科学院文献情报中心-OAuth-所友邮箱登录](https://webvpn.las.ac.cn)
 - [iData知识检索-cnki下载](https://www.cn-ki.net)
 - [论文驿站 - 师大云端图书馆下载站，一站式论文、专利下载平台](https://www.lunwenyizhan.com/)
