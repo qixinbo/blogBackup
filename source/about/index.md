@@ -5,7 +5,7 @@ date: 2016-01-12 22:40:47
 
 # Self-Introduction:
 
-Xin Bo Qi (亓欣波) 
+Xin Bo Qi
 - 2019.9 - Present, Research Scientist in Corporate Technology, Siemens Ltd. China
 - 2017.9 - 2019.9, Postdoc in Department of Mechanical Engineering, Tsinghua University
 - 2011.9 - 2017.6, PhD in Division of Materials Processing Modeling, Institute of Metal Research, Chinese Academy of Sciences
@@ -18,6 +18,6 @@ Xin Bo Qi (亓欣波)
 
 # Contact details
 
-- E-mail: qixinbo#gmail.com (请把#改成@)
+- E-mail: qixinbo!!!gmail.com (把!!!改成@)
 - WeChat:
 ![wechat](https://user-images.githubusercontent.com/6218739/107872337-a1bc4080-6ee4-11eb-9481-49cb21891f16.png)
