@@ -125,6 +125,8 @@ const imjoy = new imjoyCore.ImJoy({
 
 imjoy.start({workspace: 'default'}).then(async ()=>{
     await imjoy.api.alert("hello world");
+  }
+)
 </script>
 ```
 不过上面代码现在还没法直接运行。
