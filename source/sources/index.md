@@ -19,11 +19,13 @@ date: 2016-01-13 10:37:25
 
 
 # Widgets:
+- [在线去除图片水印](https://www.watermarkremover.io/)
 - [在线甘特图](https://www.onlinegantt.com)
 - [极简简历](https://polebrief.com/index)
 - [基于Web的语义分割标注工具](https://github.com/Hitachi-Automotive-And-Industry-Lab/semantic-segmentation-editor)
 - [OpenAPI/RestAPI工具集合](https://openapi.tools)
 - [大师兄影视 | android, ios影视app](https://dsxys.com/)
+- [奇侠影视](https://qixia.me/)
 - [网络视频下载器](https://www.tubeninja.net/zh-hans/)
 - [视频解析下载器](https://www.urlgot.com/zh_CN/)
 - [趣推：创意视频制作神器](http://www.qutui360.com/)
