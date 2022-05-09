@@ -14,6 +14,7 @@ date: 2016-01-13 10:37:25
 - [Jiasu.im 科学上网](http://i.jiasu.im/app.js)
 - [CordCloud](https://www.cordcloud.site/auth/register1?code=pfeoniCxO2mAJoy5CrwtKFPvYwEn5rDj)
 - [加速度](https://jsdcloud.xyz/auth/register)
+- [u9un](https://cp.u9un.com)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
 - [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/)
 
