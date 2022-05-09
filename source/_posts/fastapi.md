@@ -1,5 +1,5 @@
 ---
-title: FastAPI知识点
+title: FastAPI用户指南
 tags: [FastAPI]
 categories: coding 
 date: 2022-5-8
@@ -1615,3 +1615,279 @@ async def read_keyword_weights():
     return {"foo": 2.3, "bar": 3.4}
 ```
 
+## 响应状态码
+与指定响应模型的方式相同，也可以在以下任意的路径操作中使用 `status_code` 参数来声明用于响应的 HTTP 状态码。
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+# status_code 参数接收一个表示 HTTP 状态码的数字。
+# status_code 也能够接收一个 IntEnum 类型，比如 Python 的 http.HTTPStatus。
+@app.post("/items/", status_code=201)
+async def create_item(name: str):
+    return {"name": name}
+```
+注意，`status_code` 是「装饰器」方法（`get`，`post` 等）的一个参数。不像之前的所有参数和请求体，它不属于路径操作函数。
+在 HTTP 协议中，将发送 3 位数的数字状态码作为响应的一部分。
+这些状态码有一个识别它们的关联名称，但是重要的还是数字。
+（1）100 及以上状态码用于「消息」响应。很少直接使用它们。具有这些状态代码的响应不能带有响应体。
+（2）200 及以上状态码用于「成功」响应。这些是最常使用的。
+- 200 是默认状态代码，它表示一切「正常」。
+- 201表示「已创建」。它通常在数据库中创建了一条新记录后使用。
+- 204表示「无内容」。此响应在没有内容返回给客户端时使用，因此该响应不能包含响应体。
+
+    
+（3）300 及以上状态码用于「重定向」。具有这些状态码的响应可能有或者可能没有响应体，但 304「未修改」是个例外，该响应不得含有响应体。
+（4）400 及以上状态码用于「客户端错误」响应。这些可能是第二常用的类型。
+- 404，用于「未找到」响应。
+- 对于来自客户端的一般错误，可以只使用 400。
+
+（5）500 及以上状态码用于服务器端错误。几乎永远不会直接使用它们。当你的应用程序代码或服务器中的某些部分出现问题时，它将自动返回这些状态代码之一。
+要了解有关每个状态代码以及适用场景的更多信息，请查看[MDN 关于 HTTP 状态码的文档](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)。
+
+## 表单数据
+接收的不是 JSON，而是表单字段时，要使用 Form。
+要使用表单，需预先安装`python-multipart`：
+```python
+pip install python-multipart
+```
+例如：
+```python
+# 从 fastapi 导入 Form
+from fastapi import FastAPI, Form
+
+app = FastAPI()
+
+@app.post("/login/")
+# 创建表单（Form）参数的方式与 Body 和 Query 一样
+# OAuth2 规范的 "密码流" 模式规定要通过表单字段发送 username 和 password。
+# 该规范要求字段必须命名为 username 和 password，并通过表单字段发送，不能用 JSON。
+# 使用 Form 可以声明与 Body （及 Query、Path、Cookie）相同的元数据和验证。
+# 声明表单体要显式使用 Form ，否则，FastAPI 会把该参数当作查询参数或请求体（JSON）参数。
+async def login(username: str = Form(...), password: str = Form(...)):
+    return {"username": username}
+```
+
+与 JSON 不同，HTML 表单（`<form></form>`）向服务器发送数据通常使用「特殊」的编码。
+FastAPI 要确保从正确的位置读取数据，而不是读取 JSON。
+表单数据的「媒体类型」编码一般为 `application/x-www-form-urlencoded`。
+但包含文件的表单编码为 `multipart/form-data`。文件处理详见下节。
+
+可在一个路径操作中声明多个 Form 参数，但不能同时声明要接收 JSON 的 Body 字段。因为此时请求体的编码是 `application/x-www-form-urlencoded`，不是 `application/json`。
+这不是 FastAPI 的问题，而是 HTTP 协议的规定。
+
+## 请求文件
+`File` 用于定义客户端的上传文件。
+因为上传文件以「表单数据」形式发送。
+所以接收上传文件，要预先安装 `python-multipart`。
+有两种文件请求方式：
+```python
+# 从 fastapi 导入 File 和 UploadFile
+from fastapi import FastAPI, File, UploadFile
+
+app = FastAPI()
+
+
+@app.post("/files/")
+# 创建文件（File）参数的方式与 Body 和 Form 一样
+# 声明文件体必须使用 File，否则，FastAPI 会把该参数当作查询参数或请求体（JSON）参数。
+
+# 如果把路径操作函数参数的类型声明为 bytes，FastAPI 将以 bytes 形式读取和接收文件内容。
+# 这种方式把文件的所有内容都存储在内存里，适用于小型文件。
+async def create_file(file: bytes = File(...)):
+    return {"file_size": len(file)}
+
+
+@app.post("/uploadfile/")
+# 不过，很多情况下，UploadFile 更好用。
+# 定义 File 参数时使用 UploadFile
+async def create_upload_file(file: UploadFile):
+    return {"filename": file.filename}
+```
+UploadFile 与 bytes 相比有更多优势：
+（1）使用 spooled 文件：存储在内存的文件超出最大上限时，FastAPI 会把文件存入磁盘；
+（2）这种方式更适于处理图像、视频、二进制文件等大型文件，好处是不会占用所有内存；
+（3）可获取上传文件的元数据；
+（4）自带 [file-like](https://docs.python.org/zh-cn/3/glossary.html#term-file-like-object) `async` 接口；
+（5）它暴露了一个 Python `SpooledTemporaryFile` 对象，可直接传递给其他想要`file-like`对象的库。
+
+UploadFile 的属性如下：
+（1）`filename`：上传文件的文件名字符串（str），例如` myimage.jpg`；
+（2）`content_type`：内容的类型（MIME 类型 / 媒体类型）字符串（str），例如`image/jpeg`；
+（3）`file`： `SpooledTemporaryFile`（一个` file-like` 对象）。该对象可直接传递给其他想要 `file-like` 对象的函数或库。
+
+UploadFile 支持以下 `async` 方法，（使用内部 `SpooledTemporaryFile`）可调用如下方法。
+（1）`write(data)`：把 `data` （`str` 或 `bytes`）写入文件；
+（2）`read(size)`：按指定数量的字节或字符（`size (int)`）读取文件内容；
+（3）`seek(offset)`：移动至文件`offset (int)` 字节处的位置；
+例如，`await myfile.seek(0)`移动到文件开头；
+执行 `await myfile.read()` 后，需再次读取已读取内容时，这种方法特别好用。
+（4）`close()`：关闭文件。
+因为上述方法都是 `async` 方法，要搭配`await`使用。
+例如，在 `async` 路径操作函数 内，要用以下方式读取文件内容：
+```python
+contents = await myfile.read()
+```
+在普通 `def` 路径操作函数 内，则可以直接访问`UploadFile.file`：
+```python
+contents = myfile.file.read()
+```
+
+多文件上传：
+```python
+from typing import List
+
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import HTMLResponse
+
+app = FastAPI()
+
+
+@app.post("/files/")
+# 可用同一个「表单字段」发送含多个文件的「表单数据」。
+# 上传多个文件时，要声明含 bytes 或 UploadFile 的列表（List）：
+async def create_files(files: List[bytes] = File(...)):
+    # 接收的也是含 bytes 或 UploadFile 的列表（list）。
+    return {"file_sizes": [len(file) for file in files]}
+
+
+@app.post("/uploadfiles/")
+async def create_upload_files(
+    # 也可以声明元数据
+    files: List[UploadFile] = File(..., description="Multiple files as UploadFile")):
+    return {"filenames": [file.filename for file in files]}
+
+
+@app.get("/")
+async def main():
+    content = """
+<body>
+<form action="/files/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
+```
+
+## 请求表单和文件
+FastAPI 支持同时使用 `File` 和 `Form` 定义文件和表单字段。
+在同一个请求中接收数据和文件时，应同时使用 File 和 Form。
+```python
+from fastapi import FastAPI, File, Form, UploadFile
+
+app = FastAPI()
+
+
+@app.post("/files/")
+async def create_file(
+    # 创建文件和表单参数的方式与 Body 和 Query 一样
+    # 可在一个路径操作中声明多个 File 与 Form 参数，但不能同时声明要接收 JSON 的 Body 字段。因为此时请求体的编码为 multipart/form-data，不是 application/json。
+    # 这不是 FastAPI 的问题，而是 HTTP 协议的规定。
+    file: bytes = File(...), fileb: UploadFile = File(...), token: str = Form(...)
+):
+    return {
+        "file_size": len(file),
+        "token": token,
+        "fileb_content_type": fileb.content_type,
+    }
+```
+
+## 处理错误
+某些情况下，需要向客户端返回错误提示。
+这里所谓的客户端包括前端浏览器、其他应用程序、物联网设备等。
+需要向客户端返回错误提示的场景主要如下：
+（1）客户端没有执行操作的权限
+（2）客户端没有访问资源的权限
+（3）客户端要访问的项目不存在
+等等 ...
+遇到这些情况时，通常要返回 4XX（400 至 499）HTTP 状态码。
+### 使用HTTPException
+向客户端返回 HTTP 错误响应，可以使用 `HTTPException`。
+HTTPException 是一个常规 Python 异常，包含了和 API 有关的额外数据。
+```python
+# 导入 HTTPException
+from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+items = {"foo": "The Foo Wrestlers"}
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: str):
+    if item_id not in items:
+        # 因为是 Python 异常，所以不能 return，只能 raise。
+        # 如在调用路径操作函数里的工具函数时，触发了 HTTPException，FastAPI 就不再继续执行路径操作函数中的后续代码，而是立即终止请求，并把 HTTPException 的 HTTP 错误发送至客户端。
+
+        # 触发 HTTPException 时，可以用参数 detail 传递任何能转换为 JSON 的值，不仅限于 str。
+        # 还支持传递 dict、list 等数据结构。
+        # FastAPI 能自动处理这些数据，并将之转换为 JSON。
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"item": items[item_id]}
+```
+有些场景下要为 HTTP 错误添加自定义响应头。例如，出于某些方面的安全需要。
+一般情况下可能不会需要在代码中直接使用响应头。
+但对于某些高级应用场景，还是需要添加自定义响应头：
+```python
+from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+items = {"foo": "The Foo Wrestlers"}
+
+
+@app.get("/items-header/{item_id}")
+async def read_item_header(item_id: str):
+    if item_id not in items:
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found",
+            headers={"X-Error": "There goes my error"},
+        )
+    return {"item": items[item_id]}
+```
+
+### 安装自定义异常处理器
+添加自定义处理器，要使用[Starlette 的异常工具](https://www.starlette.io/exceptions/)。
+```python
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+# 假设要触发的自定义异常叫作 UnicornException。
+# 且需要 FastAPI 实现全局处理该异常。
+class UnicornException(Exception):
+    def __init__(self, name: str):
+        self.name = name
+
+
+app = FastAPI()
+
+# 可以用 @app.exception_handler() 添加自定义异常控制器
+@app.exception_handler(UnicornException)
+async def unicorn_exception_handler(request: Request, exc: UnicornException):
+    # 接收到的错误信息清晰明了，HTTP 状态码为 418，JSON 内容如下：
+    return JSONResponse(
+        status_code=418,
+        content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
+    )
+
+
+@app.get("/unicorns/{name}")
+async def read_unicorn(name: str):
+    # 请求 /unicorns/yolo 时，路径操作会触发 UnicornException。
+    # 但该异常将会被 unicorn_exception_handler 处理。
+    if name == "yolo":
+        raise UnicornException(name=name)
+    return {"unicorn_name": name}
+```
+### 覆盖默认异常处理器
+FastAPI 自带了一些默认异常处理器。
+触发 `HTTPException` 或请求无效数据时，这些处理器返回默认的 JSON 响应结果。
+不过，也可以使用自定义处理器覆盖默认异常处理器。
+（这部分内容太高阶，且一般情况下使用默认异常处理器即可。跳过本部分）
