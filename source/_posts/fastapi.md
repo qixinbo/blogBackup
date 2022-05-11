@@ -1224,6 +1224,110 @@ async def update_item(
     return results
 ```
 
+### 更新数据
+（1）用`PUT`更新数据
+```python
+from typing import List, Optional
+
+from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    tax: float = 10.5
+    tags: List[str] = []
+
+
+items = {
+    "foo": {"name": "Foo", "price": 50.2},
+    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+    "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+}
+
+
+@app.get("/items/{item_id}", response_model=Item)
+async def read_item(item_id: str):
+    return items[item_id]
+
+# PUT 用于接收替换现有数据的数据。
+@app.put("/items/{item_id}", response_model=Item)
+async def update_item(item_id: str, item: Item):
+    # 把输入数据转换为以 JSON 格式存储的数据（比如，使用 NoSQL 数据库时），可以使用 jsonable_encoder。例如，把 datetime 转换为 str。
+    update_item_encoded = jsonable_encoder(item)
+    items[item_id] = update_item_encoded
+    return update_item_encoded
+```
+当使用如下请求体：
+```python
+{
+  "name": "bar111",
+  "description": "string",
+  "price": 0
+}
+```
+用`PUT`更新`bar`时，因为上述数据未包含已存储的属性 `"tax": 20.2`，新的输入模型会把 `"tax": 10.5` 作为默认值。
+因此，本次操作把 `tax` 的值「更新」为 `10.5`。
+（2）用`PATCH`进行部分更新
+HTTP PATCH 操作用于更新 部分 数据。
+即，只发送要更新的数据，其余数据保持不变。
+PATCH 没有 PUT 知名，也怎么不常用。
+很多人甚至只用 PUT 实现部分更新。
+FastAPI 对此没有任何限制，可以随意互换使用这两种操作。
+但本指南也会分别介绍这两种操作各自的用途。
+仍然以上述请求体为例：
+```python
+from typing import List, Optional
+
+from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    tax: float = 10.5
+    tags: List[str] = []
+
+
+items = {
+    "foo": {"name": "Foo", "price": 50.2},
+    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+    "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+}
+
+
+@app.get("/items/{item_id}", response_model=Item)
+async def read_item(item_id: str):
+    return items[item_id]
+
+
+@app.patch("/items/{item_id}", response_model=Item)
+async def update_item(item_id: str, item: Item):
+    stored_item_data = items[item_id]
+    stored_item_model = Item(**stored_item_data)
+    # 更新部分数据时，可以在 Pydantic 模型的 `.dict()` 中使用 `exclude_unset` 参数。
+    # 如下代码生成的 dict 只包含创建 item 模型时显式设置的数据，而不包括默认值。
+    # 即：update_data =  {'name': 'bar111', 'description': 'string', 'price': 0.0}
+    # 而不是
+    # update_data =  {'name': 'bar111', 'description': 'string', 'price': 0.0, 'tax': 10.5, 'tags': []}
+    update_data = item.dict(exclude_unset=True)
+    # 接下来，用 .copy() 为已有模型创建调用 update 参数的副本，该参数为包含更新数据的 dict。
+    updated_item = stored_item_model.copy(update=update_data)
+    items[item_id] = jsonable_encoder(updated_item)
+    return updated_item
+```
+实际上，HTTP `PUT` 也可以完成相同的操作。 但本节以 `PATCH` 为例的原因是，该操作就是为了这种用例创建的。
+
 ## 其他数据类型
 到目前为止，一直在使用常见的数据类型，如:`int`、`float`、`str`、`bool`，但是也可以使用更复杂的数据类型。
 在这些复杂数据类型上，也能有如下功能：编辑器支持、传入请求的数据转换、响应数据的转换、数据验证、自动补全和文档。
@@ -1891,3 +1995,734 @@ FastAPI 自带了一些默认异常处理器。
 触发 `HTTPException` 或请求无效数据时，这些处理器返回默认的 JSON 响应结果。
 不过，也可以使用自定义处理器覆盖默认异常处理器。
 （这部分内容太高阶，且一般情况下使用默认异常处理器即可。跳过本部分）
+
+## 路径操作配置
+路径操作装饰器支持多种配置参数。
+通过传递参数给路径操作装饰器 ，即可轻松地配置路径操作、添加元数据。
+注意：以下参数应直接传递给路径操作装饰器，不能传递给路径操作函数。
+### 状态码
+`status_code` 用于定义路径操作响应中的 HTTP 状态码。
+可以直接传递 `int` 代码， 比如 404。
+如果记不住数字码的涵义，也可以用 `status` 的快捷常量，如`status.HTTP_201_CREATED`。
+
+### tags参数
+tags 参数的值是由 str 组成的 list （一般只有一个 str ），tags 用于为路径操作添加标签。
+```python
+from typing import Optional, Set
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
+    tags: Set[str] = set()
+
+
+@app.post("/items/", response_model=Item, tags=["items"])
+async def create_item(item: Item):
+    return item
+
+
+@app.get("/items/", tags=["items"])
+async def read_items():
+    return [{"name": "Foo", "price": 42}]
+
+
+@app.get("/users/", tags=["users"])
+async def read_users():
+    return [{"username": "johndoe"}]
+```
+OpenAPI schema会自动添加标签，供 API 文档接口使用。
+### summary 和 description 参数
+```python
+from typing import Optional, Set
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
+    tags: Set[str] = set()
+
+
+@app.post(
+    "/items/",
+    response_model=Item,
+    # 对api的概要
+    summary="Create an item",
+    # 详细说明，更复杂的说明可以使用下面的文档字符串
+    description="Create an item with all the information, name, description, price, tax and a set of unique tags",
+)
+async def create_item(item: Item):
+    return item
+```
+
+### 文档字符串
+描述内容比较长且占用多行时，可以在函数的 docstring 中声明路径操作的描述，FastAPI 支持从文档字符串中读取描述内容。
+文档字符串支持 Markdown，能正确解析和显示 Markdown 的内容，但要注意文档字符串的缩进。
+```python
+from typing import Optional, Set
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
+    tags: Set[str] = set()
+
+
+@app.post("/items/", response_model=Item, summary="Create an item")
+async def create_item(item: Item):
+    """
+    Create an item with all the information:
+
+    - **name**: each item must have a name
+    - **description**: a long description
+    - **price**: required
+    - **tax**: if the item doesn't have tax, you can omit this
+    - **tags**: a set of unique tag strings for this item
+    """
+    return item
+```
+### 响应描述
+```python
+from typing import Optional, Set
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    tax: Optional[float] = None
+    tags: Set[str] = set()
+
+
+@app.post(
+    "/items/",
+    response_model=Item,
+    summary="Create an item",
+    # response_description 参数用于定义响应的描述说明
+    # OpenAPI 规定每个路径操作都要有响应描述。
+    # 如果没有定义响应描述，FastAPI 则自动生成内容为 "Successful response" 的响应描述。
+    response_description="The created item",
+)
+async def create_item(item: Item):
+    """
+    Create an item with all the information:
+
+    - **name**: each item must have a name
+    - **description**: a long description
+    - **price**: required
+    - **tax**: if the item doesn't have tax, you can omit this
+    - **tags**: a set of unique tag strings for this item
+    """
+    return item
+```
+### 弃用路径操作
+`deprecated` 参数可以把路径操作标记为弃用，无需直接删除。
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+
+@app.get("/items/", tags=["items"])
+async def read_items():
+    return [{"name": "Foo", "price": 42}]
+
+
+@app.get("/users/", tags=["users"])
+async def read_users():
+    return [{"username": "johndoe"}]
+
+
+@app.get("/elements/", tags=["items"], deprecated=True)
+async def read_elements():
+    return [{"item_id": "Foo"}]
+```
+
+## JSON兼容编码器
+在某些情况下，可能需要将一个数据类型（如 Pydantic 模型）转换为与 JSON 兼容的类型（如`dict`、`list`等）。
+比如想将该数据存储在数据库中。
+为此，FastAPI提供了一个`jsonable_encoder()`功能。
+```python
+from datetime import datetime
+from typing import Optional
+
+from fastapi import FastAPI
+# 导入jsonable_encoder
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+
+# 假设fake_db数据库只接收 JSON 兼容的数据。
+# 例如，它不接收datetime对象，因为它们与 JSON 不兼容。
+# 因此，datetime对象必须转换为包含ISO格式数据的str对象。
+# 同样，该数据库不会接收 Pydantic 模型（具有属性的对象），只会接收dict.
+fake_db = {}
+
+
+class Item(BaseModel):
+    title: str
+    timestamp: datetime
+    description: Optional[str] = None
+
+
+app = FastAPI()
+
+
+@app.put("/items/{id}")
+def update_item(id: str, item: Item):
+    # jsonable_encoder将 Pydantic 模型转换为一个dict，并将datetime转换为str。
+    # 它不会返回一个大的str，里面包含JSON格式的数据（作为字符串）。
+    # 而是返回一个Python标准数据结构（例如一个dict），其中的值和子值都与 JSON 兼容。
+    json_compatible_item_data = jsonable_encoder(item)
+    fake_db[id] = json_compatible_item_data
+```
+
+## 依赖项
+FastAPI 提供了简单易用，但功能强大的依赖注入系统。
+这个依赖系统设计的简单易用，可以让开发人员轻松地把组件集成至 FastAPI。
+### 依赖注入
+编程中的「依赖注入」是声明代码（本文中为路径操作函数 ）运行所需的，或要使用的「依赖」的一种方式。
+然后，由系统（本文中为 FastAPI）负责执行任意需要的逻辑，为代码提供这些依赖（「注入」依赖项）。
+依赖注入常用于以下场景：
+（1）共享业务逻辑（复用相同的代码逻辑）
+（2）共享数据库连接
+（3）实现安全、验证、角色权限
+等……
+上述场景均可以使用依赖注入，将代码重复最小化。
+依赖注入系统支持构建集成和「插件」。但实际上，FastAPI 根本不需要创建「插件」，因为使用依赖项可以声明不限数量的、可用于路径操作函数的集成与交互。
+创建依赖项非常简单、直观，并且还支持导入 Python 包。毫不夸张地说，只要几行代码就可以把需要的 Python 包与 API 函数集成在一起。
+
+### FastAPI 兼容性
+依赖注入系统如此简洁的特性，让 FastAPI 可以与下列系统兼容：
+- 关系型数据库
+- NoSQL 数据库
+- 外部支持库
+- 外部 API
+- 认证和鉴权系统
+- API 使用监控系统
+- 响应数据注入系统
+等等……
+
+### 例子
+```python
+from typing import Optional
+# 导入 Depends
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+# 创建依赖项
+# 依赖项函数的形式和结构与路径操作函数一样。
+# 可以把依赖项当作没有「装饰器」（即，没有 @app.get("/some-path") ）的路径操作函数。
+async def common_parameters(q: Optional[str] = None, skip: int = 0, limit: int = 100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+# 声明依赖项
+# 与在路径操作函数参数中使用 Body、Query 的方式相同，声明依赖项需要使用 Depends 和一个新的参数。
+
+# 虽然，在路径操作函数的参数中使用 Depends 的方式与 Body、Query 相同，但 Depends 的工作方式略有不同。
+# 这里只能传给 Depends 一个参数。
+# 且该参数必须是可调用对象，比如函数。
+# 该函数接收的参数和路径操作函数的参数一样。
+@app.get("/items/")
+async def read_items(commons: dict = Depends(common_parameters)):
+    return commons
+
+# 接收到新的请求时，FastAPI 执行如下操作：
+# （1）用正确的参数调用依赖项函数（「可依赖项」）
+# （2）获取函数返回的结果
+# （3）把函数返回的结果赋值给路径操作函数的参数
+@app.get("/users/")
+async def read_users(commons: dict = Depends(common_parameters)):
+    return commons
+```
+虽然，层级式依赖注入系统的定义与使用十分简单，但它却非常强大。
+比如，可以定义依赖其他依赖项的依赖项。
+最后，依赖项层级树构建后，依赖注入系统会处理所有依赖项及其子依赖项，并为每一步操作提供（注入）结果。
+
+### 类作为依赖项
+上面例子中依赖项的声明是个函数，它的返回值是个字典。这种方式可行，但可以更好，比如此时编辑器就没法提供很好的支持，因为它不知道字典的键和值是什么。
+函数并不是声明依赖关系的唯一方法（尽管它可能更常见）。关键因素是依赖项应该是“可调用的”。
+Python 中的“可调用”是 Python 可以像函数一样“调用”的任何东西，比如类`class`也是可调用的。
+
+FastAPI 实际检查的是它是“可调用的”（函数、类或其他任何东西）和定义的参数。
+如果在FastAPI 中将“可调用”作为依赖项传递，它将分析该“可调用”的参数，并以与路径操作函数的参数相同的方式处理它们。包括子依赖。
+这也适用于完全没有参数的可调用对象。与没有参数的路径操作函数相同。
+```python
+from typing import Optional
+
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
+
+# 将依赖项从上面的函数common_parameters更改为类CommonQueryParams
+class CommonQueryParams:
+    # __init__用于创建类实例的方法
+    def __init__(self, q: Optional[str] = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+
+@app.get("/items/")
+# 使用这个类来声明依赖
+# 这将创建该类的“实例”，并且该实例将作为参数传递commons给函数。
+async def read_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
+    response = {}
+    if commons.q:
+        response.update({"q": commons.q})
+    items = fake_items_db[commons.skip : commons.skip + commons.limit]
+    response.update({"items": items})
+    return response
+```
+
+### 子依赖项
+FastAPI 支持创建含子依赖项的依赖项。
+并且，可以按需声明任意深度的子依赖项嵌套层级。
+FastAPI 负责处理解析不同深度的子依赖项。
+```python
+from typing import Optional
+
+from fastapi import Cookie, Depends, FastAPI
+
+app = FastAPI()
+
+# 创建第一层依赖项
+def query_extractor(q: Optional[str] = None):
+    return q
+
+# 创建另一个依赖项函数，并同时再声明一个依赖项
+def query_or_cookie_extractor(
+    q: str = Depends(query_extractor), last_query: Optional[str] = Cookie(None)
+):
+    if not q:
+        return last_query
+    return q
+
+
+@app.get("/items/")
+async def read_query(query_or_default: str = Depends(query_or_cookie_extractor)):
+    return {"q_or_cookie": query_or_default}
+```
+如果在同一个路径操作 多次声明了同一个依赖项，例如，多个依赖项共用一个子依赖项，FastAPI 在处理同一请求时，只调用一次该子依赖项。
+FastAPI 不会为同一个请求多次调用同一个依赖项，而是把依赖项的返回值进行「缓存」，并把它传递给同一请求中所有需要使用该返回值的「依赖项」。
+在高级使用场景中，如果不想使用「缓存」值，而是为需要在同一请求的每一步操作（多次）中都实际调用依赖项，可以把 Depends 的参数 `use_cache` 的值设置为 `False` :
+```python
+async def needy_dependency(fresh_value: str = Depends(get_value, use_cache=False)):
+    return {"fresh_value": fresh_value}
+```
+### 路径操作装饰器中的依赖项
+有时，我们并不需要在路径操作函数中使用依赖项的返回值。或者说，有些依赖项不返回值。
+但仍要执行或解析该依赖项。
+对于这种情况，不必在声明路径操作函数的参数时使用 Depends，而是可以在路径操作装饰器中添加一个由 `dependencies` 组成的 `list`。
+```python
+from fastapi import Depends, FastAPI, Header, HTTPException
+
+app = FastAPI()
+
+
+async def verify_token(x_token: str = Header(...)):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+async def verify_key(x_key: str = Header(...)):
+    if x_key != "fake-super-secret-key":
+        raise HTTPException(status_code=400, detail="X-Key header invalid")
+    return x_key
+
+# 路径操作装饰器支持可选参数dependencies。
+# 该参数的值是由 Depends() 组成的 list
+# 路径操作装饰器依赖项（以下简称为“路径装饰器依赖项”）的执行或解析方式和普通依赖项一样，但就算这些依赖项会返回值，它们的值也不会传递给路径操作函数。
+@app.get("/items/", dependencies=[Depends(verify_token), Depends(verify_key)])
+async def read_items():
+    return [{"item": "Foo"}, {"item": "Bar"}]
+```
+
+### 全局依赖项
+有时，我们要为整个应用添加依赖项。
+通过与定义路径装饰器依赖项 类似的方式，可以把依赖项添加至整个 FastAPI 应用。
+这样一来，就可以为所有路径操作应用该依赖项。
+```python
+from fastapi import Depends, FastAPI, Header, HTTPException
+
+
+async def verify_token(x_token: str = Header(...)):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+async def verify_key(x_key: str = Header(...)):
+    if x_key != "fake-super-secret-key":
+        raise HTTPException(status_code=400, detail="X-Key header invalid")
+    return x_key
+
+# 全局依赖项
+# 路径装饰器依赖项一节的思路均适用于全局依赖项
+app = FastAPI(dependencies=[Depends(verify_token), Depends(verify_key)])
+
+
+@app.get("/items/")
+async def read_items():
+    return [{"item": "Portal Gun"}, {"item": "Plumbus"}]
+
+
+@app.get("/users/")
+async def read_users():
+    return [{"username": "Rick"}, {"username": "Morty"}]
+```
+
+### 有yield的依赖项
+FastAPI 支持在完成后执行一些额外步骤的依赖项。
+为此，请使用`yield`代替`return`，并在之后编写额外的步骤。
+确保使用`yield`一次。
+一个典型例子是想在发送请求时创建一个数据库对话，然后发送完成后就关闭它。
+```python
+# async或普通函数都可以
+async def get_db():
+    # 只有在yield之前和包含yield那行代码会在发送请求前执行
+    db = DBSession()
+    try: #使用try能收到异常
+        # yield的值会注入到路径操作中，或其他依赖中
+        yield db
+    # 在yield之后的代码会在发送响应后再执行
+    finally: # 使用finally来确保执行退出步骤，无论是否有异常。
+        db.close()
+```
+
+## 安全性
+有许多方法可以处理安全性、身份认证和授权等问题。
+而且这通常是一个复杂而「困难」的话题。
+在许多框架和系统中，仅处理安全性和身份认证就会花费大量的精力和代码（在许多情况下，可能占编写的所有代码的 50％ 或更多）。
+FastAPI 提供了多种工具，可帮助你以标准的方式轻松、快速地处理安全性，而无需研究和学习所有的安全规范。
+### 基本知识
+（1）OAuth2
+OAuth2是一个规范，它定义了几种处理身份认证和授权的方法。
+它是一个相当广泛的规范，涵盖了一些复杂的使用场景。
+它包括了使用「第三方」进行身份认证的方法。这就是所有带有「使用 Facebook，Google，Twitter，GitHub 登录」的系统背后所使用的机制。
+有一个 OAuth 1，它与 OAuth2 完全不同，并且更为复杂，因为它直接包含了有关如何加密通信的规范。
+如今它已经不是很流行，没有被广泛使用了。
+OAuth2 没有指定如何加密通信，它期望你为应用程序使用 HTTPS 进行通信。
+（2）OpenID Connect
+OpenID Connect 是另一个基于 OAuth2 的规范。
+它只是扩展了 OAuth2，并明确了一些在 OAuth2 中相对模糊的内容，以尝试使其更具互操作性。
+例如，Google 登录使用 OpenID Connect（底层使用OAuth2）。
+但是 Facebook 登录不支持 OpenID Connect。它具有自己的 OAuth2 风格。
+（3）OpenID（非「OpenID Connect」）
+还有一个「OpenID」规范。它试图解决与 OpenID Connect 相同的问题，但它不是基于 OAuth2。
+因此，它是一个完整的附加系统。
+如今它已经不是很流行，没有被广泛使用了。
+（4）OpenAPI
+OpenAPI（以前称为 Swagger）是用于构建 API 的开放规范（现已成为 Linux Foundation 的一部分）。
+FastAPI 基于 OpenAPI。
+这就是使多个自动交互式文档界面，代码生成等成为可能的原因。
+OpenAPI 有一种定义多个安全「方案」的方法。
+通过使用它们，你可以利用所有这些基于标准的工具，包括这些交互式文档系统。
+OpenAPI 定义了以下安全方案：
+（4.1）`apiKey`：一个特定于应用程序的密钥，可以来自：查询参数、请求头、cookie。
+（4.2）`http`：标准的 HTTP 身份认证系统，包括：
+- bearer: 一个值为 Bearer 加令牌字符串的 Authorization 请求头。这是从 OAuth2 继承的。
+- HTTP Basic 认证方式。
+- HTTP Digest，等等。
+
+（4.3）`oauth2`：所有的 OAuth2 处理安全性的方式（称为「流程」）。 
+以下几种流程适合构建 OAuth 2.0 身份认证的提供者（例如 Google，Facebook，Twitter，GitHub 等）：`implicit`、`clientCredentials`、`authorizationCode`。
+但是有一个特定的「流程」可以完美地用于直接在同一应用程序中处理身份认证：`password`：接下来的几章将介绍它的示例。
+（4.4）`openIdConnect`：提供了一种定义如何自动发现 OAuth2 身份认证数据的方法。此自动发现机制是 OpenID Connect 规范中定义的内容。
+
+### 基本框架
+假设在某个域中拥有后端API。并且在另一个域或同一域的不同路径中（或在移动应用程序中）有一个前端。
+此时希望有一种方法让前端使用`username`和`password`与后端进行身份验证。
+我们可以使用FastAPI提供的`OAuth2`构建它。
+（注意，需要首先安装`python-multipart`，这是因为OAuth2使用“表单数据”来发送`username`和`password`。）
+```python
+from fastapi import Depends, FastAPI
+# FastAPI提供了多种不同抽象级别的工具来实现安全功能。
+# 在此示例中，将使用OAuth2，配合Password流和Bearer令牌。
+# 具体地，使用OAuth2PasswordBearer类来做到这一点。
+
+# bearer令牌不是唯一的选择。但它是该用例的最佳选择。
+# 对于大多数用例来说，它可能是最好的，除非你是 OAuth2 专家并且确切地知道为什么有另一个选项更适合需求。
+from fastapi.security import OAuth2PasswordBearer
+
+app = FastAPI()
+
+# 当创建OAuth2PasswordBearer类的实例时，传入tokenUrl参数。
+# 此参数包含客户端（在用户浏览器中运行的前端）用于发送username和password以获取令牌的URL。
+# 这里的tokenUrl="token"指的是一个相对URL，所以它相当于./token，不过该URL还尚未创建。
+# 因为使用的是相对 URL，如果API位于https://example.com/，那么它将引用https://example.com/token。
+# 但如果API 位于https://example.com/api/v1/，那么它就是https://example.com/api/v1/token.
+# 使用相对 URL 非常重要，可以确保应用程序即使在像代理服务器后面这样的高级用例中也能正常工作。
+
+# tokenUrl="token"不会创建该路径操作，但声明了/token这个URL将是客户端应该用来获取令牌的URL。该信息在 OpenAPI 中使用，然后在交互式 API 文档系统中使用。
+
+# oauth2_scheme变量是OAuth2PasswordBearer的一个实例，但它也是“可调用的”。
+# 因此它可被Depends使用
+
+# 它将查看请求中的Authorization这个header，检查该值是否是Bearer以及一些令牌，并返回str类型的令牌.
+# 如果它没有看到Authorization标头，或者该值没有Bearer标记，它将直接返回 401状态代码错误(UNAUTHORIZED)。
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+@app.get("/items/")
+# 这个依赖将提供一个str赋值给token这个参数
+async def read_items(token: str = Depends(oauth2_scheme)):
+    return {"token": token}
+```
+以上只是一个基本框架，还没有实际功能。
+### 完整功能
+在查看真正的具有安全功能的代码时，需要用到JWT令牌和哈希密码。
+（1）JWT令牌
+JWT 表示 「JSON Web Tokens」。
+它是一个将 JSON 对象编码为密集且没有空格的长字符串的标准。字符串看起来像这样：
+```python
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+```
+它没有被加密，因此任何人都可以从字符串内容中还原数据。
+但它经过了签名。因此，当你收到一个由你发出的令牌时，可以校验令牌是否真的由你发出。
+通过这种方式，你可以创建一个有效期为 1 周的令牌。然后当用户第二天使用令牌重新访问时，你知道该用户仍然处于登入状态。
+一周后令牌将会过期，用户将不会通过认证，必须再次登录才能获得一个新令牌。而且如果用户（或第三方）试图修改令牌以篡改过期时间，你将因为签名不匹配而能够发觉。
+
+对JWT令牌进行签名，实际就是一个密钥。要生成一个安全的随机密钥，可使用openssl。
+windows版的openssl可以用别人编译好的，在[这里](https://slproweb.com/products/Win32OpenSSL.html)。
+在终端中使用以下命令：
+```python
+openssl rand -hex 32
+```
+
+需要安装 python-jose 以在 Python 中生成和校验 JWT 令牌（Python-jose 需要一个额外的加密后端。这里推荐：pyca/cryptography。）
+```python
+pip install python-jose[cryptography]
+```
+
+
+（2）哈希密码
+「哈希」的意思是：将某些内容（在本例中为密码）转换为看起来像乱码的字节序列（只是一个字符串）。
+每次你传入完全相同的内容（完全相同的密码）时，你都会得到完全相同的乱码。
+但是你不能从乱码转换回密码。
+PassLib 是一个用于处理哈希密码的很棒的 Python 包。
+它支持许多安全哈希算法以及配合算法使用的实用程序。
+推荐的算法是 「Bcrypt」。
+因此，安装附带 Bcrypt 的 PassLib：
+```python
+pip install passlib[bcrypt]
+```
+
+完整实例：
+```python
+from datetime import datetime, timedelta
+from typing import Optional
+
+from fastapi import Depends, FastAPI, HTTPException, status
+# 将使用 FastAPI 的安全性实用工具来获取 username 和 password。
+# OAuth2 规定在使用「password 流程」时，客户端/用户必须将 username 和 password 字段作为表单数据发送（因此，此处不能使用 JSON）。
+# 而且规范明确了字段必须这样命名。因此 user-name 或 email 是行不通的。
+# 不过不用担心，你可以在前端按照你的想法将它展示给最终用户。
+# 而且你的数据库模型也可以使用你想用的任何其他名称。
+# 但是对于登录路径操作，我们需要使用这些名称来与规范兼容（以具备例如使用集成的 API 文档系统的能力）。
+# 具体地，导入 OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+# 从 passlib 导入我们需要的工具。
+from passlib.context import CryptContext
+
+# 导入jwt相关模块
+from jose import JWTError, jwt
+
+from pydantic import BaseModel
+
+#################################### JWT相关功能 #####################################
+# 在终端中使用openssl rand -hex 32生成如下key
+SECRET_KEY = "cda3c6e86b29270b741c9e1c62d052f5593921f26ae0badc4027b856f53d679f"
+# 创建用于设定 JWT 令牌签名算法的变量 「ALGORITHM」，并将其设置为 "HS256"。
+ALGORITHM = "HS256"
+# 创建一个设置令牌过期时间的变量。
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 
+
+# 定义一个将在令牌端点中用于响应的 Pydantic 模型。
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+# 创建一个生成新的访问令牌的工具函数。
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+#################################### 数据库相关功能 #####################################
+# 假的用户数据库
+fake_users_db = {
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
+        # 哈希密码，不明文存储，如下是明文密目"secret"的哈希，所以登录时要用secret登录
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "disabled": False,
+    }
+}
+
+
+# 创建一个用户 Pydantic 模型
+class User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
+
+
+class UserInDB(User):
+    hashed_password: str
+
+
+app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+#################################### 哈希密码相关功能 #####################################
+# 创建一个 PassLib 「上下文」。这将用于哈希和校验密码。
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# 创建一个工具函数以哈希来自用户的密码。
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+# 创建另一个工具函数，用于校验接收的密码是否与存储的哈希值匹配。
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_user(db, username: str):
+    if username in db:
+        user_dict = db[username]
+        return UserInDB(**user_dict)
+
+# 创建另一个工具函数用于认证并返回用户。
+def authenticate_user(fake_db, username: str, password: str):
+    user = get_user(fake_db, username)
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+
+
+# 创建一个 get_current_user 依赖项
+# get_current_user将具有一个之前所创建的同一个 oauth2_scheme 作为依赖项。
+# 与之前直接在路径操作中所做的相同，新的依赖项 get_current_user 将从子依赖项 oauth2_scheme 中接收一个 str 类型的 token，具体地，就是一个JWT令牌
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        # 解码接收到的令牌，对其进行校验
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # JWT 的规范中有一个 sub 键，值为该令牌的主题。
+        # 使用它并不是必须的，但这是放置用户标识的地方，所以在示例中使用了它。
+        username: str = payload.get("sub")
+
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    # 如果令牌无效，立即返回一个 HTTP 错误。
+    except JWTError:
+        raise credentials_exception
+    # 然后返回当前用户
+    user = get_user(fake_users_db, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+# 想要仅当此用户处于启用状态时才能获取 current_user。
+# 因此，创建了一个额外的依赖项 get_current_active_user，而该依赖项又以 get_current_user 作为依赖项。
+# 如果用户不存在或处于未启用状态，则这两个依赖项都将返回 HTTP 错误。
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+# 在token的路径操作中通过Depends将OAuth2PasswordRequestForm作为依赖项使用
+# OAuth2PasswordRequestForm 是一个类依赖项，声明了如下的请求表单：
+# - username。
+# - password。
+# - 一个可选的 scope 字段，但实际上它是一个由空格分隔的「作用域」组成的长字符串。每个「作用域」只是一个字符串（中间没有空格）。它们通常用于声明特定的安全权限，例如：users:read 或者 users:write 是常见的例子。类依赖项 OAuth2PasswordRequestForm 的实例不会有用空格分隔的长字符串属性 scope，而是具有一个 scopes 属性，该属性将包含实际被发送的每个作用域字符串组成的列表。
+# - 一个可选的 grant_type.
+# - 一个可选的 client_id（该示例不需要它）。
+# - 一个可选的 client_secret（该示例不需要它）。
+
+@app.post("/token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()): #这个是一个快捷方式
+    # 使用表单字段中的 username 从（伪）数据库中获取用户数据。 
+    # 如果没有这个用户，我们将返回一个错误消息，提示「用户名或密码错误」。
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    # 创建一个真实的 JWT 访问令牌 
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    # token 端点的响应必须是一个 JSON 对象，里面包含有：
+    # （1）token_type字段：在该例中，由于我们使用的是「Bearer」令牌，因此令牌类型应为「bearer」。
+    # （2）access_token字段：它是一个包含我们的访问令牌的字符串。
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+# 注意声明响应模型
+@app.get("/users/me/", response_model=User)
+# 在路径操作中使用 get_current_active_user 作为 Depends
+# 注意我们将 current_user 的类型声明为 Pydantic 模型 User。
+# 这将帮助我们在函数内部使用所有的代码补全和类型检查。
+
+# 在这个端点中，只有当用户存在，身份认证通过且处于启用状态时，我们才能获得该用户
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+@app.get("/users/me/items/")
+async def read_own_items(current_user: User = Depends(get_current_active_user)):
+    return [{"item_id": "Foo", "owner": current_user.username}]
+```
