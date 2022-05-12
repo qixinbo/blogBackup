@@ -2726,3 +2726,364 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 async def read_own_items(current_user: User = Depends(get_current_active_user)):
     return [{"item_id": "Foo", "owner": current_user.username}]
 ```
+
+## 中间件
+可以向 FastAPI 应用添加中间件.
+"中间件"是一个函数,它在每个请求被特定的路径操作处理之前,以及在每个响应返回之前工作.
+- 它接收你的应用程序的每一个请求.
+- 然后它可以对这个请求做一些事情或者执行任何需要的代码.
+- 然后它将请求传递给应用程序的其他部分 (通过某种路径操作).
+- 然后它获取应用程序生产的响应 (通过某种路径操作).
+- 它可以对该响应做些什么或者执行任何需要的代码.
+- 然后它返回这个响应。
+
+```python
+import time
+
+from fastapi import FastAPI, Request
+
+app = FastAPI()
+
+# 要创建中间件你可以在函数的顶部使用装饰器 @app.middleware("http").
+# 中间件参数接收如下参数:
+- request.
+- call_next函数：它将接收 request 作为参数.
+（1）这个函数将 request 传递给相应的 路径操作.
+（2）然后它将返回由相应的路径操作生成的 response.
+（3）然后你可以在返回 response 前进一步修改它.
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    # 可以 用'X-' 前缀添加专有自定义请求头.
+    # 但是如果你想让浏览器中的客户端看到你的自定义请求头, 你需要把它们加到 CORS 配置 (CORS (Cross-Origin Resource Sharing)) 的 expose_headers 参数中
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+```
+
+## CORS跨域资源共享
+CORS 或者「跨域资源共享」 指浏览器中运行的前端拥有与后端通信的 JavaScript 代码，而后端处于与前端不同的「源」的情况。
+源origin是协议（`http`，`https`）、域（`myapp.com`，`localhost`，`localhost.tiangolo.com`）以及端口（`80`、`443`、`8080`）的组合。
+
+因此，这些都是不同的源：`http://localhost`、`https://localhost`、`http://localhost:8080`。
+即使它们都在 localhost 中，但是它们使用不同的协议或者端口，所以它们都是不同的「源」。
+### 步骤
+假设你的浏览器中有一个前端运行在`http://localhost:8080`，并且它的 JavaScript 正在尝试与运行在`http://localhost`的后端通信（因为我们没有指定端口，浏览器会采用默认的端口`80`）。
+然后，浏览器会向后端发送一个 `HTTP OPTIONS` 请求，如果后端发送适当的 `headers` 来授权来自这个不同源（`http://localhost:8080`）的通信，浏览器将允许前端的 JavaScript 向后端发送请求。
+为此，后端必须有一个「允许的源」列表。
+在这种情况下，它必须包含`http://localhost:8080`，前端才能正常工作。
+### 通配符
+也可以使用 "*"（一个「通配符」）声明这个列表，表示全部都是允许的。
+但这仅允许某些类型的通信，不包括所有涉及凭据的内容：像 Cookies 以及那些使用 Bearer 令牌的授权 headers 等。
+因此，为了一切都能正常工作，最好显式地指定允许的源。
+### 使用CORSMiddleware
+可以在 FastAPI 应用中使用 CORSMiddleware 来配置它。
+（1）导入 CORSMiddleware。
+（2）创建一个允许的源列表（由字符串组成）。
+（3）将其作为「中间件」添加到你的 FastAPI 应用中。
+
+也可以指定后端是否允许：
+（1）凭证（授权 headers，Cookies 等）。
+（2）特定的 HTTP 方法（POST，PUT）或者使用通配符 "*" 允许所有方法。
+（3）特定的 HTTP headers 或者使用通配符 "*" 允许所有 headers。
+
+默认情况下，这个 CORSMiddleware 实现所使用的默认参数较为保守，所以你需要显式地启用特定的源、方法或者 headers，以便浏览器能够在跨域上下文中使用它们。
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins：一个允许跨域请求的源列表。例如 ['https://example.org', 'https://www.example.org']。可以使用 ['*'] 允许任何源。
+    allow_origins=origins,
+    # allow_credentials：指示跨域请求支持 cookies。默认是 False。另外，允许凭证时 allow_origins 不能设定为 ['*']，必须指定源。
+    allow_credentials=True,
+    # allow_methods：一个允许跨域请求的 HTTP 方法列表。默认为 ['GET']。你可以使用 ['*'] 来允许所有标准方法。
+    allow_methods=["*"],
+    # allow_headers：一个允许跨域请求的 HTTP 请求头列表。默认为 []。你可以使用 ['*'] 允许所有的请求头。
+    # Accept、Accept-Language、Content-Language 以及 Content-Type 请求头总是允许 CORS 请求。
+    allow_headers=["*"],
+    # 还有其他，比如：
+    # allow_origin_regex：一个正则表达式字符串，匹配的源允许跨域请求。例如 'https://.*\.example\.org'。
+    # expose_headers：指示可以被浏览器访问的响应头。默认为 []。
+    # max_age：设定浏览器缓存 CORS 响应的最长时间，单位是秒。默认为 600。
+)
+
+
+@app.get("/")
+async def main():
+    return {"message": "Hello World"}
+```
+中间件响应两种特定类型的 HTTP 请求：
+（1）CORS 预检请求
+这是些带有 Origin 和 Access-Control-Request-Method 请求头的 OPTIONS 请求。
+在这种情况下，中间件将拦截传入的请求并进行响应，出于提供信息的目的返回一个使用了适当的 CORS headers 的 200 或 400 响应。
+（2）简单请求
+任何带有 Origin 请求头的请求。在这种情况下，中间件将像平常一样传递请求，但是在响应中包含适当的 CORS headers。
+
+## SQL数据库
+FastAPI不要求使用 SQL（关系）数据库。不过可以使用任何想要的关系数据库（通过SQLAlchemy实现）。
+在下面示例中，将使用SQLite，因为它使用单个文件并且 Python 具有集成支持。对于大的生产应用程序，可能希望使用像PostgreSQL这样的数据库服务器。
+[这里](https://github.com/tiangolo/full-stack-fastapi-postgresql)有一个带有FastAPI和PostgreSQL的官方项目生成器，全部基于Docker，包括前端和更多工具。
+
+首先需要安装SQLAlchemy：
+```python
+pip install SQLAlchemy
+```
+
+文件结构：
+```python
+.
+└── sql_app
+    ├── __init__.py
+    ├── crud.py
+    ├── database.py
+    ├── main.py
+    ├── models.py
+    └── schemas.py
+```
+（1）对于database.py文件
+```python
+# 导入 SQLAlchemy 部件
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+# 为 SQLAlchemy 创建数据库 URL
+SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
+# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
+
+# 创建 SQLAlchemy engine
+engine = create_engine(
+    # connect_args仅用于SQLite. 其他数据库不需要它
+    # 默认情况下，SQLite只允许一个线程与其通信，假设每个线程将处理一个独立的请求。
+    # 这是为了防止意外地为不同的事物（不同的请求）共享相同的连接。
+    # 但是在 FastAPI 中，使用普通函数 ( def) 多个线程可以为同一个请求与数据库交互，因此我们需要让 SQLite 知道它应该允许这个connect_args={"check_same_thread": False}
+    # 此外，我们将确保每个请求获得自己的数据库连接会话，因此不需要该默认机制。
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+# 创建一个SessionLocal类
+# SessionLocal类的每一个实例都是一个数据库会话。该类本身并不是数据库会话。
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# 使用declarative_base()返回一个类。
+# 稍后将从这个类继承来创建每个数据库模型或类（ORM 模型）：
+Base = declarative_base()
+```
+（2）对于models.py文件
+```python
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+
+# 从database.py文件中导入Base类
+from .database import Base
+
+# 创建Base的子类，这些类都是SQLAlchemy模型
+class User(Base):
+    # __tablename__属性告诉SQLAlchemy这些模型在数据库中的文件
+    __tablename__ = "users"
+
+    # 创建模型字段，每个字段在数据库中都是一列Column，也就是数据表的字段
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+
+    # 创建数据表之间的关系
+    items = relationship("Item", back_populates="owner")
+
+
+class Item(Base):
+    __tablename__ = "items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    description = Column(String, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    owner = relationship("User", back_populates="items")
+```
+（3）对于schemas.py文件
+```python
+from typing import List, Optional
+
+# 为了不搞混SQLAlchemy模型和Pydantic模型，就用models.py存放SQLAlchemy模型，而该文件schemas.py存放Pydantic模型
+from pydantic import BaseModel
+
+# 创建ItemBase这一Pydantic模型，作为一个盛放关于item统一属性的模型
+class ItemBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+
+class ItemCreate(ItemBase):
+    pass
+
+
+class Item(ItemBase):
+    id: int
+    owner_id: int
+
+    # 用config属性对Pydantic模型进行配置
+    class Config:
+        # orm_mode参数告诉Pydantic模型读取数据，即使它不是一个dict，而是一个ORM模型（或其他任意带属性的对象）
+        # 此时它会尝试通过id = data.id这样获取属性的方式来读取数据，
+        # 而不是id = data['id']这样字典读key的方法
+        # 这样Pydantic模型就与ORM模型可以兼容，
+        # 在路径操作中也可使用response_model来声明
+        orm_mode = True
+
+
+class UserBase(BaseModel):
+    email: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class User(UserBase):
+    id: int
+    is_active: bool
+    items: List[Item] = []
+
+    class Config:
+        orm_mode = True
+```
+
+（4）对于crud.py文件
+```python
+# 该文件就是对数据库的操作，即增删改查
+
+# 从SQLAlchemy.orm中导入Session，这将允许对下面的db参数进行类型声明，从而有类型检查和补全功能
+from sqlalchemy.orm import Session
+
+# 导入SQLAlchemy模型和Pydantic模型
+from . import models, schemas
+
+# 创建几个工具函数
+
+# （1）通过id读取单个用户
+def get_user(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
+# （2）通过邮箱读取单个用户
+def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email == email).first()
+
+# （3）读取多个用户
+def get_users(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.User).offset(skip).limit(limit).all()
+
+# （4）创建一个用户
+def create_user(db: Session, user: schemas.UserCreate):
+    fake_hashed_password = user.password + "notreallyhashed"
+    db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
+    # add添加实例对象
+    db.add(db_user)
+    # commit提交更改
+    db.commit()
+    # refresh刷新以获得最新数据
+    db.refresh(db_user)
+    return db_user
+
+# （5）读取多个items
+def get_items(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Item).offset(skip).limit(limit).all()
+
+# （6）创建一个item
+def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
+    # **是用来解包，并且附加另一个参数
+    db_item = models.Item(**item.dict(), owner_id=user_id)
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+```
+
+（5）对于main.py文件
+```python
+from typing import List
+
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+
+from . import crud, models, schemas
+from .database import SessionLocal, engine
+
+# 创建数据库的数据表
+# 通常，可能会使用Alembic初始化数据库（创建表等）。
+# 还可以使用 Alembic 进行“迁移”（这是它的主要工作）。
+# “迁移”是每当更改 SQLAlchemy 模型的结构、添加新属性等以在数据库中复制这些更改、添加新列、新表等时所需的一组步骤。
+# 可以在Project Generation - Template的模板中找到一个 FastAPI 项目中的 Alembic 示例。
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+
+# 创建一个依赖项
+def get_db():
+    # 每个请求都有一个独立的会话，请求结束后就关闭它
+    # 但所有会话都是同一个
+    db = SessionLocal()
+    try:
+        # yield的用法可以参考之前部分
+        yield db
+    finally:
+        db.close()
+
+
+@app.post("/users/", response_model=schemas.User)
+# 在路径操作中都使用上述依赖
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    # 返回的是SQLAlchemy模型，但是因为设置了orm_mode，就能与响应模型兼容
+    return crud.create_user(db=db, user=user)
+
+
+@app.get("/users/", response_model=List[schemas.User])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    return users
+
+
+@app.get("/users/{user_id}", response_model=schemas.User)
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = crud.get_user(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+
+@app.post("/users/{user_id}/items/", response_model=schemas.Item)
+def create_item_for_user(
+    user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
+):
+    return crud.create_user_item(db=db, item=item, user_id=user_id)
+
+
+@app.get("/items/", response_model=List[schemas.Item])
+def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    items = crud.get_items(db, skip=skip, limit=limit)
+    return items
+```
+
+运行：
+```python
+uvicorn sql_app.main:app --reload
+```
+注意得在包外面，按如上方式运行。因为文件内有相对路径导入。
+
+查看SQLite数据，可以使用在线工具，如[https://inloop.github.io/sqlite-viewer/](https://inloop.github.io/sqlite-viewer/)。
