@@ -236,6 +236,33 @@ FastAPI 利用这些类型提示来做下面几件事。
 （4）使用 OpenAPI 记录 API，然后用于自动生成交互式文档的用户界面。
 
 
+# 并发和异步/等待
+如果使用的第三方库说了使用`await`来调用，例如：
+```python
+results = await some_library()
+```
+那么就用`async def`声明路径操作函数，如下所示：
+```python
+@app.get('/')
+async def read_results():
+    results = await some_library()
+    return results
+```
+如果正在使用一个第三方库来与某些东西（数据库、API、文件系统等）进行通信，并且它不支持使用`await`（目前大多数数据库都是这种情况），那么就只需`def`声明路径操作，例如：
+```python
+@app.get('/')
+def results():
+    results = some_library()
+    return results
+```
+如果你的应用程序（以某种方式）不必与其他任何东西通信并等待它响应，请使用`async def`。
+如果你是啥都不知道，就直接使用普通`def`。
+
+注意：可以根据需要混合使用`def`和`async def`。FastAPI 会对它们做正确的事情。
+无论如何，在上述任何情况下，FastAPI 仍将以异步方式工作并且非常快。
+但是按照上面的步骤，它将能够进行一些性能优化。
+
+
 # 用户指南
 ## OpenAPI
 FastAPI 使用OpenAPI标准将所有 API 转换成模式schema。
@@ -3087,3 +3114,396 @@ uvicorn sql_app.main:app --reload
 注意得在包外面，按如上方式运行。因为文件内有相对路径导入。
 
 查看SQLite数据，可以使用在线工具，如[https://inloop.github.io/sqlite-viewer/](https://inloop.github.io/sqlite-viewer/)。
+
+## 大型项目的文件组织
+如果正在开发一个应用程序或 Web API，很少会将所有的内容都放在一个文件中。
+FastAPI 提供了一个方便的工具，可以在保持所有灵活性的同时构建你的应用程序。
+如果你来自 Flask，那这将相当于 Flask 的 Blueprints。
+
+文件结构：
+```python
+.
+├── app                  # 「app」是一个 Python 包
+│   ├── __init__.py      # 这个文件使「app」成为一个 Python 包
+│   ├── main.py          # 「main」模块，例如 import app.main
+│   ├── dependencies.py  # 「dependencies」模块，例如 import app.dependencies
+│   └── routers          # 「routers」是一个「Python 子包」
+│   │   ├── __init__.py  # 使「routers」成为一个「Python 子包」
+│   │   ├── items.py     # 「items」子模块，例如 import app.routers.items
+│   │   └── users.py     # 「users」子模块，例如 import app.routers.users
+│   └── internal         # 「internal」是一个「Python 子包」
+│       ├── __init__.py  # 使「internal」成为一个「Python 子包」
+│       └── admin.py     # 「admin」子模块，例如 import app.internal.admin
+```
+
+### APIRouter路由
+APIRouter可以使得对于不同对象的路径操作写在不同文件中，以使其井井有条。
+（1）专门用于处理用户逻辑的文件是位于 `/app/routers/users.py` 的子模块
+```python
+# 专门处理用户逻辑的路由文件
+
+# 导入 APIRouter
+from fastapi import APIRouter
+
+# 通过与 FastAPI 类相同的方式创建一个「实例」
+router = APIRouter()
+
+# 可以将 APIRouter 视为一个「迷你 FastAPI」类。
+# 所有相同的选项都得到支持。
+# 所有相同的 parameters、responses、dependencies、tags 等等。
+@router.get("/users/", tags=["users"])
+async def read_users():
+    return [{"username": "Rick"}, {"username": "Morty"}]
+
+
+@router.get("/users/me", tags=["users"])
+async def read_user_me():
+    return {"username": "fakecurrentuser"}
+
+
+@router.get("/users/{username}", tags=["users"])
+async def read_user(username: str):
+    return {"username": username}
+```
+（2）专门用于处理应用程序中「项目」的路由操作：
+```python
+from fastapi import APIRouter, Depends, HTTPException
+
+from ..dependencies import get_token_header
+
+# 此模块中的所有路径操作都有相同的：
+    # 路径 prefix：/items。
+    # tags：（仅有一个 items 标签）。
+    # 额外的 responses。
+    # dependencies：它们都需要我们创建的 X-Token 依赖项。
+# 因此，我们可以将其添加到 APIRouter 中，而不是将其添加到每个路径操作中。
+router = APIRouter(
+    prefix="/items",
+    tags=["items"],
+    dependencies=[Depends(get_token_header)],
+    responses={404: {"description": "Not found"}},
+)
+
+
+fake_items_db = {"plumbus": {"name": "Plumbus"}, "gun": {"name": "Portal Gun"}}
+
+
+@router.get("/")
+async def read_items():
+    return fake_items_db
+
+
+@router.get("/{item_id}")
+async def read_item(item_id: str):
+    if item_id not in fake_items_db:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"name": fake_items_db[item_id]["name"], "item_id": item_id}
+
+
+@router.put(
+    "/{item_id}",
+    # 仍然可以添加更多将会应用于特定的路径操作的tags，以及一些特定于该路径操作的额外 responses
+    # 最后的这个路径操作将包含标签的组合：["items"，"custom"]。
+    # 并且在文档中也会有两个响应，一个用于 404，一个用于 403。
+    tags=["custom"],
+    responses={403: {"description": "Operation forbidden"}},
+)
+async def update_item(item_id: str):
+    if item_id != "plumbus":
+        raise HTTPException(
+            status_code=403, detail="You can only update the item: plumbus"
+        )
+    return {"item_id": item_id, "name": "The great Plumbus"}
+```
+
+也可以在另一个 APIRouter 中包含 APIRouter，通过：
+```python
+router.include_router(other_router)
+```
+请确保在你将 `router` 包含到 FastAPI 应用程序之前进行此操作，以便 `other_router` 中的路径操作也能被包含进来。
+
+（3）现在，假设你的组织为你提供了 `app/internal/admin.py` 文件。
+它包含一个带有一些由你的组织在多个项目之间共享的管理员路径操作的 `APIRouter`。
+对于此示例，它将非常简单。但是假设由于它是与组织中的其他项目所共享的，因此我们无法对其进行修改，以及直接在 APIRouter 中添加 `prefix`、`dependencies`、`tags` 等：
+```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+
+@router.post("/")
+async def update_admin():
+    return {"message": "Admin getting schwifty"}
+```
+但是我们仍然希望在包含 APIRouter 时设置一个自定义的 `prefix`，以便其所有路径操作以 `/admin` 开头，我们希望使用本项目已经有的 `dependencies` 保护它，并且我们希望它包含自定义的 `tags` 和 `responses`。
+这些将在主体文件`main.py`中实现。
+
+
+### 依赖项
+我们将需要一些在应用程序的好几个地方所使用的依赖项。
+因此，将它们放在 `dependencies` 模块（`app/dependencies.py`）中。
+```python
+from fastapi import Header, HTTPException
+# 我们正在使用虚构的请求首部来简化此示例。
+# 但在实际情况下，使用集成的安全性实用工具会得到更好的效果。
+async def get_token_header(x_token: str = Header(...)):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+async def get_query_token(token: str):
+    if token != "jessica":
+        raise HTTPException(status_code=400, detail="No Jessica token provided")
+```
+所有的这些路径操作都将在自身之前计算/执行 dependencies 列表。
+- 如果你还在一个具体的路径操作中声明了依赖项，它们也会被执行。
+- 路由器的依赖项最先执行，然后是装饰器中的 dependencies，再然后是普通的参数依赖项。
+- 你还可以添加具有 scopes 的 Security 依赖项。
+
+
+### 主体
+`app/main.py`模块导入并使用 FastAPI 类。
+这将是你的应用程序中将所有内容联结在一起的主文件。
+并且由于你的大部分逻辑现在都存在于其自己的特定模块中，因此主文件的内容将非常简单。
+```python
+from fastapi import Depends, FastAPI
+
+from .dependencies import get_query_token, get_token_header
+from .internal import admin
+from .routers import items, users
+
+# 甚至可以声明全局依赖项，它会和每个 APIRouter 的依赖项组合在一起：
+app = FastAPI(dependencies=[Depends(get_query_token)])
+
+# 包含来自 users 和 items 子模块的 router。
+# 使用 app.include_router()，我们可以将每个 APIRouter 添加到主 FastAPI 应用程序中。
+app.include_router(users.router)
+app.include_router(items.router)
+# 通过将以下这些参数传递给 app.include_router() 来完成所有的声明，而不必修改原始的 APIRouter
+# 这样，原始的APIRouter将保持不变，因此我们仍然可以与组织中的其他项目共享相同的 app/internal/admin.py 文件。
+# 但这只会影响我们应用中的 APIRouter，而不会影响使用它的任何其他代码。
+# 因此，举例来说，其他项目能够以不同的身份认证方法使用相同的 APIRouter。
+app.include_router(
+    admin.router,
+    prefix="/admin",
+    tags=["admin"],
+    dependencies=[Depends(get_token_header)],
+    responses={418: {"description": "I'm a teapot"}},
+)
+
+# 可以直接将路径操作添加到 FastAPI 应用中
+@app.get("/")
+async def root():
+    return {"message": "Hello Bigger Applications!"}
+```
+
+## 后台任务
+可以定义在返回响应后运行的后台任务。
+这对于需要在请求之后发生的操作很有用，但客户端实际上不必在接收响应之前等待操作完成。
+这包括，例如：
+（1）执行操作后发送的电子邮件通知： 由于连接到电子邮件服务器并发送电子邮件往往“慢”（几秒钟），可以立即返回响应并在后台发送电子邮件通知。
+（2）处理数据：例如，假设您收到一个必须经过缓慢处理的文件，您可以返回“已接受”（HTTP 202）的响应并在后台处理它。
+```python
+# 导入BackgroundTasks
+from fastapi import BackgroundTasks, FastAPI
+
+app = FastAPI()
+
+
+# 创建一个作为后台任务运行的函数。
+# 它是一个可以接收参数的标准函数。
+# 它可以是一个async def或普通def函数，FastAPI会知道如何正确处理它。
+# 该例中任务函数将写入文件（模拟发送电子邮件的场景）。
+# 并且由于写操作不使用async和await，我们用 normal 定义函数def：
+def write_notification(email: str, message=""):
+    with open("log.txt", mode="w") as email_file:
+        content = f"notification for {email}: {message}"
+        email_file.write(content)
+
+
+@app.post("/send-notification/{email}")
+async def send_notification(
+    email: str,
+    # 定义一个参数，其类型声明为：BackgroundTasks 
+    # FastAPI将为您创建类型的对象BackgroundTasks并将其作为该参数传递。
+    background_tasks: BackgroundTasks):
+    # 在路径操作函数内部，使用以下方法将任务函数传递给后台任务对象
+    background_tasks.add_task(write_notification, email, message="some notification")
+    return {"message": "Notification sent in the background"}
+```
+
+注意：
+如果需要执行繁重的后台计算并且不一定需要它由同一进程运行（例如，不需要共享内存、变量等），可能会受益于使用其他更大的工具，例如Celery。
+它们往往需要更复杂的配置，消息/作业队列管理器，如 RabbitMQ 或 Redis，但它们允许在多个进程中运行后台任务，尤其是在多个服务器中。
+要查看示例，请查看Project Generators，它们都包含已配置的 Celery。
+但是，如您需要从同一个FastAPI应用程序访问变量和对象，或者需要执行小型后台任务（例如发送电子邮件通知），只需使用BackgroundTasks.
+
+
+### 依赖注入
+`BackgroundTasks`也适用于依赖注入系统。
+```python
+from typing import Optional
+
+from fastapi import BackgroundTasks, Depends, FastAPI
+
+app = FastAPI()
+
+
+def write_log(message: str):
+    with open("log.txt", mode="a") as log:
+        log.write(message)
+
+
+def get_query(background_tasks: BackgroundTasks, q: Optional[str] = None):
+    if q:
+        message = f"found query: {q}\n"
+        background_tasks.add_task(write_log, message)
+    return q
+
+
+@app.post("/send-notification/{email}")
+async def send_notification(
+    # 在此示例中，消息将在发送响应后写入文件log.txt。
+    # 如果请求中有查询，它将在后台任务中写入日志。
+    # 然后在路径操作函数处生成的另一个后台任务将使用email路径参数写入一条消息。
+    email: str, background_tasks: BackgroundTasks, q: str = Depends(get_query)
+):
+    message = f"message to {email}\n"
+    background_tasks.add_task(write_log, message)
+    return {"message": "Message sent"}
+```
+
+## 元数据和文档URL
+可以在 FastAPI 应用中自定义几个元数据配置。
+```python
+from fastapi import FastAPI
+
+description = """
+ChimichangApp API helps you do awesome stuff. 🚀
+
+## Items
+
+You can **read items**.
+
+## Users
+
+You will be able to:
+
+* **Create users** (_not implemented_).
+* **Read users** (_not implemented_).
+"""
+
+app = FastAPI(
+    # Title：在 OpenAPI 和自动 API 文档用户界面中作为 API 的标题/名称使用。
+    title="ChimichangApp",
+    # Description：在 OpenAPI 和自动 API 文档用户界面中用作 API 的描述。
+    description=description,
+    # Version：API 版本，例如 v2 或者 2.5.0。
+    version="0.0.1",
+    terms_of_service="http://example.com/terms/",
+    contact={
+        "name": "Deadpoolio the Amazing",
+        "url": "http://x-force.example.com/contact/",
+        "email": "dp@x-force.example.com",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+    },
+)
+
+
+@app.get("/items/")
+async def read_items():
+    return [{"name": "Katana"}]
+```
+
+### 标签元数据
+也可以使用参数 `openapi_tags`，为用于分组路径操作的不同标签添加额外的元数据。
+```python
+from fastapi import FastAPI
+
+# 接受一个列表，这个列表包含每个标签对应的一个字典。
+# 每个标签元数据字典的顺序也定义了在文档用户界面显示的顺序。
+tags_metadata = [
+    {
+        # name（必要）：一个 str，它与路径操作和 APIRouter 中使用的 tags 参数有相同的标签名。
+        "name": "users",
+        # description：一个用于简短描述标签的 str。它支持 Markdown 并且会在文档用户界面中显示。
+        "description": "Operations with users. The **login** logic is also here.",
+    },
+    {
+        "name": "items",
+        "description": "Manage items. So _fancy_ they have their own docs.",
+        # externalDocs：一个描述外部文档的 dict：
+            # description：用于简短描述外部文档的 str。
+            # url（必要）：外部文档的 URL str。
+        "externalDocs": {
+            "description": "Items external docs",
+            "url": "https://fastapi.tiangolo.com/",
+        },
+    },
+]
+
+app = FastAPI(openapi_tags=tags_metadata)
+
+# 将 tags 参数和路径操作（以及 APIRouter）一起使用，将其分配给不同的标签
+@app.get("/users/", tags=["users"])
+async def get_users():
+    return [{"name": "Harry"}, {"name": "Ron"}]
+
+
+@app.get("/items/", tags=["items"])
+async def get_items():
+    return [{"name": "wand"}, {"name": "flying broom"}]
+```
+
+### 文档URL
+```python
+from fastapi import FastAPI
+# 可以配置两个文档用户界面，包括：
+
+#     Swagger UI：服务于 /docs。
+#         可以使用参数 docs_url 设置它的 URL。
+#         可以通过设置 docs_url=None 禁用它。
+#     ReDoc：服务于 /redoc。
+#         可以使用参数 redoc_url 设置它的 URL。
+#         可以通过设置 redoc_url=None 禁用它。
+
+
+# 例如，设置 Swagger UI 服务于 /documentation 并禁用 ReDoc：
+app = FastAPI(docs_url="/documentation", redoc_url=None)
+
+
+@app.get("/items/")
+async def read_items():
+    return [{"name": "Foo"}]
+```
+
+## 静态文件
+可以使用`StaticFiles`来挂载静态文件。
+
+## 测试客户端
+基于Starlette，测试FastAPI应用程序变得简单而愉快。具体地，它基于Requests，因此非常熟悉和直观。
+有了它，可以直接将pytest与FastAPI一起使用。
+```python
+from fastapi import FastAPI
+# 导入TestClient
+from fastapi.testclient import TestClient
+
+app = FastAPI()
+
+
+@app.get("/")
+async def read_main():
+    return {"msg": "Hello World"}
+
+
+client = TestClient(app)
+
+
+def test_read_main():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"msg": "Hello World"}
+```
