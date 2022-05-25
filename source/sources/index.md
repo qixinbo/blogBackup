@@ -20,6 +20,7 @@ date: 2016-01-13 10:37:25
 
 
 # Widgets:
+- [图片托管](https://postimages.org/)
 - [在线去除图片水印](https://www.watermarkremover.io/)
 - [在线甘特图](https://www.onlinegantt.com)
 - [极简简历](https://polebrief.com/index)
