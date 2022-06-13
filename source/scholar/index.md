@@ -68,7 +68,6 @@ date: 2016-01-13 08:41:43
 
 # E-collaboration toolsets
 
-- [Dataverse](https://github.com/IQSS/dataverse)
 - [Jupyter](http://jupyter.org/)
 - [Galaxy](https://galaxyproject.org/)
 - [Pegasus](https://pegasus.isi.edu/)
