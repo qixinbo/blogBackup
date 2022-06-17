@@ -68,7 +68,6 @@ date: 2016-01-13 08:41:43
 
 # E-collaboration toolsets
 
-- [Jupyter](http://jupyter.org/)
 - [Galaxy](https://galaxyproject.org/)
 - [Pegasus](https://pegasus.isi.edu/)
 - [KNIME](https://www.knime.com/)
