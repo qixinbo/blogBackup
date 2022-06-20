@@ -70,7 +70,6 @@ date: 2016-01-13 08:41:43
 
 - [Galaxy](https://galaxyproject.org/)
 - [Pegasus](https://pegasus.isi.edu/)
-- [KNIME](https://www.knime.com/)
 
 # World leading groups in Phase-field Model:
 
