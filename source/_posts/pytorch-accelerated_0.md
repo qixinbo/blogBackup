@@ -1,8 +1,8 @@
 ---
-title: 轻量级PyTorch通用训练模板pytorch-accelerated介绍及入门
+title: 轻量级PyTorch通用训练模板pytorch-accelerated解析：0 -- 介绍及入门
 tags: [PyTorch]
 categories: machine learning 
-date: 2022-6-18
+date: 2022-5-28
 ---
 # 介绍
 [`pytorch-accelerated`](https://github.com/Chris-hughes10/pytorch-accelerated)是一个轻量级的库，旨在通过提供一个最小但可扩展的训练循环（封装在一个`Trainer`对象中）来加速`PyTorch`模型的训练过程；它足够灵活，可以处理大多数用例，并且能够利用不同的硬件选项而不需要修改代码。更多介绍见原作者的[博文](https://towardsdatascience.com/introducing-pytorch-accelerated-6ba99530608c)。
