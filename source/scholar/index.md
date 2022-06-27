@@ -66,10 +66,6 @@ date: 2016-01-13 08:41:43
 - [Interatomic Potentials Repository Project](https://www.ctcms.nist.gov/potentials/)
 - [PyMKS](http://pymks.org)
 
-# E-collaboration toolsets
-
-- [Galaxy](https://galaxyproject.org/)
-
 # World leading groups in Phase-field Model:
 
 - [Prof. Ingo Steinbach @ ICAMS](http://www.icams.de/content/departments/scale-bridging-thermodynamic-and-kinetic-simulations/)
