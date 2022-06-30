@@ -89,7 +89,6 @@ date: 2016-01-13 08:41:43
 - [Prof. Harshad Kumar Dharamshi Hansraj Bhadeshia](http://www.msm.cam.ac.uk/phase-trans/Bhadeshia.html)
 - [Prof. Tomohiro Takaki](http://www.cis.kit.ac.jp/~takaki/index-e.html)
 - [Prof. Yunzhi Wang @ OSU](https://mse.osu.edu/people/wang.363)
-- [Dr. Kumar Ankit](http://www.kumarankitresearch.com/)
 
 
 # Useful links
