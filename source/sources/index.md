@@ -4,11 +4,18 @@ date: 2016-01-13 10:37:25
 ---
 
 # Search:
+- [Sci-hub可用链接](http://tool.yovisun.com/scihub/)
+- [专业书籍原文传递 | 读秀](http://www.duxiu.com/)
 - [全国图书馆参考咨询联盟](http://www.ucdrs.superlib.net)
+- [中国科学院文献情报中心-OAuth-所友邮箱登录](https://webvpn.las.ac.cn)
+- [iData知识检索-cnki下载](https://www.cn-ki.net)
+- [论文驿站 - 师大云端图书馆下载站，一站式论文、专利下载平台](https://www.lunwenyizhan.com/)
 - [ePUBee电子书](http://cn.epubee.com/books/)
 - [鸠摩搜索- 文档搜索引擎](https://www.jiumodiary.com/)
 - [大木虫学术导航](http://www.4243.net/)
+- [SciHub学术导航](https://www.scihub.net.cn/)
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
+- [库问搜索-千万级文献免费下载](http://www.koovin.com/)
 - [SOCKBOOM 科学上网](https://sockboom.vip)
 - [iKuuu 科学上网](https://ikuuu.co)
 - [Jiasu.im 科学上网](http://i.jiasu.im/app.js)
@@ -17,9 +24,13 @@ date: 2016-01-13 10:37:25
 - [u9un](https://cp.u9un.com)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
 - [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/)
-
+- [EBooks downloader | Library Genesis](http://gen.lib.rus.ec/)
+- [EBooks downloader | books43](http://www.books43.com/)
 
 # Widgets:
+- [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
+- 英语语法检查 [Ginger](http://www.gingersoftware.com/zh), [Grammarly](https://www.grammarly.com/)
+- [英语前后词查询 | linggle](http://linggle.com/)
 - [JSON在线查看器](https://www.bejson.com/jsonviewernew/)
 - [图片托管](https://postimages.org/)
 - [在线去除图片水印](https://www.watermarkremover.io/)
