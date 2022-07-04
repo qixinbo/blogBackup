@@ -42,7 +42,6 @@ date: 2016-01-13 10:37:25
 - [奇侠影视](https://qixia.me/)
 - [网络视频下载器](https://www.tubeninja.net/zh-hans/)
 - [视频解析下载器](https://www.urlgot.com/zh_CN/)
-- [趣推：创意视频制作神器](http://www.qutui360.com/)
 - [Twitter Video Downloader](https://twdownload.net/)
 - [MikuTools-一个轻量的工具集合](https://miku.tools/)
 - [DeepL基于深度学习的翻译器](https://www.deepl.com/translator)
