@@ -23,9 +23,8 @@ date: 2016-01-13 10:37:25
 - [加速度](https://jsdcloud.xyz/auth/register)
 - [u9un](https://cp.u9un.com)
 - [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
-- [Unofficial Windows Binaries for Python Extension Packages](https://www.lfd.uci.edu/~gohlke/pythonlibs/)
-- [EBooks downloader | Library Genesis](http://gen.lib.rus.ec/)
-- [EBooks downloader | books43](http://www.books43.com/)
+- [电子书下载 | Library Genesis](http://gen.lib.rus.ec/)
+- [电子书下载 | books43](http://www.books43.com/)
 
 # Widgets:
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
