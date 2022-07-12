@@ -8,7 +8,7 @@ date: 2019-10-13
 参考文献：
 [Python 的 import 机制](https://loggerhead.me/posts/python-de-import-ji-zhi.html)
 [Python 相对导入与绝对导入](http://blog.konghy.cn/2016/07/21/python-import-relative-and-absolute/)
-[python: __main__ is not a package](https://blog.csdn.net/junbujianwpl/article/details/79324814)
+[python: `__main__` is not a package](https://blog.csdn.net/junbujianwpl/article/details/79324814)
 
 # Python import的搜索路径
 import的搜索路径为：
@@ -52,7 +52,7 @@ python -m example.foo
 
 # 包和模块
 模块: 一个 .py 文件就是一个模块（module）
-包: __init__.py 文件所在目录就是包（package）
+包: `__init__.py` 文件所在目录就是包（package）
 
 # 各种情形测试
 ## 模块直接导入
@@ -76,7 +76,7 @@ modu2.py中的内容为：
 def hello2():
     print("hello, I am module 2")
 ```
-注意在modu1中一定加上sys.path.append那部分内容，即根据上面的描述，一定要让modu1能找到modu2才行，否则就会出现如下错误：
+注意在modu1中一定加上`sys.path.append`那部分内容，即根据上面的描述，一定要让modu1能找到modu2才行，否则就会出现如下错误：
 ```python
 ModuleNotFoundError: No module named 'modu2'
 ```
@@ -134,7 +134,7 @@ python Test3\pack1\modu1.py
 ```python
 ValueError: attempted relative import beyond top-level package
 ```
-这是因为，相对导入使用模块的__name__（这里的name和下面的main都是有两个下划线的，但是网页显示不出来。。）属性来决定模块在包结构中的位置。当__name__属性不包含包信息（i.e. 没有用'.'表示的层次结构，比如'__main__'），则相对导入将模块解析为顶层模块，而不管模块在文件系统中的实际位置。这里模块被直接运行，则它自己为顶层模块，不存在层次结构，所以找不到其他的相对路径。
+这是因为，相对导入使用模块的`__name__`属性来决定模块在包结构中的位置。当`__name__`属性不包含包信息（即没有用`.`表示的层次结构，比如`__main__`），则相对导入将模块解析为顶层模块，而不管模块在文件系统中的实际位置。这里模块被直接运行，则它自己为顶层模块，不存在层次结构，所以找不到其他的相对路径。
 
 因此，直接运行带有相对导入的模块是不行的，需要通过模块运行的方式，将包结构明确告诉它才行。
 
@@ -147,7 +147,7 @@ hello2()
 ```python
 ModuleNotFoundError: No module named '__main__.modu2'; '__main__' is not a package
 ```
-原因就是此时没有包结构，__main__也不是个包。
+原因就是此时没有包结构，`__main__`也不是个包。
 
 那么解决方法就是或者使用模块运行的方式运行，或者将它改成下面的绝对导入的方式就可以直接运行。
 
