@@ -28,6 +28,7 @@ date: 2016-01-13 08:41:43
 - [Y. Chen, D.Z. Li, B. Billia, H. Nguyen-Thi, X.B. Qi, N.M. Xiao. Quantitative phase-field simulation of dendritic equiaxed growth and comparison with in situ observation on Al-4wt.% Cu alloy by means of synchrotron X-ray radiography, ISIJ Int. 54 (2014) 445-451. (IF: 0.96)](https://www.jstage.jst.go.jp/article/isijinternational/54/2/54_445/_article)
 
 # 数据集
+- [Datasets collection in Hugging Face](https://huggingface.co/datasets)
 - [A large-scale three-fold annotated microscopy image dataset of potato tubers for deep learning-based plant cell assessment](https://springernature.figshare.com/collections/A_large-scale_three-fold_annotated_microscopy_image_dataset_of_potato_tubers_for_deep_learning-based_plant_cell_assessment/4955669)
 - [医学图像开源数据集汇总（二）](https://mp.weixin.qq.com/s/KirzDH92S8Eog7f4AY53QQ)
 - [目标检测开源数据集汇总（二）](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247610614&idx=1&sn=1cbe29362a8acd5bfeb93a5f1af936f4&chksm=ec1ddd0fdb6a541917b7cd0cbfe5eba203adca4e4da0d66918808471456720d5ca0bb921291e&mpshare=1&scene=1&srcid=0711hc2xY8b9IjKqB4JwZOid&sharer_sharetime=1657517713734&sharer_shareid=19f9b91729f0d36195fb60fbcb61cd8c&exportkey=AeN0MiUrNTySwbo1Sej0Nvg%3D&acctmode=0&pass_ticket=UC%2Bw7bwSVCHsfQSt97%2FbZtYw0ehuxmj5O%2FPnvOZ8NZp0qTg74VJC8xRRd6raL93h&wx_header=0#rd)
