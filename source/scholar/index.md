@@ -46,6 +46,9 @@ date: 2016-01-13 08:41:43
 
 
 # 实用工具
+- [交互式分割标注软件EISeg](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.5/EISeg)
+- [Paddle模型自动化压缩工具ACT](https://github.com/PaddlePaddle/PaddleSlim/tree/develop/example/auto_compression)
+- [机器之心SOTA模型](https://www.jiqizhixin.com/sota)
 - [Machine Learning Methods](https://paperswithcode.com/methods)
 - [Browse State-of-the-Art](https://paperswithcode.com/sota)
 - [飞桨产业模型选型工具](https://www.paddlepaddle.org.cn/smrt)
