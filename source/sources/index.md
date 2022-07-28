@@ -3,7 +3,7 @@ title: sources
 date: 2016-01-13 10:37:25
 ---
 
-# Search:
+# Search
 - [Sci-hub可用链接](http://tool.yovisun.com/scihub/)
 - [专业书籍原文传递 | 读秀](http://www.duxiu.com/)
 - [全国图书馆参考咨询联盟](http://www.ucdrs.superlib.net)
@@ -26,7 +26,7 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | Library Genesis](http://gen.lib.rus.ec/)
 - [电子书下载 | books43](http://www.books43.com/)
 
-# Widgets:
+# Widgets
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
 - 英语语法检查 [Ginger](http://www.gingersoftware.com/zh), [Grammarly](https://www.grammarly.com/)
 - [英语前后词查询 | linggle](http://linggle.com/)
