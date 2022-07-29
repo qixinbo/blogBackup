@@ -28,6 +28,7 @@ date: 2016-01-13 08:41:43
 - [Datasets collection in PapersWithCode](https://paperswithcode.com/datasets)
 - [Datasets collection in Hugging Face](https://huggingface.co/datasets)
 - [A large-scale three-fold annotated microscopy image dataset of potato tubers for deep learning-based plant cell assessment](https://springernature.figshare.com/collections/A_large-scale_three-fold_annotated_microscopy_image_dataset_of_potato_tubers_for_deep_learning-based_plant_cell_assessment/4955669)
+- [极市数据集](https://www.cvmart.net/dataSets)
 - [医学图像开源数据集汇总](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247605502&idx=1&sn=765c5daf43e458ca1f6d54b53515ed21&chksm=ec1db107db6a38110960e65a75313944a711f7434f77b35b4151b91300e3f9ba6ce73f851993&mpshare=1&scene=1&srcid=0728FqeNhmpb29MOw82NYLRc&sharer_sharetime=1658989475190&sharer_shareid=19f9b91729f0d36195fb60fbcb61cd8c&exportkey=ARb47T4PTX%2FDVNEo%2FrsiKgE%3D&acctmode=0&pass_ticket=QUQFbIdj9aYAySX1v6lNcBc8VbiNDLZjQZRCc6mw%2Bf%2F%2BOgLuBB5shGbKxOdLoV9Q&wx_header=0#rd)
 - [医学图像开源数据集汇总（二）](https://mp.weixin.qq.com/s/KirzDH92S8Eog7f4AY53QQ)
 - [15个目标检测开源数据集汇总](https://mp.weixin.qq.com/s?src=11&timestamp=1658989596&ver=3947&signature=NtlGbvFYQVE2Kw8IJATxSHvHXlPERhycuY2*hkQPBW7jdSCS3UciImHUbYgWvXbUV5M3EenkkDOB9LLFhwNhSOrMWYkA7rKZvu91JhG9Ny2A22hFPLJThBc9pUf5kMeu&new=1)
