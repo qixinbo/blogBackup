@@ -65,7 +65,8 @@ date: 2016-01-13 10:37:25
 - [PowerPoint插件](http://islide.cc/)
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
 
-# Hexo NexT theme
+
+## Hexo NexT theme
 - [NexT Math Equations](https://github.com/theme-next/hexo-theme-next/blob/master/docs/MATH.md)
 - [hexo-renderer-kramed与mathJax的兼容问题及解决方法](https://duskcloudxu.github.io/2018/07/14/hexo-renderer-kramed%E4%B8%8EmathJax%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/)
 - [Hexo NexT图片不显示](http://selier.coding.me/2018/09/01/Hexo%E4%BD%BF%E7%94%A8%E7%BB%86%E8%8A%82%E5%8F%8A%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98/)
