@@ -784,7 +784,7 @@ h,_ = np.histogramdd(tuple(pflows), bins=edges)
 对于米粒移动的理解，可以参考如下示意图：
 ![flow_mark](https://user-images.githubusercontent.com/6218739/182538756-c12d38d4-b21a-4764-b47d-d1470cb5d717.png)
 
-上面是以相对位置角度来理解，另一个角度来看，从绝对位置来看，pflows中的要移动米粒的位置上面的值正是热源所在坐标位置：即要移动到的位置，就是要寻找的热源位置（下面的求解可知道）。
+上面是以相对位置角度来理解，另一个角度来看，从绝对位置来看，pflows中的要移动米粒的位置上面的值正是热源所在坐标位置：即要移动到的位置，就是要寻找的热源位置，即相对于原网格点阵有变化的格点上的新坐标就是标明了热源位置，比如，那两个由0变为1的格点，其原坐标分别是`(0, 2)`和`(0, 3)`，现在分别变成为`(1, 2)`和`(1, 3)`，即它俩指向的热源就在`(1, 2)`和`(1, 3)`上。这一点非常重要，后面会用到。
 
 关于直方图统计这一部分理解结束！
 
@@ -824,6 +824,8 @@ pix = list(np.array(seeds).T)
 ```python
 pix =  [array([1, 2], dtype=int64), array([1, 3], dtype=int64), array([3, 7], dtype=int64)]
 ```
+
+### 漫水填充
 然后构建一个3乘3（注意这是二维，三维下是3乘3乘3）的窗口：
 ```python
 expand = np.nonzero(np.ones((3,3)))
@@ -832,42 +834,45 @@ expand = np.nonzero(np.ones((3,3)))
 ```python
 expand =  (array([0, 0, 0, 1, 1, 1, 2, 2, 2], dtype=int64), array([0, 1, 2, 0, 1, 2, 0, 1, 2], dtype=int64))
 ```
-接下来是两层循环。先看内部循环，它是对pix的长度进行循环（再次明确一下，pix是局部极大值的坐标索引）：
+接下来是两层循环。 以下代码中的注释和输出是以单次外层循环下的单次内层循环为例。
 ```python
+    # 外层循环，目的是为了重复进行多次内层循环，5也是超参数
+    for iter in range(5):
+        # 对pix的每个元素进行循环，再次提醒，pix是局部极大值的坐标索引
         for k in range(len(pix)):
+            # 如果是第一次外循环，将每个pix元素由np.array改成list
             if iter==0:
                 pix[k] = list(pix[k])
             newpix = []
-            iin = []
+            # 对expand的两个维度进行循环
             for i,e in enumerate(expand):
+                # 第一项是对expand的每个维度中的元素加上一个维度
+                # 第二项是对pix的当前元素的每个维度中的元素加上一个维度
+                # 第三项是减去1
                 epix = e[:,np.newaxis] + np.expand_dims(pix[k][i], 0) - 1
                 epix = epix.flatten()
-                iin.append(np.logical_and(epix>=0, epix<shape[i]))
+                # newpix是在两个维度上对epix进行组合
                 newpix.append(epix)
-            iin = np.all(tuple(iin), axis=0)
+            # 总体来说，newpix就是以pix中的元素为中心的八邻域中的九个邻居像素（加上了它自己）的坐标索引
+            # 比如pix中某个像素是[1, 2]，那么newpix就是：
+            # [array([0, 0, 0, 1, 1, 1, 2, 2, 2], dtype=int64), array([1, 2, 3, 1, 2, 3, 1, 2, 3], dtype=int64)]
             newpix = tuple(newpix)
+            # 然后看之前的直方图统计矩阵h在这九个像素点上是否大于2
+            # 如果大于2，即代表有热源流入，将igood设为true
+            # 以pix中的第一个元素[1, 2]为例，其igood为：
+            # igood =  [False False False False  True  True False False False]
+            # 这代表了[1, 2]和[1, 3]位置上的热流强度大于2
             igood = h[newpix]>2
+            # 将有热流流入的这个flag带入newpix中，然后再重新存入pix
             for i in range(dims):
                 pix[k][i] = newpix[i][igood]
+            # 接上例，此时pix变成：
+            # [[array([1, 1], dtype=int64), array([2, 3], dtype=int64)], array([1, 3], dtype=int64), array([3, 7], dtype=int64)]
+            # 对比pix之前的数值：
+            # [array([1, 2], dtype=int64), array([1, 3], dtype=int64), array([3, 7], dtype=int64)]
+            # 发现就是将pix的第一个元素由原来的局部极大值索引[1, 2]，变成了以它为中心的九个像素中直方图统计大于2的像素坐标索引，注意[[array([1, 1], dtype=int64), array([2, 3], dtype=int64)]]的意思是两个x坐标放在一起，两个y坐标放在一起，实际索引要竖过来看，即[1, 2]和[1, 3]
             if iter==4:
                 pix[k] = tuple(pix[k])
-```
-这里面的变量较多，各自具体的意义为：pix刚开始是局部极大值的坐标索引，epix是在某一个维度上expand滑动窗加上pix索引减去1，newpix是在两个维度上对epix进行合成，这样来说，newpix就是以pix中的坐标为中心的九个像素坐标索引，比如pix中某个像素是[1, 2]，那么newpix就是：
-```python
-newpix =  [array([0, 0, 0, 1, 1, 1, 2, 2, 2], dtype=int64), array([1, 2, 3, 1, 2, 3, 1, 2, 3], dtype=int64)]
-```
-然后看之前的直方图统计矩阵h在这九个像素点上是否大于2，即为igood的值，即是否有热流流入，以上面的[1, 2]中心像素所产生的九个像素为例，igood就是：
-```python
-igood =  [False False False False  True  True False False False]
-```
-即仍然是[1, 2]和[1, 3]中的热流强度大于2，然后把这两个坐标提取出来再次放入pix中，即下面这句：
-```python
-            for i in range(dims):
-                pix[k][i] = newpix[i][igood]
-```
-此时pix变为：
-```python
-pix =  [[array([1, 1], dtype=int64), array([2, 3], dtype=int64)], array([1, 3], dtype=int64), array([3, 7], dtype=int64)]
 ```
 对比一下pix最开始的坐标索引，可以发现pix中第一个元素由原来的局部极大值索引[1, 2]，变成了以它为中心的九个像素中直方图统计大于2的像素坐标索引。
 那么对原来pix中所有极大值索引都循环一遍后，得到了新的pix：
@@ -876,8 +881,8 @@ pix =  [[array([1, 1], dtype=int64), array([2, 3], dtype=int64)], array([1, 3], 
  [array([1, 1], dtype=int64), array([2, 3], dtype=int64)],
  [array([3, 4], dtype=int64), array([7, 7], dtype=int64)]]
 ```
-以上就是内层循环的作用：以最开始的局部极大值所在像素为中心，在其上罩一个3乘3的窗口，看该窗口内直方图统计是否大于2，如果是，就将该邻居像素的坐标索引加入pix中。
-那么外层循环就是不断地重复这个内层循环5次（这里的5也是一个可调参数），即一步步地查找是否由邻居像素的热流大于2。
+以上就是内层循环的作用：以最开始的局部极大值所在像素为中心，在其上罩一个3乘3的窗口，看该窗口内直方图统计是否大于2，如果是，就将这些有热流输入的位置的坐标索引加入pix中。
+那么外层循环就是不断地重复这个内层循环5次（这里的5也是一个可调参数），即一步步地查找是否由邻居像素（包括自己）的热流大于2。
 内层循环和外层循环加起来实现的效果就是：模仿漫水填充，查找最开始的最大热源所辐射的范围，看哪些邻居像素属于该热源。
 
 在该例中，经过上述内外循环后，pix的值为：
@@ -895,7 +900,10 @@ pix =  [[array([1, 1], dtype=int64), array([2, 3], dtype=int64)], array([1, 3], 
   array([7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
        7, 7, 7, 7, 7, 7, 7, 7, 7, 7], dtype=int64))]
 ```
-虽然看起来里面有很多元素，但pix的length只有3，表明这些元素都是由最开始的3个局部极大值所辐射的；另一方面，很多元素都是重复的，实际只有[1, 2]、[1, 3]、[3, 7]、[4, 7]这四个元素。
+虽然看起来里面有很多元素，但pix的length只有3，表明这些元素都是由最开始的3个局部极大值所辐射的；另一方面，很多元素都是重复的，实际只有[1, 2]、[1, 3]、[3, 7]、[4, 7]这四个元素（注意竖过来看坐标组合）。
+
+
+### 标记辐射范围
 然后对这些元素进行label：
 ```python
     M = np.zeros(h.shape, np.int32)
