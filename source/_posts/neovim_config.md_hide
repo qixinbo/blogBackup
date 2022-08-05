@@ -1,0 +1,1288 @@
+---
+title: 将Neovim打造成强大的IDE
+tags: [vim, IDE]
+categories: coding 
+date: 2022-8-6
+---
+
+参考教程：
+推荐购买[掘金上的这个小册](https://juejin.cn/book/7051157342770954277)，作者非常用心地、深入浅出地讲解neovim的各个知识点，基本能使你很快地上手neovim，同时每节下面的讨论也能给出非常有用的见解和及时的更新。
+
+本文是对该小册的笔记，其中`LSP`部分是直接参考的官方文档。
+
+# 简介
+`Vim`是一个强大的代码编辑器，而`Neovim`是它的一个分支，提供了很多新性能，也有极强的扩展性，这里尝试通过学习将其打造成一个强大的IDE。
+
+# 安装
+不同系统下的安装方式见[官方链接](https://github.com/neovim/neovim/wiki/Installing-Neovim)。
+对于`Windows`系统，neovim可以在系统默认的终端下运行，也可以使用安装包中自带的`Nvim-qt`这个图形界面。但个人还是倾向于使用终端。不过windows以前的老旧终端（即`cmd`和`powershell`）支持相当差，推荐使用微软新开源的`Windows Terminal`，安装在[这里](https://docs.microsoft.com/zh-cn/windows/terminal/install)。
+## 安装字体
+一个推荐的编程字体是`Fira Code`字体，这里不光安装它，还安装它的一个扩展，即`Nerd fonts`（`Nerd fonts` 本身并不是一种新的字体，而是把常用图标以打补丁的方式打到了常用字体上。）
+具体到[官网这里](https://www.nerdfonts.com/font-downloads)进行下载（也可以选择其他想要的字体，对于`Windows`版本，注意在下载的文件中选择`XXXX Windows Compatible.ttf`）。
+然后在`Windows Terminal`的字体中选择`FiraCode NF`字体即可。
+为了测试是否成功，可以到[这个网址](www.nerdfonts.com/cheat-sheet)，点击 `Show All Icons` 按钮，选择一个图标，点击右上角的 `Copy Icon`，然后粘贴到命令行里即可。
+
+
+# 配置架构
+虽然可以把所有配置写在一个文件里，但由于后续要配置很多东西，所以预先的规划是很有必要的，因为配置可能随时调整，需要随时打开、关闭某个功能的时候，尽量不要影响到其他功能。[掘金小册](https://juejin.cn/book/7051157342770954277)上的架构如下：
+```sh
+├── LICENSE
+├── README.md
+├── init.lua
+└── lua
+    ├── autocmds.lua
+    ├── basic.lua
+    ├── colorscheme.lua
+    ├── keybindings.lua
+    ├── lsp
+    │   ├── cmp.lua
+    │   ├── config
+    │   │   ├── bash.lua
+    │   │   ├── emmet.lua
+    │   │   ├── html.lua
+    │   │   ├── json.lua
+    │   │   ├── lua.lua
+    │   │   ├── markdown.lua
+    │   │   ├── pyright.lua
+    │   │   ├── rust.lua
+    │   │   └── ts.lua
+    │   ├── formatter.lua
+    │   ├── null-ls.lua
+    │   ├── setup.lua
+    │   └── ui.lua
+    ├── plugin-config
+    │   ├── bufferline.lua
+    │   ├── comment.lua
+    │   ├── dashboard.lua
+    │   ├── gitsigns.lua
+    │   ├── indent-blankline.lua
+    │   ├── lualine.lua
+    │   ├── nvim-autopairs.lua
+    │   ├── nvim-tree.lua
+    │   ├── nvim-treesitter.lua
+    │   ├── project.lua
+    │   ├── surround.lua
+    │   ├── telescope.lua
+    │   ├── toggleterm.lua
+    │   ├── vimspector.lua
+    │   └── which-key.lua
+    ├── plugins.lua
+    └── utils
+        ├── fix-yank.lua
+        ├── global.lua
+        └── im-select.lua
+```
+首先`init.lua`是整个配置的入口文件，负责引用所有其他的模块，基本上想要打开或关闭某个插件只要在这里修改一行代码即可。
+- `basic.lua`：基础配置，是对默认配置的一个重置。
+- `colorscheme.lua`：主题皮肤配置，在这里切换主题。
+- `keybindings.lua`：快捷键的设置，所有插件的快捷键也都会放在这里。
+- `plugins.lua`：插件安装管理，插件安装或卸载全在这里设置。
+- `lsp`文件夹：是对 Neovim 内置 LSP 功能的配置，包括常见编程语言与语法提示等。
+  - `config`：文件夹包含各种语言服务器单独的配置文件。
+  - `setup.lua`：内置 LSP 的配置。
+  - `cmp.lua`：语法自动补全的配置，包括各种补全源，与自定义代码段。
+  - `ui.lua`：对内置 LSP 功能增强和 UI 美化。
+  - `formatter.lua`：独立代码格式化功能。
+- `plugin-config`文件夹：是对第三方插件的配置，未来每添加一个插件，这里就多一个配置文件。
+- `utils`文件夹： 是对常见问题的修改，包括输入法切换，针对windows的特殊配置等。
+
+
+# 配置文件入口
+Neovim 配置文件入口与 VIM 不太一样，不是`.vimrc`。而是保存在用户`Home`目录中的`~/.config/nvim/init.lua`文件（如果没有，则新建）， 也可以是用 VIM 脚本写的`init.vim`文件。
+（特别注意：对于Windows系统，如果不是使用WSL子系统，那么neovim的配置文件路径是`~/AppData/Local/nvim`）。
+## 配置入口init.lua
+在 `~/.config/nvim/init.lua` 里写入如下内容：
+```lua
+-- 基础设置
+require('basic')
+```
+`require`函数在 Lua 中用于加载一个模块，而这些模块通常位于 `runtimepath` 中的 `lua/` 目录下，也就是我们的`~/.config/nvim/lua/`目录。
+所以上边的代码，就是加载 `~/.config/nvim/lua/basic.lua` 文件（注意：`require` 里没有 `.lua` 扩展名）。当然也可以创建 `~/.config/nvim/lua/basic/` 目录，在目录下边创建 `init.lua` 文件也是可以成功加载的。
+
+## 基础配置文件basic.lua
+创建对应的 `~/.config/nvim/lua/basic.lua` 文件，作为基础配置文件。
+添加内容如下：
+```lua
+-- utf8
+vim.g.encoding = "UTF-8"
+vim.o.fileencoding = 'utf-8'
+-- jkhl 移动时光标周围保留8行
+vim.o.scrolloff = 8
+vim.o.sidescrolloff = 8
+-- 使用相对行号
+vim.wo.number = true
+vim.wo.relativenumber = true
+-- 高亮所在行
+vim.wo.cursorline = true
+-- 显示左侧图标指示列
+vim.wo.signcolumn = "yes"
+-- 右侧参考线，超过表示代码太长了，考虑换行
+vim.wo.colorcolumn = "80"
+-- 缩进2个空格等于一个Tab
+vim.o.tabstop = 2
+vim.bo.tabstop = 2
+vim.o.softtabstop = 2
+vim.o.shiftround = true
+-- >> << 时移动长度
+vim.o.shiftwidth = 2
+vim.bo.shiftwidth = 2
+-- 空格替代tab
+vim.o.expandtab = true
+vim.bo.expandtab = true
+-- 新行对齐当前行
+vim.o.autoindent = true
+vim.bo.autoindent = true
+vim.o.smartindent = true
+-- 搜索大小写不敏感，除非包含大写
+vim.o.ignorecase = true
+vim.o.smartcase = true
+-- 搜索不要高亮
+vim.o.hlsearch = false
+-- 边输入边搜索
+vim.o.incsearch = true
+-- 命令行高为2，提供足够的显示空间
+vim.o.cmdheight = 2
+-- 当文件被外部程序修改时，自动加载
+vim.o.autoread = true
+vim.bo.autoread = true
+-- 禁止折行
+vim.wo.wrap = false
+-- 光标在行首尾时<Left><Right>可以跳到下一行
+vim.o.whichwrap = '<,>,[,]'
+-- 允许隐藏被修改过的buffer
+vim.o.hidden = true
+-- 鼠标支持
+vim.o.mouse = "a"
+-- 禁止创建备份文件
+vim.o.backup = false
+vim.o.writebackup = false
+vim.o.swapfile = false
+-- smaller updatetime
+vim.o.updatetime = 300
+-- 设置 timeoutlen 为等待键盘快捷键连击时间500毫秒，可根据需要设置
+vim.o.timeoutlen = 500
+-- split window 从下边和右边出现
+vim.o.splitbelow = true
+vim.o.splitright = true
+-- 自动补全不自动选中
+vim.g.completeopt = "menu,menuone,noselect,noinsert"
+-- 样式
+vim.o.background = "dark"
+vim.o.termguicolors = true
+vim.opt.termguicolors = true
+-- 不可见字符的显示，这里只把空格显示为一个点
+vim.o.list = true
+vim.o.listchars = "space:·"
+-- 补全增强
+vim.o.wildmenu = true
+-- Dont' pass messages to |ins-completin menu|
+vim.o.shortmess = vim.o.shortmess .. 'c'
+-- 补全最多显示10行
+vim.o.pumheight = 10
+-- 永远显示 tabline
+vim.o.showtabline = 2
+-- 使用增强状态栏插件后不再需要 vim 的模式提示
+vim.o.showmode = false
+```
+这里用到的分类有:
+- `vim.g.{name}`: 全局变量
+- `vim.b.{name}`: 缓冲区变量
+- `vim.w.{name}`: 窗口变量
+- `vim.bo.{option}`: buffer-local 选项
+- `vim.wo.{option}`: window-local 选项
+
+这样的分类初看上去是有些混乱的，有些时候想设置一个变量，确实很难判断应该放在哪个分类里。一般来说，全部设置在 `vim.opt` 下也是可以的，例如`vim.opt.number = true` 也是有效的，只是我们上边设置到了比较详细位置而已，具体每个变量的分类可以在 `:help`文档中查看。
+不管怎么说， `basic.lua` 代码中都是一些非常常用的配置，基本上大家也都是这么配置的，所以如果你是新手的话，完全可以不用考虑太多，直接拷贝到你的配置里就可以了。
+
+# 快捷键
+在 Neovim 中使用以下方法设置快捷键：
+- `vim.api.nvim_set_keymap()`：全局快捷键
+- `vim.api.nvim_buf_set_keymap()`：Buffer 快捷键
+
+一般情况下，都是定义使用全局快捷键， Buffer 快捷键一般是在某些异步回调函数里指定，例如某插件初始化结束后，会有回调函数提供 Buffer，这个时候我们可以只针对这一个 Buffer 设置快捷键。
+这里先看全局设置：
+```lua
+vim.api.nvim_set_keymap('模式', '按键', '映射为', 'options')
+```
+这里“模式”参数用一个字母表示，常见的有：
+- `n`: Normal 模式
+- `i`: Insert 模式
+- `v`: Visual 模式
+- `t`: Terminal 模式
+- `c`: Command 模式
+
+“按键”参数就是你按下的键，没什么说的。
+“映射为”参数可以是多个按键组合，比如 `5j` 就是连续点击`5`和`j`， 也可以是一条命令比如 `:q<CR>`，表示退出。
+“options”大部分会设置为 `{ noremap = true, silent = true }`。`noremap` 表示不会重新映射，比如你有一个映射 `A -> B` , 还有一个 `B -> C`，这个时候如果你设置 `noremap = false` 的话，表示会重新映射，那么 A 就会被映射为 C。`silent` 为 `true`，表示不会输出多余的信息。
+
+## Leader Key
+`leader key` 是你常用的前缀，比如设置为`空格`。
+```lua
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+```
+后边定义快捷键看到`<leader>`就表示`空格` 。
+由于要设置很多快捷键，所以先保存本地变量：
+```lua
+local map = vim.api.nvim_set_keymap
+-- 复用 opt 参数
+local opt = {noremap = true, silent = true }
+```
+之后就可以这样映射按键了 `map('模式', '按键', '映射为', 'options')` 。
+
+## 示例
+比如设置窗口管理：
+```lua
+-- 取消 s 默认功能
+map("n", "s", "", opt)
+-- windows 分屏快捷键
+map("n", "sv", ":vsp<CR>", opt)
+map("n", "sh", ":sp<CR>", opt)
+-- 关闭当前
+map("n", "sc", "<C-w>c", opt)
+-- 关闭其他
+map("n", "so", "<C-w>o", opt)
+-- Alt + hjkl  窗口之间跳转
+map("n", "<A-h>", "<C-w>h", opt)
+map("n", "<A-j>", "<C-w>j", opt)
+map("n", "<A-k>", "<C-w>k", opt)
+map("n", "<A-l>", "<C-w>l", opt)
+```
+别忘了在 `init.lua` 入口文件里引入 `lua/keybindings.lua`：
+```lua
+-- 快捷键映射
+require("keybindings")
+```
+
+# 插件
+Neovim 可以通过扩展插件来添加新功能，或修改现有功能以增强开发体验。为了安装插件，需要先安装一个插件管理器，插件管理器可以安装，升级，卸载第三方插件。
+目前在 Neovim 最常见的插件管理器主要有 `vim-plug` 和 `packer.nvim` 两个。
+一个好插件管理器，最重要是常用的插件都支持。 现在 Neovim 常用插件的 github 主页上，一般都会同时有 vim-plug 和 Packer.nvim 的安装的说明。
+vim-plug 的特点是使用简单，并且同时支持 Vim 和 Neovim，所有功能在一个 VIM 脚本中实现了。
+而 Packer.nvim 是后起之秀，但功能更为强大，支持插件间的依赖，指定 commit 版本，Post-install/update hooks，指定分支等功能，使用全 lua 编写，是专门针对最新 Neovim v0.5.0 以上版本设计的，所以推荐使用。
+本节将选用 `Packer.nvim` 作为插件管理器。
+
+## 安装Packer.nvim插件管理器
+由于 Neovim 的插件默认都是通过 Github 进行安装的，所以我们需要保证网络环境是可以联通 Github 的。
+具体安装可以参考[官网的QuickStart](https://github.com/wbthomason/packer.nvim#quickstart)。
+
+安装Packer.nvim管理器后，添加一个新的配置文件，专门用于管理插件，新建 `lua/plugins.lua`
+加入如下代码：
+```lua
+local packer = require("packer")
+packer.startup(
+  function(use)
+   -- Packer 可以管理自己本身
+   use 'wbthomason/packer.nvim'
+   -- 你的插件列表...
+end)
+```
+通常使用 `use 'name/repo'` 来安装插件，`name/repo` 对应github的地址。例如上边代码中的 `use 'wbthomason/packer.nvim'`，对应的就是 `https://github.com/wbthomason/packer.nvim` 地址。
+
+别忘了想要这个配置文件生效，必须在 入口文件 中引入才可以：
+```lua
+-- Packer 插件管理
+require("plugins")
+```
+
+## 管理插件
+配置生效后，Neovim 会增加以下命令。
+- `:PackerCompile`：每次改变插件配置时，必须运行此命令或 `PackerSync`, 重新生成编译的加载文件
+- `:PackerClean`：清除所有不用的插件
+- `:PackerInstall`：清除，然后安装缺失的插件
+- `:PackerUpdate`：清除，然后更新并安装插件
+- `:PackerSync`: 执行 `PackerUpdate`后，再执行 `PackerCompile`
+- `:PackerLoad`: 立刻加载 `opt` 插件
+
+通过上边的说明，观察到 `:PackerSync` 命令包含了 `:PackerUpdate` 和`:PackerCompile`，而 `:PackerUpdate`又包含了 `:PackerClean` 和 `:PackerInstall`流程。
+所以通常情况下，无论安装还是更新插件，只需要`:PackerSync`这一条命令就够了：每次修改完 `lua/plugins.lua` 这个文件后，保存退出，重新打开并调用 `:PackerSync` 就可以了，只要你的网络可以连接到 github，插件就会安装成功。
+
+### 安装位置
+Neovim 推荐将数据存储在 `标准数据目录`下（`:h base-directories` 查看详细文档），可以通过调用 `:echo stdpath("data")` 命令查看你系统下的实际路径。
+Packer 会将插件默认安装在 `标准数据目录/site/pack/packer/start` 中。
+
+### 自动安装
+之前讲了安装组件的流程为： 修改`lua/plugins.lua`文件，保存退出，重新打开并调用 `:PackerSync`。
+其实如果你愿意的话，我们可以添加一条自动命令让每次保存 `lua/plugins.lua` 就自动安装组件。
+打开 `lua/plugins.lua` 文件，在最后添加：
+```lua
+-- 每次保存 plugins.lua 自动安装插件
+pcall(
+  vim.cmd,
+  [[
+    augroup packer_user_config
+    autocmd!
+    autocmd BufWritePost plugins.lua source <afile> | PackerSync
+    augroup end
+  ]]
+)
+```
+这里的 `[[ ... ]]` 中间的部分是 VIM 脚本，因为 Neovim 还没有实现自动命令的 API，所以需要使用 vim.cmd 命令来执行这段脚本。
+这段脚本的意思是 `BufWritePost` 事件时，如果改的是 `lua/plugins.lua` 文件，就自动重新加载并调用 `:PackerSync` 命令，这样就不用手动重启，可以自动安装插件了。
+`pcall` 命令是一个 Lua 函数，它的作用是检查一个函数是否执行成功，如果执行成功，则返回 true，否则返回 false ，防止报错。
+
+# 主题
+Neovim 本身内置了一些主题配色，你可以通过 `:colorscheme Tab键`（注意中间的空格） 命令来查看， 回车确认选中。
+但通过这种方式选择的主题，在重启后就失效了。需要写入配置才可以保存，下边看一下如何写入配置。
+## 增加主题配置文件
+打开入口文件，增加：
+```lua
+-- 主题设置 （新增）
+require("colorscheme")
+```
+新建被引入的 `lua/colorscheme.lua` 文件，代码如下：
+```lua
+local colorscheme = "tokyonight"
+local status_ok, _ = pcall(vim.cmd, "colorscheme " .. colorscheme)
+if not status_ok then
+  vim.notify("colorscheme " .. colorscheme .. " 没有找到！")
+  return
+end
+```
+注意其实这里使用的 `tokyonight` 并不存在，所以neovim启动时会其实没有找到。
+
+## 安装第三方主题
+打开 `lua/plugins.lua` 文件，增加 `colorschemes` 部分：
+```lua
+use("folke/tokyonight.nvim")
+```
+
+## 补充说明
+通常我们都会选择专门为 Neovim 制作的第三方主题，因为它们大多都会支持基于 `TreeSitter` 的语法高亮，小册作者认为这是考量是否应该选择一个主题最基础也是重要的事。
+也就是说，一个现代化的主题，必须支持 `nvim-treesitter` 语法高亮。
+`nvim-treesitter`的官方 wiki 上列出了许多支持 Treesitter 的主题，如果你想寻找更多的主题配色，可以到 [`nvim-treesitter wiki`](https://github.com/nvim-treesitter/nvim-treesitter/wiki/Colorschemes)页里查看。
+
+一个优秀的现代化主题的第二个特点，就是能支持很多流行 Lua 插件的配色。
+
+比如刚刚安装的 tokyonight 主题，就支持非常多的 Lua 插件，也是 Github 上星星最多的一款主题，我在这里强烈推荐，本书后续也将使用这款主题配色。
+
+# 文件浏览器
+侧边栏，也叫做文件浏览器，一般 IDE 默认都有，用于列出当前目录树。可以方便地浏览目录结构，添加、删除、移动或者重命名文件，更快地打开文件。
+
+## 安装
+目前[nvim-tree.lua](https://github.com/kyazdani42/nvim-tree.lua)是最流行的全 Lua 编写的侧边栏插件。
+打开 `lua/plugins.lua`，增加：
+```lua
+-- nvim-tree (新增)
+use({ "kyazdani42/nvim-tree.lua", requires = "kyazdani42/nvim-web-devicons" })
+```
+注意上边 `requires` 语法，表示 `nvim-tree.lua` 依赖 `nvim-web-devicons`，当安装组件的时候，两个组件都会安装。
+
+## 配置
+创建 `lua/plugin-config/nvim-tree.lua` 文件，添加如下内容：
+```lua
+local status, nvim_tree = pcall(require, "nvim-tree")
+if not status then
+    vim.notify("没有找到 nvim-tree")
+  return
+end
+```
+上边的代码相当于：
+```lua
+local nvim_tree = require'nvim-tree'
+```
+但是如果我们直接 `require` 一个插件，当这个插件不存在的时候，Neovim 就会崩溃，所以这里使用 `pcall` 来捕获了错误，如果 `nvim-tree` 没有安装，我们就会直接 `return`，不再继续执行下边的配置。
+由于我们经常会调整插件，所以应该尽量避免报错，后续的所有插件配置文件都会这么做。
+继续增加代码：
+```lua
+local status, nvim_tree = pcall(require, "nvim-tree")
+if not status then
+    vim.notify("没有找到 nvim-tree")
+  return
+end
+
+-- 列表操作快捷键
+local list_keys = require('keybindings').nvimTreeList
+nvim_tree.setup({
+    -- 不显示 git 状态图标
+    git = {
+        enable = false,
+    },
+    -- project plugin 需要这样设置
+    update_cwd = true,
+    update_focused_file = {
+        enable = true,
+        update_cwd = true,
+    },
+    -- 隐藏 .文件 和 node_modules 文件夹
+    filters = {
+        dotfiles = true,
+        custom = { 'node_modules' },
+    },
+    view = {
+        -- 宽度
+        width = 40,
+        -- 也可以 'right'
+        side = 'left',
+        -- 隐藏根目录
+        hide_root_folder = false,
+        -- 自定义列表中快捷键
+        mappings = {
+            custom_only = false,
+            list = list_keys,
+        },
+        -- 不显示行数
+        number = false,
+        relativenumber = false,
+        -- 显示图标
+        signcolumn = 'yes',
+    },
+    actions = {
+        open_file = {
+            -- 首次打开大小适配
+            resize_window = true,
+            -- 打开文件时关闭
+            quit_on_open = true,
+        },
+    },
+    -- wsl install -g wsl-open
+    -- https://github.com/4U6U57/wsl-open/
+    system_open = {
+        cmd = 'wsl-open', -- mac 直接设置为 open
+    },
+})
+-- 自动关闭
+vim.cmd([[
+  autocmd BufEnter * ++nested if winnr('$') == 1 && bufname() == 'NvimTree_' . tabpagenr() | quit | endif
+]])
+```
+`nvim-tree`初始化支持很多参数，如果想知道还有哪些其他的参数，可以运行 `:h nvim-tree.setup` 调出帮助文档查看。
+注意到上述代码第一行，引入了我们之前创建的 `lua/keybindings.lua`，并取出 `nvimTreeList` 变量作为快捷键设置， 那我们就看看 `keybinding` 中是如何导出这个变量的。
+打开 `lua/keybindings.lua` 文件，增加如下代码：
+```lua
+-- 插件快捷键
+local pluginKeys = {}
+
+-- nvim-tree
+-- alt + m 键打开关闭tree
+map("n", "<A-m>", ":NvimTreeToggle<CR>", opt)
+-- 列表快捷键
+pluginKeys.nvimTreeList = {
+  -- 打开文件或文件夹
+  { key = {"<CR>", "o", "<2-LeftMouse>"}, action = "edit" },
+  -- 分屏打开文件
+  { key = "v", action = "vsplit" },
+  { key = "h", action = "split" },
+  -- 显示隐藏文件
+  { key = "i", action = "toggle_custom" }, -- 对应 filters 中的 custom (node_modules)
+  { key = ".", action = "toggle_dotfiles" }, -- Hide (dotfiles)
+  -- 文件操作
+  { key = "<F5>", action = "refresh" },
+  { key = "a", action = "create" },
+  { key = "d", action = "remove" },
+  { key = "r", action = "rename" },
+  { key = "x", action = "cut" },
+  { key = "c", action = "copy" },
+  { key = "p", action = "paste" },
+  { key = "s", action = "system_open" },
+}
+return pluginKeys
+```
+在上边代码中，我们首先在 Normal 模式下定义了一个`Alt + m` 的快捷键，调用 ``:NvimTreeToggle<CR>`` 命令，这个快捷键用来打开和关闭侧边栏。
+`pluginKeys.nvimTreeList` 下则是在光标在列表中时的快捷键设置，比如用 `o` 来打开关闭文件夹，`a` 添加一个文件，`d` 删除文件等等。
+代码的最后一行，我们 `return` 了一个 `lua table`， 类似 Javascript的 `object`，也叫关联数组。 当我们从其他文件 `require` 这个文件的时候，就会得到这个对象。
+
+最后不要忘记在入口文件 `init.lua` 中引入配置：
+```lua
+-- 插件配置
+require("plugin-config.nvim-tree")
+```
+
+## 使用
+重启 nvim 后，侧边栏就会生效了，使用 `Alt + m` 打开/关闭， `j/k` 上下移动， `Alt + h / Alt + l` 可以左右窗口跳转。
+
+# 顶部标签页和底部状态栏
+这一节介绍如何通过 `bufferline.nvim` 和 `lualine.nvim` 插件给 Neovim 增加顶部标签页与底部状态栏。
+## 顶部标签页
+`bufferline` 顾名思义是把 Neovim 的 `buffer` 图形化显示成类似 VSCode 中 标签页的形式。一个 Tab 用来表示一个打开的文件，很匹配 Neovim 中 `buffer` 的概念。
+### 安装
+打开 `lua/plugins.lua`，增加 `bufferline` 相关的代码：
+```lua
+-- bufferline (新增)
+use({ "akinsho/bufferline.nvim", requires = { "kyazdani42/nvim-web-devicons", "moll/vim-bbye" }})
+```
+这里增加了一个 `vim-bbye` 依赖，因为这个插件安装后会增加一个 `:Bdelete` 命令，相比内置的 `:bdelete`, 它删除 `buffer` 的同时，并不会搞乱布局 。稍后会配置 `Bdelete` 为关闭 Tab 的命令。
+
+### 配置
+新建配置文件 `lua/plugin-config/bufferline.lua`，代码如下：
+```lua
+local status, bufferline = pcall(require, "bufferline")
+if not status then
+    vim.notify("没有找到 bufferline")
+  return
+end
+
+-- bufferline 配置
+-- https://github.com/akinsho/bufferline.nvim#configuration
+bufferline.setup({
+  options = {
+    -- 关闭 Tab 的命令，这里使用 moll/vim-bbye 的 :Bdelete 命令
+    close_command = "Bdelete! %d",
+    right_mouse_command = "Bdelete! %d",
+    -- 侧边栏配置
+    -- 左侧让出 nvim-tree 的位置，显示文字 File Explorer
+    offsets = {
+      {
+        filetype = "NvimTree",
+        text = "File Explorer",
+        highlight = "Directory",
+        text_align = "left",
+      },
+    },
+    -- 使用 nvim 内置 LSP  后续课程会配置
+    diagnostics = "nvim_lsp",
+    -- 可选，显示 LSP 报错图标
+    ---@diagnostic disable-next-line: unused-local
+    diagnostics_indicator = function(count, level, diagnostics_dict, context)
+      local s = " "
+      for e, n in pairs(diagnostics_dict) do
+        local sym = e == "error" and " " or (e == "warning" and " " or "")
+        s = s .. n .. sym
+      end
+      return s
+    end,
+  },
+})
+```
+经过这样配置后，就基本跟 VSCode 中的标签页一样了，相关的说明见注释，更多的配置项可参考官网的配置项说明。
+
+### 快捷键
+打开 `lua/keybindings.lua`，根据你的使用习惯增加键盘映射，比如：
+```lua
+-- bufferline
+-- 左右Tab切换
+map("n", "<C-h>", ":BufferLineCyclePrev<CR>", opt)
+map("n", "<C-l>", ":BufferLineCycleNext<CR>", opt)
+-- 关闭
+--"moll/vim-bbye"
+map("n", "<C-w>", ":Bdelete!<CR>", opt)
+map("n", "<leader>bl", ":BufferLineCloseRight<CR>", opt)
+map("n", "<leader>bh", ":BufferLineCloseLeft<CR>", opt)
+map("n", "<leader>bc", ":BufferLinePickClose<CR>", opt)
+```
+### 配置入口文件
+ 打开 `init.lua`，增加代码：
+ ```lua
+require("plugin-config.bufferline")
+```
+
+## 底部状态栏
+底部状态栏用于显示一些额外信息，比如当前的编辑模式，光标所在的行号，列号。当前文件大小，编码格式，当前 git 分支等状态。
+在这里选择了 `lualine.nvim` 插件。
+### 安装
+打开 `lua/plugins.lua`， 增加 `lualine` 相关代码：
+```lua
+-- lualine (新增)
+use({ "nvim-lualine/lualine.nvim", requires = { "kyazdani42/nvim-web-devicons" } })
+use("arkav/lualine-lsp-progress")
+```
+### 配置
+新建配置文件 `lua/plugin-config/lualine.lua`，代码如下：
+```lua
+-- 如果找不到lualine 组件，就不继续执行
+local status, lualine = pcall(require, "lualine")
+if not status then
+    vim.notify("没有找到 lualine")
+  return
+end
+
+lualine.setup({
+  options = {
+    theme = "tokyonight",
+    component_separators = { left = "|", right = "|" },
+    -- https://github.com/ryanoasis/powerline-extra-symbols
+    section_separators = { left = " ", right = "" },
+  },
+  extensions = { "nvim-tree", "toggleterm" },
+  sections = {
+    lualine_c = {
+      "filename",
+      {
+        "lsp_progress",
+        spinner_symbols = { " ", " ", " ", " ", " ", " " },
+      },
+    },
+    lualine_x = {
+      "filesize",
+      {
+        "fileformat",
+        -- symbols = {
+        --   unix = '', -- e712
+        --   dos = '', -- e70f
+        --   mac = '', -- e711
+        -- },
+        symbols = {
+          unix = "LF",
+          dos = "CRLF",
+          mac = "CR",
+        },
+      },
+      "encoding",
+      "filetype",
+    },
+  },
+})
+```
+`lualine` 的配置参数主要有 `options`，`extensions` 和 `sections` 三块。
+`options` 用于设置样式， 其中 `theme` 设置主题配色，可以设置为 `auto`， 也可以设置为主题列表中的一个， 这里设置的是 `tokyonight`，是由 `tokyonight` 主题配色额外提供的支持。`section_separators` 设置分段分隔符， `component_separators` 设置分段中的组件分隔符。
+`extensions` 用于设置 `lualine` 支持的扩展，详见[扩展列表](https://github.com/nvim-lualine/lualine.nvim#extensions)。 这里只会用到 `nvim-tree` 和 `toggleterm` 。
+`sections` 用于设置不同分段，所需显示的功能模块， 分段有 6 个，分别为： `A B C X Y Z`：
+```text
++-------------------------------------------------+
+| A | B | C                             X | Y | Z |
++-------------------------------------------------+
+```
+对应默认配置项为：
+```lua
+ sections = {
+    lualine_a = {'mode'},
+    lualine_b = {'branch', 'diff', 'diagnostics'},
+    lualine_c = {'filename'},
+    lualine_x = {'encoding', 'fileformat', 'filetype'},
+    lualine_y = {'progress'},
+    lualine_z = {'location'}
+  },
+```
+以上示例是更改了`C`和`X`的部分。
+### 配置入口文件
+ 打开 `init.lua`，增加代码：
+ ```lua
+require("plugin-config.lualine")
+```
+
+
+# 模糊搜索快速打开文件
+在写代码的时候，经常会想要打开一个文件，但却不记得完整的文件名，只记得部分文件名或者隐约只记得里边写过的代码。这个时候如何快速找到并打开这个文件呢？
+使用之前章节中定义的`Alt + m` 打开 `nvim-tree` 目录树查找？不，这个时候你需要的是一个模糊查询工具。
+VSCode及sublime_text中都内置了模糊查找 `Ctrl + p` 来查找文件，以及vscode还使用 `Ctrl + shift + f` 来全局查找，非常方便，这节就是使用`telescope.nvim`来给 Neovim 也增加这样的的功能。
+## 安装
+打开 `lua/plugins.lua` 文件，新增 `telescope` 相关的内容：
+```lua
+-- telescope （新增）
+use { 'nvim-telescope/telescope.nvim', requires = { "nvim-lua/plenary.nvim" } }
+```
+保存后，重启使用`:PackerSync`安装。
+安装完成后，需要调用 `:checkhealth telescope` 检查依赖情况，这里通常会提示 `rg` 不存在，因为 `telescope` 依赖以下项目：
+- [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep)
+- [sharkdp/fd](https://github.com/sharkdp/fd)
+
+这两个项目都需要根据具体的操作系统进行安装，具体安装方法可以参考其中的安装说明。
+安装完成后，注意重开一个终端以使这两个命令被正确找到。
+再次运行 `:checkhealth telescope`会发现依赖都已经安装完成。
+
+此时，可以运行命令 `:Telescope find_files` 打开搜索文件窗口，快速打开文件。除此之外，还有一个常用的功能是全局查找，`:Telescope live_grep` 可以打开搜索窗口，输入内容后，结果会实时显示。
+
+## 快捷键
+将以上这两个常用功能定义为快捷键，打开 `lua/keybindings.lua`，根据你的使用习惯增加键盘映射：
+```lua
+-- Telescope
+-- 查找文件
+map("n", "<C-p>", ":Telescope find_files<CR>", opt)
+-- 全局搜索
+map("n", "<C-f>", ":Telescope live_grep<CR>", opt)
+```
+默认情况下打开窗口就会进入输入模式，这个时候和在普通编辑器一样，可以按 `ESC` 键进入 `Normal` 模式，然后 `j/k` 在文件列表里上下浏览， 按 `i` 或 `a` 回到 `Insert` 模式，按 `ESC` 退出。
+
+除了默认的快捷键以外，`Telescope` 还支持在打开的窗口中自定义快捷键，打开 `lua/keybindings.lua` 继续添加：
+```lua
+-- Telescope 列表中 插入模式快捷键
+pluginKeys.telescopeList = {
+  i = {
+    -- 上下移动
+    ["<C-j>"] = "move_selection_next",
+    ["<C-k>"] = "move_selection_previous",
+    ["<Down>"] = "move_selection_next",
+    ["<Up>"] = "move_selection_previous",
+    -- 历史记录
+    ["<C-n>"] = "cycle_history_next",
+    ["<C-p>"] = "cycle_history_prev",
+    -- 关闭窗口
+    ["<C-c>"] = "close",
+    -- 预览窗口上下滚动
+    ["<C-u>"] = "preview_scrolling_up",
+    ["<C-d>"] = "preview_scrolling_down",
+  },
+}
+```
+这样在插入模式下按 `Ctrl + j / Ctrl +k` 就可以在文件列表中上下切换了，不再需要切回 `Normal` 模式了。
+当然这个快捷键还没有生效，因为我们还没有创建 `telescope` 的配置文件。
+
+## 配置
+新建配置文件 `lua/plugin-config/telescope.lua`，代码如下：
+```lua
+local status, telescope = pcall(require, "telescope")
+if not status then
+  vim.notify("没有找到 telescope")
+  return
+end
+
+telescope.setup({
+  defaults = {
+    -- 打开弹窗后进入的初始模式，默认为 insert，也可以是 normal
+    initial_mode = "insert",
+    -- 窗口内快捷键
+    mappings = require("keybindings").telescopeList,
+  },
+  pickers = {
+    -- 内置 pickers 配置
+    find_files = {
+      -- 查找文件换皮肤，支持的参数有： dropdown, cursor, ivy
+      -- theme = "dropdown", 
+    }
+  },
+  extensions = {
+     -- 扩展插件配置
+  },
+})
+```
+一方面，在上面的配置文件中，`mappings` 部分引入了我们刚才在 `lua/keybindings.lua` 中定义的快捷键 `telescopeList`，这样定义才会生效。
+另一方面，可以尝试把查找文件的 `picker` 也就是 `Ctrl + p` 打开的窗口换一个皮肤，比如 `dropdown` 这个皮肤是把窗口垂直排列了，内置的皮肤还有 `cursor` 让窗口在光标位置打开， `ivy` 则是全屏覆盖的。建议自己手动试试，看看喜欢哪种效果。
+`Telescope` 非常强大，内置了很多的 `pickers`，比如 `:Telescope buffers` 命令可以列出打开的 `buffers`， `:Telescope git_files` 列出 git 文件，`:Telescope man_pages` 列出帮助等等。可以在命令补全里看到这些支持的 `pickers`。
+
+最后别忘了在 入口文件 中引入配置文件才能生效。 打开 `init.lua`，增加代码：
+```lua
+require("plugin-config.telescope")
+```
+
+## Telescope扩展安装
+Telescope 支持非常多的第三方扩展，列表见[该链接](https://github.com/nvim-telescope/telescope.nvim/wiki/Extensions)。
+
+# 启动页
+本节会介绍如何给 Neovim 增加一个自定义启动画面，并列出常用功能。
+当我们在命令行中输入 `nvim` 不带任何路径并敲击回车的时候，就会打开这个界面，通常我们会在这个界面中配置最常用功能，比如打开最近编辑过的文件，快速打开项目文件夹，快速修改快捷键等。
+
+## 安装
+首先需要安装 `dashboard-nvim` 插件。
+修改 `lua/plugins.lua` 文件中添加 `glepnir/dashboard-nvim` 插件：
+```lua
+-- dashboard-nvim (新增)
+use("glepnir/dashboard-nvim")
+```
+
+## 配置
+创建配置文件 `lua/plugin-config/dashboard.lua`，添加如下内容：
+```lua
+local status, db = pcall(require, "dashboard")
+if not status then
+  vim.notify("没有找到 dashboard")
+  return
+end
+
+db.custom_footer = {
+  "https://qixinbo.info",
+}
+
+db.custom_center = {
+  {
+    icon = "  ",
+    desc = "Projects                            ",
+    action = "Telescope projects",
+  },
+  {
+    icon = "  ",
+    desc = "Recently files                      ",
+    action = "Telescope oldfiles",
+  },
+  {
+    icon = "  ",
+    desc = "Edit keybindings                    ",
+    action = "edit ~/.config/nvim/lua/keybindings.lua",
+  },
+  {
+    icon = "  ",
+    desc = "Edit Projects                       ",
+    action = "edit ~/.local/share/nvim/project_nvim/project_history",
+  },
+  -- {
+  --   icon = "  ",
+  --   desc = "Edit .bashrc                        ",
+  --   action = "edit ~/.bashrc",
+  -- },
+  -- {
+  --   icon = "  ",
+  --   desc = "Change colorscheme                  ",
+  --   action = "ChangeColorScheme",
+  -- },
+  -- {
+  --   icon = "  ",
+  --   desc = "Edit init.lua                       ",
+  --   action = "edit ~/.config/nvim/init.lua",
+  -- },
+  -- {
+  --   icon = "  ",
+  --   desc = "Find file                           ",
+  --   action = "Telescope find_files",
+  -- },
+  -- {
+  --   icon = "  ",
+  --   desc = "Find text                           ",
+  --   action = "Telescopecope live_grep",
+  -- },
+}
+
+
+db.custom_header = 
+{
+[[              ▄▄▄▄▄▄▄▄▄             ]],
+[[           ▄█████████████▄          ]],
+[[   █████  █████████████████  █████  ]],
+[[   ▐████▌ ▀███▄       ▄███▀ ▐████▌  ]],
+[[    █████▄  ▀███▄   ▄███▀  ▄█████   ]],
+[[    ▐██▀███▄  ▀███▄███▀  ▄███▀██▌   ]],
+[[     ███▄▀███▄  ▀███▀  ▄███▀▄███    ]],
+[[     ▐█▄▀█▄▀███ ▄ ▀ ▄ ███▀▄█▀▄█▌    ]],
+[[      ███▄▀█▄██ ██▄██ ██▄█▀▄███     ]],
+[[       ▀███▄▀██ █████ ██▀▄███▀      ]],
+[[      █▄ ▀█████ █████ █████▀ ▄█     ]],
+[[      ███        ███        ███     ]],
+[[      ███▄    ▄█ ███ █▄    ▄███     ]],
+[[      █████ ▄███ ███ ███▄ █████     ]],
+[[      █████ ████ ███ ████ █████     ]],
+[[      █████ ████▄▄▄▄▄████ █████     ]],
+[[       ▀███ █████████████ ███▀      ]],
+[[         ▀█ ███ ▄▄▄▄▄ ███ █▀        ]],
+[[            ▀█▌▐█████▌▐█▀           ]],
+[[               ███████              ]],
+}
+```
+`db.custom_footer` 用于自定义底部显示的文字，
+`db.custom_header` 是最重要的部分，用于自定义顶部显示的 ascii 图片，[官方 wiki](https://github.com/glepnir/dashboard-nvim/wiki/Ascii-Header-Text)上有很多推荐图片。也可以使用文字，从网上搜索一下 ascii 图片生成器，生成自己专属图片，比如使用 [`patorjk.com`](http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=Type%20Something%20) 。进入后输入文字，然后点击左下角的 `Select & Copy` 即可复制到剪贴板。
+`db.custom_center` 列出常用功能， 它的基本格式为：
+```lua
+db.custom_center = {
+  { icon = '图标', desc = '描述文字', action = '命令'}
+}
+```
+比如想要增加一条查找文件，就可以：
+```lua
+{
+    icon = "  ",
+    desc = "Find file                           ",
+    action = "Telescope find_files",
+},
+```
+这里的图标需要 `Nerdfont` 字体支持，所以会显示成问号，复制到 Neovim 中就可以正常显示了，你可以到这个网站 `nerdfonts.com/cheat-sheet` 搜索想要的图标，并复制过来。
+可以调用任何你想要的命令，比如增加一个换肤功能，调用 `Telescope colorscheme`：
+```lua
+{ 
+    icon="  ", 
+    desc = { "Change Theme                           "}, 
+    action = 'Telescope colorscheme'
+},
+```
+
+同时别忘了在入口文件中进行配置：
+```lua
+require("plugin-config.dashboard")
+```
+上例中的第一条命令`Telescope projects` 并不是 telescope 内置的命令。 而是 telescope 的一个插件，需要安装 `ahmedkhalf/project.nvim` 后才能使用。
+
+## project插件
+打开 `lua/plugins.lua`，在文件中添加 `ahmedkhalf/project.nvim` 插件：
+```lua
+-- project
+use("ahmedkhalf/project.nvim")
+```
+根据 `project.nvim` 的文档，首先要确保我们之前设置的 `lua/plugin-config/nvim-tree.lua` 配置文件中有下边这一段代码：
+```lua
+nvim_tree.setup({
+  --- 上略
+
+  -- project plugin 需要这样设置
+  update_cwd = true,
+  update_focused_file = {
+    enable = true,
+    update_cwd = true,
+  },
+
+  -- 下略
+}
+```
+这段代码让 nvim-tree 支持切换目录。 之后可以创建 `lua/plugin-config/project.lua` 配置文件：
+```lua
+local status, project = pcall(require, "project_nvim")
+if not status then
+    vim.notify("没有找到 project_nvim")
+  return
+end
+
+-- nvim-tree 支持
+vim.g.nvim_tree_respect_buf_cwd = 1
+
+project.setup({
+  detection_methods = { "pattern" },
+  patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json", ".sln" },
+})
+
+local status, telescope = pcall(require, "telescope")
+if not status then
+  vim.notify("没有找到 telescope")
+  return
+end
+pcall(telescope.load_extension, "projects")
+```
+
+`detection_methods` 设置检测方式，这里设置为 `pattern`，也就是按照下边的 `patterns` 参数来检测，当文件夹里有这些文件时，就会被当作一个 `project` 文件夹，自动保存在配置文件中。
+同时别忘了在入口文件中进行配置：
+```lua
+require("plugin-config.project")
+```
+
+但有时候会发现 project 列表并不是我常用的项目列表，列出了很多没用的项目，这时候就需要手动编辑 `project_history` 列表了，但这个列表保存在哪里呢？
+运行命令 `:lua print(require("project_nvim.utils.path").historyfile)` 就可以看到 `project_history`文件的路径了。
+可以直接手动修改这个文件，仅保存常用的项目。
+
+# 代码高亮、缩进和折叠
+提到代码高亮，首先要提到的是 [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) 项目， `Tree-sitter` 是一个解析器生成器工具和增量解析库，它可以在源文件编辑的同时高效的实时生成语法树.
+接着出现的是 `nvim-treesitter` 项目，`nvim-treesitter` 是 Neovim 下的 `Tree-sitter` 配置和抽象层，它的目标是给 Neovim 提供一个简单的 `Tree-sitter` 接口，并且提供多个基于 `Tree-sitter` 的基础功能模块，它可以让你在 nvim 中高效的实现代码高亮，增量选择等基础功能。
+## 安装
+修改 `lua/plugins.lua` 文件中添加 `nvim-treesitter/nvim-treesitter` 插件：
+```lua
+-- treesitter （新增）
+use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
+```
+这里的 `run = ":TSUpdate"` 是 `Packer.nvim` 的一个 `Post-install hook`，表示当组件安装或更新完成时会执行 `:TSUpdate` 命令。
+这一步实际有个前提，需要neovim能提前知道`c`编译器的所在，比如`gcc`、`cc`、`cl`，所以如果在安装该插件报错后，要注意提前将这些编译器命令在neovim所在的终端被识别，即加入到`PATH`变量中。详情看[官方教程](https://github.com/nvim-treesitter/nvim-treesitter#quickstart)。
+对于Windows操作系统，具体教程[在这](https://github.com/nvim-treesitter/nvim-treesitter/wiki/Windows-support)。
+
+需要这句是因为特定的 `nvim-treesitter` 插件版本只与特定的 `language parser` 版本匹配。所以每次我们需要更新了这个插件的时候，当然我们也必须要同步更新所有已经安装的 `language parsers`。
+
+`nvim-treesitter` 代码高亮之所以效果这么好，就是因为可以针对不同的语言，安装不同的 `language parser`， 下面我们看一下如何根据你的需要来安装。
+
+
+## 手动安装Language parser
+可以运行`:TSInstallInfo` 命令查看 language parsers 列表与安装状态。
+如果我们要安装指定的 Language parser，则我们需要调用命令：
+```vim
+:TSInstall <language_to_install>
+```
+比如我们要安装 JavaScript 语言，则应该调用 `:TSInstall javascript`。
+当我们调用 `TSInstall` 命令的时候，插件会生成一个 `<language>.so` 语法文件，放在插件的 parser 文件夹内。
+对应的 `:TSUninstall <language_to_uninstall>` 命令用于卸载 language parser 。
+其实也可以不必手动安装 language parsers ，可以在 `nvim-treesitter` 的配置文件中指定自动安装，下边开始配置 `nvim-treesitter`。
+
+## 配置
+创建 `lua/plugin-config/nvim-treesitter.lua` 文件：
+```lua
+local status, treesitter = pcall(require, "nvim-treesitter.configs")
+if not status then
+    vim.notify("没有找到 nvim-treesitter")
+    return
+end
+
+treesitter.setup({
+  -- 安装 language parser
+  -- :TSInstallInfo 命令查看支持的语言
+  ensure_installed = { "json", "html", "css", "vim", "lua", "javascript", "typescript", "tsx" },
+  -- 启用代码高亮模块
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+})
+```
+`ensure_installed` 就是自动安装 parsers，不必提前手动安装，只要这里列出，下次重启后就会自动安装，当然如果设置过多那么首次重启会卡一下，而且网络不好的话每个下载失败都会报错。
+可以和上述代码一样为`ensure_installed` 制定一个列表，也可以是直接设置为 `"all"` 或 `"maintained"` ，表示一次下载所有的 parsers。下次重启后就会下载对应的语法文件了。 这里建议你还是自定义用到的语言列表，其次是设置成 `maintained`。
+`highlight` 是 `nvim-treesitter` 的语法高亮模块，设置 `enable` 为 `true` 则开启语法高亮功能，由于使用基于 `treesitter` 的语法高亮，所以将`additional_vim_regex_highlighting` 设置为 `false` 关闭 `vim` 的正则语法高亮。
+
+保存后别忘了在 入口文件 中引入该配置文件：
+```lua
+require("plugin-config.nvim-treesitter") 
+```
+重启后，如果一切正常即可看到代码高亮效果，调用 `:TSBufToggle highlight` 命令可以切换打开关闭代码高亮功能。
+然而这个代码高亮颜色，和我们之前安装的 `colorscheme` 支持程度有关，不同的主题配色显示会不一样，你可以在 `nvim-treesitter` 的 wiki 里查看不同到皮肤的显示效果，网址[在这里](https://github.com/nvim-treesitter/nvim-treesitter/wiki/Colorschemes)。所以还是推荐使用下载量比较大，比较流行的主题配色，通常不会出现 bug ，比如`tokyonight`主题。
+
+除了代码高亮功能外，`nvim-treesitter` 还提供其他 3 个内置模块功能，可以根据你的需要添加。
+## 增量选择模块
+什么是增量选择 (incremental selection) ？ 当你的光标在一个语法结点上时，可以设置一个增加键和一个减少键，敲击这两个，在表现上为不断外扩和收缩选中代码。
+如果需要这个功能，需要打开 `lua/plugin-config/nvim-treesitter.lua` 文件，在 `highlight` 模块下方，增加如下代码：
+```lua
+-- 启用增量选择模块
+incremental_selection = {
+  enable = true,
+  keymaps = {
+    init_selection = "<CR>",
+    node_incremental = "<CR>",
+    node_decremental = "<BS>",
+    scope_incremental = "<TAB>",
+  },
+},
+```
+注意到上边代码，为了减少记忆额外快捷键的负担，将增加和减少结点的快捷键设置成了 回车 和 退格 。通过不断的按 `Enter` 选择区域会从里层不断外扩， `Backspace` 则相反不断内收。
+
+## 代码缩进模块
+启用该模块后，可以使用 `=` 操作符对代码缩进。
+打开 `lua/plugin-config/nvim-treesitter.lua` 文件，在 `incremental_selection` 模块下方，增加如下代码：
+```lua
+-- 启用代码缩进模块 (=)
+indent = {
+  enable = true,
+},
+```
+如果要对整个文件进行缩进，可以使用 `gg=G` 组合键，因为 `gg` 是跳到首行，`G` 是跳到尾行，`gg=G` 就是从首行一直缩进到尾行，相当于 `ggvG` 选中整个文件然后用 `=` 格式化。
+如果你经常使用这个组合键，那么你可以考虑像我们之前一样，添加一个快捷键到 `lua/keybindings.lua`，这里不再详述。
+
+## 代码折叠模块
+代码折叠可以使代码更清晰，更易于阅读，基于 `Tree-sitter` 的代码折叠可以精确的折叠 `{}` 中的内容。
+打开 `lua/plugin-config/nvim-treesitter.lua`，在文件的最下方插入代码：
+```lua
+-- 开启 Folding 模块
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+-- 默认不要折叠
+-- https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
+vim.opt.foldlevel = 99
+```
+注意这次是插入在文件的最下方，因为这个功能严格意义上不是一个模块，因为它对应的是 `window` 而不是一个 `buffer`。
+最后，可以运行 `:TSModuleInfo` 命令来查看模块是否开启成功
+
+# 内置LSP基础配置
+想要在 Neovim 中配置代码补全、代码悬停、代码提示等等功能，首先要了解什么是 LSP (Language Server Protocol) 语言服务协议。
+在 LSP 出现之前，传统的 IDE 都要为其支持的每个语言实现类似的代码补全、文档提示、跳转到定义等功能，不同的 IDE 做了很多重复的工作，并且兼容性也不是很好。 LSP 的出现将编程工具解耦成了 Language Server 与 Language Client 两部分。定义了编辑器与语言服务器之间交互协议。
+Client 专注于显示样式实现， Server 负责提供语言支持，包括常见的自动补全、跳转到定义、查找引用、悬停文档提示等功能。
+而这里所说的 Neovim 内置 LSP 就是说 Neovim 内置了一套 Language Client 端的实现，这样就可以连接到和 VSCode 相同的第三方 language servers ，实现高质量的语法补全等功能。
+
+还有一个简单的教程见[这里](http://xfyuan.github.io/2021/02/neovim-builtin-lsp-basic-configuration/)。
+为了简化 LSP 的安装和配置，NeoVim 官方专门创建了 `nvim-lspconfig` 插件来帮助我们。这个插件把所有 LSP 背后的繁琐都封装到其内部，让使用者再也毋需担心出现费了大半天功夫结果仍然无法用起来的事。
+下面以python语言所用的`pyright`为例进行研究。
+
+## 安装插件
+打开 `lua/plugins.lua` 添加 `nvim-lspconfig` 组件：
+```lua
+-- Lspconfig
+use({ "neovim/nvim-lspconfig" })
+```
+
+## 安装language server
+前面已说到，内置的LSP实际只是Language client端的实现，对于server端，需要单独安装以下，以`pyright`为例：
+```sh
+npm i -g pyright
+```
+
+## 配置入口文件
+在`init.lua`中写入：
+```lua
+require'lspconfig'.pyright.setup{}
+```
+
+完毕！
+现在这样就已经配置好了。此时用neovim打开一个python文件后就会有各种诊断信息。
+但是因为`nvim-lspconfig`没有提供快捷键，所以它建议使用以下推荐的配置。
+## 推荐配置
+创建文件 `lua/lsp/setup.lua`，内容如下：
+```lua
+-- Mappings.
+-- See `:help vim.diagnostic.*` for documentation on any of the below functions
+local opts = { noremap=true, silent=true }
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+
+-- Use an on_attach function to only map the following keys
+-- after the language server attaches to the current buffer
+local on_attach = function(client, bufnr)
+  -- Enable completion triggered by <c-x><c-o>
+  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+  -- Mappings.
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  local bufopts = { noremap=true, silent=true, buffer=bufnr }
+  vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+  vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+  vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
+  vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+  vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+  vim.keymap.set('n', '<space>wl', function()
+    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+  end, bufopts)
+  vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
+  vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
+  vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
+  vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+  vim.keymap.set('n', '<space>f', vim.lsp.buf.formatting, bufopts)
+end
+
+local lsp_flags = {
+  -- This is the default in Nvim 0.7+
+  debounce_text_changes = 150,
+}
+require('lspconfig')['pyright'].setup{
+    on_attach = on_attach,
+    flags = lsp_flags,
+}
+require('lspconfig')['tsserver'].setup{
+    on_attach = on_attach,
+    flags = lsp_flags,
+}
+require('lspconfig')['rust_analyzer'].setup{
+    on_attach = on_attach,
+    flags = lsp_flags,
+    -- Server-specific settings...
+    settings = {
+      ["rust-analyzer"] = {}
+    }
+}
+```
+然后在入口文件中将之前那个`require`语句改为：
+```lua
+require("lsp.setup")
+```
+
+## 诊断界面美化
+加入了LSP的诊断功能后，会经常发现`E`和`W`，分别表示`Error`和`Warning`。这里将它们替换成图标。
+### 配置
+新建文件 `lua/lsp/ui.lua` ，内容如下：
+```lua
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = true,
+  -- 在输入模式下也更新提示，设置为 true 也许会影响性能
+  update_in_insert = true,
+})
+local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+for type, icon in pairs(signs) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+end
+```
+以及在入口文件中引入：
+```lua
+require("lsp.ui")
+```
+
+# 代码补全
+Neovim 本身不支持代码补全，需要通过插件实现，这里使用最流行的 `nvim-cmp` 插件。
+在安装自动代码补全之前，需要了解几个概念：
+- 补全引擎：补全引擎就是为 Neovim 提供代码补全核心功能的插件，比如 `nvim-cmp`。
+- 补全源：补全源就是补全引擎需要的数据来源，最常见的来源是来自 Language Server 提供的数据，它会知道某个类有哪些属性和方法等。
+- snippet 引擎：snippet 引擎就是自定义代码段的引擎，常见的有 `vsnip`、`luasnip` 等。
+
+三个词组一个句子，可以说：`nvim-cmp` 是使用 Lua 编写的 补全引擎 插件。可以配置多种外部的补全源，支持 `vsnip`、`luasnip`、`snippy`、 `ultisnips` 4 种 snippet 引擎 。
+
+## 安装
+```lua
+-- 补全引擎
+use("hrsh7th/nvim-cmp")
+-- snippet 引擎
+use("hrsh7th/vim-vsnip")
+-- 补全源
+use("hrsh7th/cmp-vsnip")
+use("hrsh7th/cmp-nvim-lsp") -- { name = nvim_lsp }
+use("hrsh7th/cmp-buffer") -- { name = 'buffer' },
+use("hrsh7th/cmp-path") -- { name = 'path' }
+use("hrsh7th/cmp-cmdline") -- { name = 'cmdline' }
+
+-- 常见编程语言代码段
+use("rafamadriz/friendly-snippets")
+```
+
+## 配置
+新建文件 `lua/lsp/cmp.lua` ，内容如下：
+```lua
+local cmp = require("cmp")
+
+cmp.setup({
+  -- 指定 snippet 引擎
+  snippet = {
+    expand = function(args)
+      -- For `vsnip` users.
+      vim.fn["vsnip#anonymous"](args.body)
+
+      -- For `luasnip` users.
+      -- require('luasnip').lsp_expand(args.body)
+
+      -- For `ultisnips` users.
+      -- vim.fn["UltiSnips#Anon"](args.body)
+
+      -- For `snippy` users.
+      -- require'snippy'.expand_snippet(args.body)
+    end,
+  },
+  -- 补全源
+  sources = cmp.config.sources({
+    { name = "nvim_lsp" },
+    -- For vsnip users.
+    { name = "vsnip" },
+
+    -- For luasnip users.
+    -- { name = 'luasnip' },
+
+    --For ultisnips users.
+    -- { name = 'ultisnips' },
+
+    -- -- For snippy users.
+    -- { name = 'snippy' },
+  }, { { name = "buffer" }, { name = "path" } }),
+
+  -- 快捷键设置
+  mapping = require("keybindings").cmp(cmp),
+})
+
+-- / 查找模式使用 buffer 源
+cmp.setup.cmdline("/", {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = "buffer" },
+  },
+})
+
+-- : 命令行模式中使用 path 和 cmdline 源.
+cmp.setup.cmdline(":", {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({
+    { name = "path" },
+  }, {
+    { name = "cmdline" },
+  }),
+})
+```
+在入口文件中配置：
+```lua
+require("lsp.cmp")
+```
+
+## 快捷键
+打开 `lua/keybindings.lua` 在 `pluginKeys` 变量下边增加 `cmp` 方法：
+```lua
+-- nvim-cmp 自动补全
+pluginKeys.cmp = function(cmp)
+    return {
+        -- 出现补全
+        ["<A-.>"] = cmp.mapping(cmp.mapping.complete(), {"i", "c"}),
+        -- 取消
+        ["<A-,>"] = cmp.mapping({
+            i = cmp.mapping.abort(),
+            c = cmp.mapping.close()
+        }),
+        -- 上一个
+        ["<C-k>"] = cmp.mapping.select_prev_item(),
+        -- 下一个
+        ["<C-j>"] = cmp.mapping.select_next_item(),
+        -- 确认
+        ["<CR>"] = cmp.mapping.confirm({
+            select = true,
+            behavior = cmp.ConfirmBehavior.Replace
+        }),
+        -- 如果窗口内容太多，可以滚动
+        ["<C-u>"] = cmp.mapping(cmp.mapping.scroll_docs(-4), {"i", "c"}),
+        ["<C-d>"] = cmp.mapping(cmp.mapping.scroll_docs(4), {"i", "c"}),
+    }
+end
+```
+
+# 代码格式化
+代码格式化 和 代码缩进 是不同的，在 `tree-sitter` 章节实现的代码缩进只能缩进首字母的位置 如果代码中间出现格式问题，`tree-sitter` 就无能为力了
+如果需要添加代码格式化功能，基本上有两种方案:
+- 第一种是使用专门的格式化插件；
+- 第二种是给 Language Server 注入格式化功能。
+
+## Formatter.nvim
+先看第一种方法，可以安装 `formatter.nvim` 插件，`Formatter.nvim` 插件是很简单易用的格式化插件， 支持很多常见编程语言，例如 JavaScript、Rust、JSON、Bash、Lua、C、Ruby、Python、Golang 等等。
+
+## null-ls.nvim
+`null-ls` 非常强大，可以作为一个通用 Language Server 来给编辑器注入代码补全，格式化，提示，code actions 等新功能。
+简单来说就是你在编辑的同一个 buffer 时，不只可以挂一个 Language Server，还可以多挂一个通用的 `null-ls Server` 作为补充，这样无论我们使用哪个 Server 都可以共享 null-ls 提供的功能。
+`null-ls` 不仅可以作为代码格式化的工具，它更像一个 Lua 语言与 Language Server 的桥梁，它可以通过注入的方式给编辑器带来更多有趣的功能。
