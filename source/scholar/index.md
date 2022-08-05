@@ -28,14 +28,20 @@ date: 2016-01-13 08:41:43
 - [Datasets collection in PapersWithCode](https://paperswithcode.com/datasets)
 - [Datasets collection in Hugging Face](https://huggingface.co/datasets)
 - [极市数据集](https://www.cvmart.net/dataSets)
+- [15个目标检测开源数据集汇总](https://mp.weixin.qq.com/s?src=11&timestamp=1658989596&ver=3947&signature=NtlGbvFYQVE2Kw8IJATxSHvHXlPERhycuY2*hkQPBW7jdSCS3UciImHUbYgWvXbUV5M3EenkkDOB9LLFhwNhSOrMWYkA7rKZvu91JhG9Ny2A22hFPLJThBc9pUf5kMeu&new=1)
+- [目标检测开源数据集汇总（二）](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247610614&idx=1&sn=1cbe29362a8acd5bfeb93a5f1af936f4&chksm=ec1ddd0fdb6a541917b7cd0cbfe5eba203adca4e4da0d66918808471456720d5ca0bb921291e&mpshare=1&scene=1&srcid=0711hc2xY8b9IjKqB4JwZOid&sharer_sharetime=1657517713734&sharer_shareid=19f9b91729f0d36195fb60fbcb61cd8c&exportkey=AeN0MiUrNTySwbo1Sej0Nvg%3D&acctmode=0&pass_ticket=UC%2Bw7bwSVCHsfQSt97%2FbZtYw0ehuxmj5O%2FPnvOZ8NZp0qTg74VJC8xRRd6raL93h&wx_header=0#rd)
+
+## 工业相关
+- [10个开源工业检测数据集汇总](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247593671&idx=1&sn=b3a39c9ff12f13e867bf7b64402b9b16&chksm=ec1d833edb6a0a28313c257f76744e4cf3deab417d8b7b6e93ca6df53092ebe7eb366e585c02&scene=21#wechat_redirect)
+- [表面缺陷检测数据集汇总及其相关项目推荐](https://mp.weixin.qq.com/s/XqL9iOyqX-_P_1e6tUPHVA)
+
+## Bio相关
+- [DeepCell Datasets](https://datasets.deepcell.org/)
+- [LIVECell dataset](https://sartorius-research.github.io/LIVECell/)
 - [A large-scale three-fold annotated microscopy image dataset of potato tubers for deep learning-based plant cell assessment](https://springernature.figshare.com/collections/A_large-scale_three-fold_annotated_microscopy_image_dataset_of_potato_tubers_for_deep_learning-based_plant_cell_assessment/4955669)
 - [Broad Bioimage Benchmark Collection](https://bbbc.broadinstitute.org/)
 - [医学图像开源数据集汇总](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247605502&idx=1&sn=765c5daf43e458ca1f6d54b53515ed21&chksm=ec1db107db6a38110960e65a75313944a711f7434f77b35b4151b91300e3f9ba6ce73f851993&mpshare=1&scene=1&srcid=0728FqeNhmpb29MOw82NYLRc&sharer_sharetime=1658989475190&sharer_shareid=19f9b91729f0d36195fb60fbcb61cd8c&exportkey=ARb47T4PTX%2FDVNEo%2FrsiKgE%3D&acctmode=0&pass_ticket=QUQFbIdj9aYAySX1v6lNcBc8VbiNDLZjQZRCc6mw%2Bf%2F%2BOgLuBB5shGbKxOdLoV9Q&wx_header=0#rd)
 - [医学图像开源数据集汇总（二）](https://mp.weixin.qq.com/s/KirzDH92S8Eog7f4AY53QQ)
-- [15个目标检测开源数据集汇总](https://mp.weixin.qq.com/s?src=11&timestamp=1658989596&ver=3947&signature=NtlGbvFYQVE2Kw8IJATxSHvHXlPERhycuY2*hkQPBW7jdSCS3UciImHUbYgWvXbUV5M3EenkkDOB9LLFhwNhSOrMWYkA7rKZvu91JhG9Ny2A22hFPLJThBc9pUf5kMeu&new=1)
-- [目标检测开源数据集汇总（二）](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247610614&idx=1&sn=1cbe29362a8acd5bfeb93a5f1af936f4&chksm=ec1ddd0fdb6a541917b7cd0cbfe5eba203adca4e4da0d66918808471456720d5ca0bb921291e&mpshare=1&scene=1&srcid=0711hc2xY8b9IjKqB4JwZOid&sharer_sharetime=1657517713734&sharer_shareid=19f9b91729f0d36195fb60fbcb61cd8c&exportkey=AeN0MiUrNTySwbo1Sej0Nvg%3D&acctmode=0&pass_ticket=UC%2Bw7bwSVCHsfQSt97%2FbZtYw0ehuxmj5O%2FPnvOZ8NZp0qTg74VJC8xRRd6raL93h&wx_header=0#rd)
-- [10个开源工业检测数据集汇总](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247593671&idx=1&sn=b3a39c9ff12f13e867bf7b64402b9b16&chksm=ec1d833edb6a0a28313c257f76744e4cf3deab417d8b7b6e93ca6df53092ebe7eb366e585c02&scene=21#wechat_redirect)
-- [表面缺陷检测数据集汇总及其相关项目推荐](https://mp.weixin.qq.com/s/XqL9iOyqX-_P_1e6tUPHVA)
 
 # 好文推荐
 - [深度思考AI部署以及工业落地之路](https://mp.weixin.qq.com/s/Nz5RAMBnQ9gbuwOK5CwpPA)
