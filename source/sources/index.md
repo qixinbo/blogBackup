@@ -66,6 +66,10 @@ date: 2016-01-13 10:37:25
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
 
 
+## Neovim
+- [neovimcraft: curated list of neovim plugins](https://neovimcraft.com/)
+- [Awesome Neovim: Collections of awesome Neovim plugins](https://github.com/rockerBOO/awesome-neovim)
+
 ## Hexo NexT theme
 - [NexT Math Equations](https://github.com/theme-next/hexo-theme-next/blob/master/docs/MATH.md)
 - [hexo-renderer-kramed与mathJax的兼容问题及解决方法](https://duskcloudxu.github.io/2018/07/14/hexo-renderer-kramed%E4%B8%8EmathJax%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/)
