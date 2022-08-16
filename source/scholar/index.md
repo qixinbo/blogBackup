@@ -71,6 +71,7 @@ date: 2016-01-13 08:41:43
 - [在 Linux 上使用 Clash 作代理 ](https://einverne.github.io/post/2021/03/linux-use-clash.html)
 
 ## Python相关
+- [numpy max vs amax vs maximum](https://stackoverflow.com/questions/33569668/numpy-max-vs-amax-vs-maximum)
 - [Matplotlib简明教程](https://lijin-thu.github.io/06.%20matplotlib/06.01%20pyplot%20tutorial.html)
 - [Argparse 教程](https://docs.python.org/zh-cn/3/howto/argparse.html)
 - [Python namedtuple](https://www.runoob.com/note/25726)
