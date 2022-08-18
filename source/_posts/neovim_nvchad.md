@@ -499,6 +499,84 @@ M.plugins = {
 - `S`是`Shift`
 - 默认配置在`core/mappings.lua`中定义。
 
+### 快捷键映射格式
+```lua
+-- opts here is completely optional
+
+ ["keys"] = {"action", "icon  mapping description", opts = {}},
+
+ -- more examples
+ ["<C-n>"] = {"<cmd> NvimTreeToggle <CR>", "Toggle nvimtree", opts = {}},
+
+ ["<leader>uu"] = { "<cmd> :NvChadUpdate <CR>", "  update nvchad" },
+
+ [";"] = { ":", "enter cmdline", opts = { nowait = true } },
+ ["jk"] = { "<ESC>", "escape insert mode" , opts = { nowait = true }},
+
+ -- example with lua function
+ ["<leader>tt"] = {
+     function()
+        require("base46").toggle_theme()
+     end,
+        "   toggle theme",
+   },
+```
+- 映射描述对`Whichkey`是必要的，对于非`Whichkey`则不是必需
+- 可以使用图标来帮助阅读，不过也不是必选项，而是可选项
+- 可以从[这里](https://www.nerdfonts.com/cheat-sheet)来复制和粘贴图标
+- 默认的`opts`的值有：
+```lua
+{
+  buffer = nil, -- Global mappings. Specify a buffer number for buffer local mappings
+  silent = true, 
+  noremap = true,
+  nowait = false,
+
+  -- all standard key binding opts are supported 
+}
+```
+
+### 增加新的映射
+默认配置在`core/mappings.lua`中定义，然后可以在`custom/mappings.lua`中增加新的映射：
+```lua
+-- lua/custom/mappings 
+local M = {}
+
+-- add this table only when you want to disable default keys
+M.disabled = {
+  n = {
+      ["<leader>h"] = "",
+      ["<C-s>"] = ""
+  }
+}
+
+M.abc = {
+
+  n = {
+     ["<C-n>"] = {"<cmd> Telescope <CR>", "Open Telescope"}
+  }
+
+  i = {
+    -- more keys!
+  }
+}
+
+M.xyz = {
+  -- stuff
+}
+
+return M
+```
+注意在自己的`custom/chadrc.lua`中引入：
+```lua
+-- chadrc
+M.mappings = require "custom.mappings"
+```
+- 上面的`abc`和`xyz`是随意取的，为了可读性，可以改成插件名字
+- 上面的映射关系是自动加载的，不需要手动加载。
+
+
+
 ## UI插件
 `NvChad`使用了自己的[UI插件](https://github.com/NvChad/ui)。
 
