@@ -44,6 +44,7 @@ date: 2016-01-13 08:41:43
 - [医学图像开源数据集汇总（二）](https://mp.weixin.qq.com/s/KirzDH92S8Eog7f4AY53QQ)
 
 # 好文推荐
+- [统计学和机器学习到底有什么区别？](https://mp.weixin.qq.com/s/gUJIddpounyBvCw6XndMiA)
 - [深度思考AI部署以及工业落地之路](https://mp.weixin.qq.com/s/Nz5RAMBnQ9gbuwOK5CwpPA)
 - [热流科学前沿与PINN的研究与应用](https://aistudio.baidu.com/aistudio/education/lessonvideo/2687762/1)
 - [不平衡问题: 深度神经网络训练之殇](https://mp.weixin.qq.com/s/S5DtxvY7WHPRtVLZC0_03A)
@@ -56,6 +57,8 @@ date: 2016-01-13 08:41:43
 
 # 知识点
 ## ML相关
+- [各种神经网络层和模块的计算量和参数量估计总结](https://mp.weixin.qq.com/s/3rWtzZUGRnZbes89z8cjbw)
+- [PyTorch 源码解读 - 知乎](https://www.zhihu.com/column/c_1316816403623084032)
 - [图像分割损失函数最全面、最详细总结，含代码](https://mp.weixin.qq.com/s/8oKiVRjtPQIH1D2HltsREQ)
 - [mAP (mean Average Precision) might confuse you!](https://towardsdatascience.com/map-mean-average-precision-might-confuse-you-5956f1bfa9e2)
 - [机器学习中的评价指标](https://zhuanlan.zhihu.com/p/110399695)
