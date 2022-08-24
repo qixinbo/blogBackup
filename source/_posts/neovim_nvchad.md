@@ -15,10 +15,18 @@ date: 2022-8-11
 # 安装
 ## 前提条件
 在使用`NvChad`之前，要有一些前提依赖：
-- [`Neovim 0.7.2及以上`](https://github.com/neovim/neovim/releases/tag/v0.7.2)
+- `Neovim 0.7.2`及以上
+安装教程在[这里](https://github.com/neovim/neovim/wiki/Installing-Neovim)。
 - 字体及图标：
 一个推荐的编程字体是`Fira Code`字体，这里不光安装它，还安装它的一个扩展，即`Nerd fonts`（`Nerd fonts` 本身并不是一种新的字体，而是把常用图标以打补丁的方式打到了常用字体上。）
-具体到[官网这里](https://www.nerdfonts.com/font-downloads)进行下载（也可以选择其他想要的字体，对于`Windows`版本，注意在下载的文件中选择`XXXX Windows Compatible.ttf`。然后在`Windows Terminal`的字体中选择`FiraCode NF`字体即可。）为了测试是否成功，可以到[这个网址](www.nerdfonts.com/cheat-sheet)，点击 `Show All Icons` 按钮，选择一个图标，点击右上角的 `Copy Icon`，然后粘贴到命令行里即可。
+具体到[官网这里](https://www.nerdfonts.com/font-downloads)进行下载。
+对于`Linux`字体的安装，步骤为：
+```sh
+sudo unzip FiraCode.zip -d /usr/share/fonts
+sudo fc-cache -fv
+````
+对于`Windows`版本，注意在下载的文件中选择`XXXX Windows Compatible.ttf`。然后在`Windows Terminal`的字体中选择`FiraCode NF`字体即可。）
+为了测试是否成功，可以到[这个网址](www.nerdfonts.com/cheat-sheet)，点击 `Show All Icons` 按钮，选择一个图标，点击右上角的 `Copy Icon`，然后粘贴到命令行里即可。
 - 保证所需的目录干净
 对于Linux和MacOS系统，删除`~/.local/share/nvim`这个文件夹；对于Windows系统，删除`~\AppData\Local\nvim`和`~\AppData\Local\nvim-data`。
 - 如果要用到`Telescope`的模糊搜索，还要提前安装`ripgrep`。具体安装方法可以参考官方文档[BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep)。
@@ -68,12 +76,27 @@ cp examples/chadrc.lua lua/custom/chadrc.lua
 
 ## 安装Treesitter解析器
 [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)提供了代码高亮、缩进和折叠等功能。
-`nvim-treesitter`会默认安装`c`语言的解析器，而这个解析器需要先有`c`编译器,这也是为什么对于`Windows`系统要提前安装`mingw`，即需要neovim能提前知道`c`编译器的所在，对于Linux系统就是`gcc`、`cc`、`cl`等。
+`nvim-treesitter`的正常运行需要满足以下条件：
+- 在环境变量中能找到`tar`和`curl`命令（或者`git`命令）
+- 在环境变量中有`C`编译器和`libstdc++`
+在`Linux`系统中，使用`sudo apt install build-essential`即可安装相应依赖，在`Windows`系统中，可查看[该详细教程](https://github.com/nvim-treesitter/nvim-treesitter/wiki/Windows-support)
+
 
 安装解析器使用以下命令（以`Python`为例）：
 ```sh
 :TSInstall python
 ```
+
+## 安装Node.JS
+`Node.js`对于后面的`LSP`是有用的，比如安装`pyright`时需要用到`npm`，所以这里也可以事先安装。
+安装包在[这里](https://nodejs.org/zh-cn/)。
+对于`Ubuntu`等`Linux`系统，也可以使用包管理器来安装，教程见[这里](https://nodejs.org/zh-cn/download/package-manager/)。
+以`Ubuntu`为例：
+```sh
+curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
 
 # Lua简明教程
 ## Print
@@ -647,3 +670,28 @@ end
     },
 ```
 然后执行`:MasonInstallAll`（注意该命令是`NvChad`的定制命令，不是官方原有命令）。
+
+
+## DAP
+使用`Debug Adapter Protocol`（`DAP`）需要安装一各特定语言的`Debug Adapter`。
+`python`的话就是使用`debugpy`。
+### 使用conda安装debugpy
+正常安装`miniconda`或者`ananconda`后，激活某个虚拟环境，然后安装：
+```python
+pip install debugpy
+```
+然后在`custom/plugins/dap/dap-python.lua`中使用`nvim-dap-python`的默认配置即可：
+```lua
+require('dap-python').setup('python')
+```
+
+### 在venv中debugpy
+```sh
+sudo apt install python3.10-venv
+python -m venv path/to/virtualenvs/debugpy
+path/to/virtualenvs/debugpy/bin/python -m pip install debugpy
+```
+然后在`custom/plugins/dap/dap-python.lua`中将该路径配置进去：
+```lua
+require('dap-python').setup('path/to/virtualenvs/debugpy/bin/python')
+```
