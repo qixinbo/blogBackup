@@ -15,6 +15,8 @@ date: 2022-8-11
 # 安装
 ## 前提条件
 在使用`NvChad`之前，要有一些前提依赖：
+- 终端
+即`Neovim`运行的环境，`Linux`系统推荐[`Terminator`](https://github.com/gnome-terminator/terminator)，`Windows`推荐[`Windows Terminal`](https://github.com/microsoft/terminal)。
 - `Neovim 0.7.2`及以上
 安装教程在[这里](https://github.com/neovim/neovim/wiki/Installing-Neovim)。
 - 字体及图标：
@@ -672,8 +674,11 @@ end
 然后执行`:MasonInstallAll`（注意该命令是`NvChad`的定制命令，不是官方原有命令）。
 
 
-## DAP
-使用`Debug Adapter Protocol`（`DAP`）需要安装一各特定语言的`Debug Adapter`。
+## 代码调试DAP
+`DAP`，即`Debug Adapter Protocol`，是`neovim`最常用的代码调试工具。
+不过当前的`NvChad`并没有内置`DAP`，据说可能在`NvChad 2.0`中会加入。
+当前可以参考我的配置，在[这里](https://github.com/qixinbo/NvChad/tree/custom/lua/custom)。
+使用DAP`需要安装一各特定语言的`Debug Adapter`。
 `python`的话就是使用`debugpy`。
 ### 使用conda安装debugpy
 正常安装`miniconda`或者`ananconda`后，激活某个虚拟环境，然后安装：

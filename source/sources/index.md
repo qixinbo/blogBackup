@@ -27,6 +27,7 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | books43](http://www.books43.com/)
 
 # Widgets
+- [promptoMANIA | AI art community with an online prompt builder](https://promptomania.com/)
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
 - 英语语法检查 [Ginger](http://www.gingersoftware.com/zh), [Grammarly](https://www.grammarly.com/)
 - [英语前后词查询 | linggle](http://linggle.com/)

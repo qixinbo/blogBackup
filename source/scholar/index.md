@@ -46,6 +46,10 @@ date: 2016-01-13 08:41:43
 - [医学图像开源数据集汇总（二）](https://mp.weixin.qq.com/s/KirzDH92S8Eog7f4AY53QQ)
 
 # 好文推荐
+- [时序异常检测综述整理](https://mp.weixin.qq.com/s/KNeSAPx-6B-wo5jzCM17YQ)
+- [时序资料汇总：模型和常见库对比](https://mp.weixin.qq.com/s/rb6iAVV1Tx4F_z9PU2Aeeg)
+- [计算机视觉深度学习训练推理框架](https://mp.weixin.qq.com/s/bXsSdQMsLTCQCSkXNrNPow)
+- [2022年竞赛打榜，神经网络还是干不过树模型？？](https://mp.weixin.qq.com/s/tnbw-DwMUg0uCck1VRs9ZQ)
 - [统计学和机器学习到底有什么区别？](https://mp.weixin.qq.com/s/gUJIddpounyBvCw6XndMiA)
 - [深度思考AI部署以及工业落地之路](https://mp.weixin.qq.com/s/Nz5RAMBnQ9gbuwOK5CwpPA)
 - [热流科学前沿与PINN的研究与应用](https://aistudio.baidu.com/aistudio/education/lessonvideo/2687762/1)
@@ -64,7 +68,7 @@ date: 2016-01-13 08:41:43
 - [图像分割损失函数最全面、最详细总结，含代码](https://mp.weixin.qq.com/s/8oKiVRjtPQIH1D2HltsREQ)
 - [mAP (mean Average Precision) might confuse you!](https://towardsdatascience.com/map-mean-average-precision-might-confuse-you-5956f1bfa9e2)
 - [机器学习中的评价指标](https://zhuanlan.zhihu.com/p/110399695)
-- [目标检测中的评价指标有哪些？](https://mp.weixin.qq.com/s?__biz=MzIzNDM2OTMzOQ==&mid=2247486555&idx=1&sn=711410c13daacdc78b6f5146676fe917&chksm=e8f6340fdf81bd1915a9180515f0d88df645b0e8936aa8612fdbb4049bdb52d98fc74fc6c7a7&mpshare=1&scene=1&srcid=0531ZksBaI3cWyT2t2lPm1Yn&sharer_sharetime=1590911545844&sharer_shareid=a4ed7bb9de5f5fa82fddfda288dcd838&exportkey=AZyqLRjioupDw9TGcS3rD5U%3D&pass_ticket=IT3iUo5fw6xq6mGacL%2FPCW%2FxuOasy9Gg0iSUaQhcC3eXD6Rhs6NyQLMQUKrrRu3w#rd)
+- [目标检测中的评价指标有哪些？](https://mp.weixin.qq.com/s/KPSI_X9bqbVXi8Spw1EebA)
 - [CNN 入门讲解：什么是标准化(Normalization)？](https://zhuanlan.zhihu.com/p/35597976)
 - [transforms.ToTensor()与transforms.Normalize()函数解析](https://blog.csdn.net/weixin_43593330/article/details/107543737)
 - [pytorch tensor 操作：合并、分割、维度变换](https://alyssaasa.github.io/posts/309/)
