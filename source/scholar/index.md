@@ -36,6 +36,8 @@ date: 2016-01-13 08:41:43
 ## 工业相关
 - [10个开源工业检测数据集汇总](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247593671&idx=1&sn=b3a39c9ff12f13e867bf7b64402b9b16&chksm=ec1d833edb6a0a28313c257f76744e4cf3deab417d8b7b6e93ca6df53092ebe7eb366e585c02&scene=21#wechat_redirect)
 - [表面缺陷检测数据集汇总及其相关项目推荐](https://mp.weixin.qq.com/s/XqL9iOyqX-_P_1e6tUPHVA)
+- [《百度飞桨案例集》完整版](https://pan.baidu.com/s/1mbmBo7u-odVvo0vhp5zxrg?pwd=padd)
+- [飞桨智能制造行业系列课程](https://aistudio.baidu.com/aistudio/course/introduce/26235)
 
 ## Bio相关
 - [DeepCell Datasets](https://datasets.deepcell.org/)
