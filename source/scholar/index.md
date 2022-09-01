@@ -92,6 +92,7 @@ date: 2016-01-13 08:41:43
 - [Python getattr() 使用方法及示例](https://www.cainiaojc.com/python/python-methods-built-in-getattr.html)
 
 ## 其他
+- [Git教材](https://git-scm.com/book/zh/v2)
 - [图文详解基于角色的权限控制模型RBAC](https://juejin.cn/post/6844904004179230733)
 - [如何给开源项目贡献代码](https://gist.github.com/zxhfighter/62847a087a2a8031fbdf)
 - [Github进行fork后如何与原仓库同步](https://github.com/selfteaching/the-craft-of-selfteaching/issues/67)
