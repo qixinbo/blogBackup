@@ -5,6 +5,14 @@ categories: coding
 date: 2021-3-25
 ---
 
+# 说明
+在最近一次在不同电脑间迁移时，使用了[`Vercel`](https://vercel.com/)这个站点托管工具，有如下几个优点：
+- 完全不需要像下面那样在本地搭建开发环境，只需`git clone`源码到本地即可
+- 对源码的更改会自动触发其对站点的部署
+- 对大陆的访问友好，速度快
+
+具体的使用教程可以参考[该博文](https://www.zywvvd.com/notes/hexo/website/31-vercel/vercel-deploy/)。
+
 # 简介
 该博客是基于hexo搭建的，部署在github pages里，用netlify加速。之前一直用自己的笔记本写博客，现在需要换用另一台电脑，因此需要在新电脑上将环境重新搭建一遍，顺便对hexo及其next主题进行升级。
 
