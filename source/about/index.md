@@ -13,7 +13,7 @@ Xin Bo Qi
 
 # Skills:
 - Programming languages: C/C++, Mathematica, Python
-- Major: Modeling/Simulation, Machine Learning, Materials Informatics
+- Major: Modeling/Simulation, Machine Learning
 - OS Platform: Linux, Windows
 
 # Contact details
