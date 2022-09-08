@@ -17,6 +17,8 @@ date: 2016-01-13 08:41:43
 - [Y. Chen, D.Z. Li, B. Billia, H. Nguyen-Thi, X.B. Qi, N.M. Xiao. Quantitative phase-field simulation of dendritic equiaxed growth and comparison with in situ observation on Al-4wt.% Cu alloy by means of synchrotron X-ray radiography, ISIJ Int. 54 (2014) 445-451. (IF: 0.96)](https://www.jstage.jst.go.jp/article/isijinternational/54/2/54_445/_article)
 
 # 实用工具
+- [Text Renderer](https://github.com/Sanster/text_renderer)
+- [PPOCRLabel | 适用于OCR领域的半自动化图形标注工具](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.6/PPOCRLabel/README_ch.md)
 - [交互式分割标注软件EISeg](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.5/EISeg)
 - [Paddle模型自动化压缩工具ACT](https://github.com/PaddlePaddle/PaddleSlim/tree/develop/example/auto_compression)
 - [机器之心SOTA模型](https://www.jiqizhixin.com/sota)
@@ -92,6 +94,7 @@ date: 2016-01-13 08:41:43
 - [Python getattr() 使用方法及示例](https://www.cainiaojc.com/python/python-methods-built-in-getattr.html)
 
 ## 其他
+- [一文看懂：什么是数据库、数据湖、数据仓库、湖仓一体、智能湖仓？](https://www.smartcity.team/consultingskills/experience/shujukuyushujuhu/)
 - [Git教材](https://git-scm.com/book/zh/v2)
 - [图文详解基于角色的权限控制模型RBAC](https://juejin.cn/post/6844904004179230733)
 - [如何给开源项目贡献代码](https://gist.github.com/zxhfighter/62847a087a2a8031fbdf)
