@@ -29,6 +29,7 @@ date: 2016-01-13 08:41:43
 # 数据集
 - [Datasets collection in PapersWithCode](https://paperswithcode.com/datasets)
 - [Datasets collection in Hugging Face](https://huggingface.co/datasets)
+- [飞桨AI Studio数据集](https://aistudio.baidu.com/aistudio/datasetoverview)
 - [极市数据集](https://www.cvmart.net/dataSets)
 - [15个目标检测开源数据集汇总](https://mp.weixin.qq.com/s?src=11&timestamp=1658989596&ver=3947&signature=NtlGbvFYQVE2Kw8IJATxSHvHXlPERhycuY2*hkQPBW7jdSCS3UciImHUbYgWvXbUV5M3EenkkDOB9LLFhwNhSOrMWYkA7rKZvu91JhG9Ny2A22hFPLJThBc9pUf5kMeu&new=1)
 - [目标检测开源数据集汇总（二）](https://mp.weixin.qq.com/s?__biz=MzI5MDUyMDIxNA==&mid=2247610614&idx=1&sn=1cbe29362a8acd5bfeb93a5f1af936f4&chksm=ec1ddd0fdb6a541917b7cd0cbfe5eba203adca4e4da0d66918808471456720d5ca0bb921291e&mpshare=1&scene=1&srcid=0711hc2xY8b9IjKqB4JwZOid&sharer_sharetime=1657517713734&sharer_shareid=19f9b91729f0d36195fb60fbcb61cd8c&exportkey=AeN0MiUrNTySwbo1Sej0Nvg%3D&acctmode=0&pass_ticket=UC%2Bw7bwSVCHsfQSt97%2FbZtYw0ehuxmj5O%2FPnvOZ8NZp0qTg74VJC8xRRd6raL93h&wx_header=0#rd)
