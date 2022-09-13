@@ -67,6 +67,10 @@ date: 2016-01-13 10:37:25
 - [PowerPoint插件](http://islide.cc/)
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
 
+# 仓库精选
+- [DataEase | 人人可用的开源数据可视化分析工具](https://github.com/dataease/dataease)
+- [Sunmao | A Framework for Developing Low-code Tool](https://github.com/smartxworks/sunmao-ui)
+
 
 ## Neovim
 - [neovimcraft: curated list of neovim plugins](https://neovimcraft.com/)
