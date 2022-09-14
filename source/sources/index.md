@@ -22,7 +22,6 @@ date: 2016-01-13 10:37:25
 - [CordCloud](https://www.cordcloud.site/auth/register1?code=pfeoniCxO2mAJoy5CrwtKFPvYwEn5rDj)
 - [加速度](https://jsdcloud.xyz/auth/register)
 - [u9un](https://cp.u9un.com)
-- [百度云满速下载 | 百度云直链](http://free.pcs.huangguofeng.com/)
 - [电子书下载 | Library Genesis](http://gen.lib.rus.ec/)
 - [电子书下载 | books43](http://www.books43.com/)
 
