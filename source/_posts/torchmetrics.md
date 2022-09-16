@@ -1,5 +1,5 @@
 ---
-title: YOLO系列算法原理及极简代码解析
+title: PyTorch指标计算库TorchMetrics详解
 tags: [PyTorch]
 categories: machine learning 
 date: 2022-9-17
