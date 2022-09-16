@@ -67,8 +67,11 @@ date: 2016-01-13 10:37:25
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
 
 # 仓库精选
+- [jsPlumb | Visual connectivity for webapps](https://github.com/jsplumb/jsplumb)
+- [jsPlumb中文教程](https://github.com/wangduanduan/jsplumb-chinese-tutorial)
 - [DataEase | 人人可用的开源数据可视化分析工具](https://github.com/dataease/dataease)
 - [Sunmao | A Framework for Developing Low-code Tool](https://github.com/smartxworks/sunmao-ui)
+- [Rancher | Complete container management platform](https://github.com/rancher/rancher)
 
 
 ## Neovim
