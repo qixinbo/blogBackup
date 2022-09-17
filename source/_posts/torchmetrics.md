@@ -203,4 +203,21 @@ print(metric_collection(preds, target))
  'Recall': tensor(0.1111)}
 ```
 使用`MetricCollection`对象的另一个好处是，它将自动尝试通过寻找共享相同基础指标状态的指标组来减少所需的计算。如果找到了这样的指标组，实际上只有其中一个指标被更新，而更新的状态将被广播给组内的其他指标。在上面的例子中，与禁用该功能相比，这将导致计算成本降低2-3倍。然而，这种速度的提高伴随着前期的固定成本，即在第一次更新后必须确定状态组。这个开销可能会大大高于在很低的步数（大约100步）下获得的速度提升，但仍然会导致超过这个步数的整体速度提升。如果事先知道分组，也可以手动设置，以避免动态搜索的这种额外成本。关于这个主题的更多信息，请看该类文档中的`compute_groups`参数。
+# 指标可微性
+如果在指标计算中涉及的所有计算都是可微的，那么该指标就支持反向传播。所有的类形式的指标都有一个属性`is_differentiable`，它指明该指标是否是可微的。
+然而，请注意，一旦缓存的状态从计算图中分离出来，它就不能被反向传播。如果不分离的话就意味着每次更新调用都要存储计算图，这可能会导致内存不足的错误。具体到实际操作时，意味着：
+```python
+MyMetric.is_differentiable  # returns True if metric is differentiable
+metric = MyMetric()
+val = metric(pred, target)  # this value can be back-propagated
+val = metric.compute()  # this value cannot be back-propagated
+```
+# 超参数优化
+如果想直接优化一个指标，它需要支持反向传播（见上节）。然而，如果只是想对使用的指标进行超参数调整，此时如果不确定该指标应该被最大化还是最小化，那么可以参考指标类的`higher_is_better`属性：
+```python
+# returns True because accuracy is optimal when it is maximized
+torchmetrics.Accuracy.higher_is_better
 
+# returns False because the mean squared error is optimal when it is minimized
+torchmetrics.MeanSquaredError.higher_is_better
+```
