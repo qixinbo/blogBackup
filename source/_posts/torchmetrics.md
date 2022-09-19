@@ -229,8 +229,8 @@ torchmetrics.MeanSquaredError.higher_is_better
 $$
 \text{MSE} = \frac{1}{N}\sum_i^N(y_i - \hat{y_i})^2
 $$
-其中，$y$是目标值的张量，而$hat{y}$是预测值的张量。
-代码：
+其中，$y$是目标值的张量，而$\hat{y}$是预测值的张量。
+示例代码：
 ```python
 import torch
 from torchmetrics import MeanSquaredError
@@ -244,4 +244,41 @@ mean_squared_error(preds, target)
 输出为：
 ```python
 tensor(0.2500)
+```
+### MSLE
+均方对数误差`MSLE`，即`mean squared logarithmic error`，计算公式为：
+$$
+\text{MSLE} = \frac{1}{N}\sum_i^N (\log_e(1 + y_i) - \log_e(1 + \hat{y_i}))^2
+$$
+示例代码：
+```python
+from torchmetrics import MeanSquaredLogError
+target = torch.tensor([2.5, 5, 4, 8])
+preds = torch.tensor([3, 5, 2.5, 7])
+mean_squared_log_error = MeanSquaredLogError()
+mean_squared_log_error(preds, target)
+```
+输出为：
+```python
+tensor(0.0397)
+```
+### MAE
+平均绝对误差`MAE`，即`Mean Absolute Error`，计算公式为：
+$$
+\text{MAE} = \frac{1}{N}\sum_i^N | y_i - \hat{y_i} |
+$$
+示例代码：
+```python
+import torch
+from torchmetrics import MeanAbsoluteError
+
+target = torch.tensor([3.0, -0.5, 2.0, 7.0])
+preds = torch.tensor([2.5, 0.0, 2.0, 8.0])
+
+mean_absolute_error = MeanAbsoluteError()
+mean_absolute_error(preds, target)
+```
+输出为：
+```python
+tensor(0.5000)
 ```
