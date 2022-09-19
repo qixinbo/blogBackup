@@ -221,3 +221,27 @@ torchmetrics.Accuracy.higher_is_better
 # returns False because the mean squared error is optimal when it is minimized
 torchmetrics.MeanSquaredError.higher_is_better
 ```
+
+# 常用指标
+## 回归问题
+### MSE
+均方误差`MSE`，即`mean squared error`，计算公式为：
+$$
+\text{MSE} = \frac{1}{N}\sum_i^N(y_i - \hat{y_i})^2
+$$
+其中，$y$是目标值的张量，而$hat{y}$是预测值的张量。
+代码：
+```python
+import torch
+from torchmetrics import MeanSquaredError
+
+target = torch.tensor([0., 1, 2, 3])
+preds = torch.tensor([0., 1, 2, 2])
+
+mean_squared_error = MeanSquaredError()
+mean_squared_error(preds, target)
+```
+输出为：
+```python
+tensor(0.2500)
+```
