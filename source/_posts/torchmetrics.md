@@ -282,3 +282,33 @@ mean_absolute_error(preds, target)
 ```python
 tensor(0.5000)
 ```
+
+### MAPE
+平均绝对百分比误差`MAPE`，即`Mean Absolute Percentage Error`，计算公式为：
+$$
+\text{MAPE} = \frac{1}{n}\sum_{i=1}^n\frac{|   y_i - \hat{y_i} |}{\max(\epsilon, | y_i |)}
+$$
+示例代码：
+```python
+from torchmetrics import MeanAbsolutePercentageError
+target = torch.tensor([1, 10, 1e6])
+preds = torch.tensor([0.9, 15, 1.2e6])
+mean_abs_percentage_error = MeanAbsolutePercentageError()
+mean_abs_percentage_error(preds, target)
+>>> tensor(0.2667)
+```
+### WMAPE
+加权绝对百分比误差`WMAPE`，即`Weighted Mean Absolute Percentage Error`，计算公式为：
+$$
+\text{WMAPE} = \frac{\sum_{t=1}^n | y_t - \hat{y}_t | }{\sum_{t=1}^n |y_t| }
+$$
+其与`MAPE`的区别可以参考[这篇文章](https://blog.csdn.net/zpf336/article/details/104374570)。
+示例代码：
+```python
+from torchmetrics import WeightedMeanAbsolutePercentageError
+target = torch.tensor([1, 10, 1e6])
+preds = torch.tensor([0.9, 15, 1.2e6])
+mean_abs_percentage_error = WeightedMeanAbsolutePercentageError()
+mean_abs_percentage_error(preds, target)
+>>> tensor(0.2000)
+```
