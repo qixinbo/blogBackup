@@ -298,7 +298,7 @@ mean_abs_percentage_error(preds, target)
 >>> tensor(0.2667)
 ```
 ### WMAPE
-加权绝对百分比误差`WMAPE`，即`Weighted Mean Absolute Percentage Error`，计算公式为：
+加权平均绝对百分比误差`WMAPE`，即`Weighted Mean Absolute Percentage Error`，计算公式为：
 $$
 \text{WMAPE} = \frac{\sum_{t=1}^n | y_t - \hat{y}_t | }{\sum_{t=1}^n |y_t| }
 $$
@@ -311,4 +311,144 @@ preds = torch.tensor([0.9, 15, 1.2e6])
 mean_abs_percentage_error = WeightedMeanAbsolutePercentageError()
 mean_abs_percentage_error(preds, target)
 >>> tensor(0.2000)
+```
+### SMAPE
+对称平均绝对百分比误差`SMAPE`，即`symmetric mean absolute percentage error`，计算公式为：
+$$
+\text{SMAPE} = \frac{2}{n}\sum_1^n max(\frac{|   y_i - \hat{y_i} |}{| y_i | + | \hat{y_i} |, \epsilon})
+$$
+示例代码：
+```python
+from torchmetrics import SymmetricMeanAbsolutePercentageError
+target = tensor([1, 10, 1e6])
+preds = tensor([0.9, 15, 1.2e6])
+smape = SymmetricMeanAbsolutePercentageError()
+smape(preds, target)
+>>> tensor(0.2290)
+```
+### 余弦相似度
+余弦相似度，即`Cosine Similarity`，其含义可以参考其[维基百科](https://zh.wikipedia.org/zh-cn/%E4%BD%99%E5%BC%A6%E7%9B%B8%E4%BC%BC%E6%80%A7)：
+> 余弦相似性通过测量两个向量的夹角的余弦值来度量它们之间的相似性。0度角的余弦值是1，而其他任何角度的余弦值都不大于1；并且其最小值是-1。从而两个向量之间的角度的余弦值确定两个向量是否大致指向相同的方向。两个向量有相同的指向时，余弦相似度的值为1；两个向量夹角为90°时，余弦相似度的值为0；两个向量指向完全相反的方向时，余弦相似度的值为-1。这结果是与向量的长度无关的，仅仅与向量的指向方向相关。余弦相似度通常用于正空间，因此给出的值为0到1之间。
+> 注意这上下界对任何维度的向量空间中都适用，而且余弦相似性最常用于高维正空间。例如在信息检索中，每个词项被赋予不同的维度，而一个文档由一个向量表示，其各个维度上的值对应于该词项在文档中出现的频率。余弦相似度因此可以给出两篇文档在其主题方面的相似度。
+> 另外，它通常用于文本挖掘中的文件比较。此外，在数据挖掘领域中，会用到它来度量集群内部的凝聚力。
+
+计算公式为：
+$$
+cos_{sim}(x,y) = \frac{x \cdot y}{||x|| \cdot ||y||} = \frac{\sum_{i=1}^n x_i y_i}{\sqrt{\sum_{i=1}^n x_i^2}\sqrt{\sum_{i=1}^n y_i^2}}
+$$
+具体计算过程可以参考[该文章](https://clay-atlas.com/blog/2020/03/26/cosine-similarity-text-count/)。
+
+示例代码：
+```python
+from torchmetrics import CosineSimilarity
+target = torch.tensor([[0, 1], [1, 1]])
+preds = torch.tensor([[0, 1], [0, 1]])
+# reduction: how to reduce over the batch dimension using 'sum', 'mean' or 'none' (taking the individual scores)
+cosine_similarity = CosineSimilarity(reduction = 'mean')
+cosine_similarity(preds, target)
+>>> tensor(0.8536)
+```
+### 可解释方差
+可解释方差，即`explained variance`，解释可参考[维基百科](https://zh.wikipedia.org/zh-cn/%E5%8F%AF%E8%A7%A3%E9%87%8A%E5%8F%98%E5%BC%82)，计算公式为：
+$$
+\text{ExplainedVariance} = 1 - \frac{\text{Var}(y - \hat{y})}{\text{Var}(y)}
+$$
+示例代码为：
+```python
+from torchmetrics import ExplainedVariance
+target = torch.tensor([3, -0.5, 2, 7])
+preds = torch.tensor([2.5, 0.0, 2, 8])
+# multioutput defines aggregation in the case of multiple output scores. 
+explained_variance = ExplainedVariance(multioutput='uniform_average')
+explained_variance(preds, target)
+>>> tensor(0.9572)
+```
+### KL散度
+KL散度，即`KL divergence`，解释可见[这里](https://zhuanlan.zhihu.com/p/39682125)，计算公式为：
+$$
+D_{KL}(P||Q) = \sum_{x\in\mathcal{X}} P(x) \log\frac{P(x)}{Q(x)}
+$$
+示例代码为：
+```python
+from torchmetrics import KLDivergence
+p = torch.tensor([[0.36, 0.48, 0.16]])
+q = torch.tensor([[1/3, 1/3, 1/3]])
+kl_divergence = KLDivergence()
+kl_divergence(p, q)
+>>> tensor(0.0853)
+```
+### Tweedie偏差分数
+Tweedie偏差分数，即`Tweedie Deviance Score`，可参考[这里的解释](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_tweedie_deviance.html)，计算公式为：
+$$
+        deviance\_score(\hat{y},y) =
+        \begin{cases}
+        (\hat{y} - y)^2, & \text{for }p=0\\
+        2 * (y * log(\frac{y}{\hat{y}}) + \hat{y} - y),  & \text{for }p=1\\
+        2 * (log(\frac{\hat{y}}{y}) + \frac{y}{\hat{y}} - 1),  & \text{for }p=2\\
+        2 * (\frac{(max(y,0))^{2 - p}}{(1 - p)(2 - p)} - \frac{y(\hat{y})^{1 - p}}{1 - p} + \frac{(
+            \hat{y})^{2 - p}}{2 - p}), & \text{otherwise}
+        \end{cases}
+$$
+示例代码为：
+```python
+from torchmetrics import TweedieDevianceScore
+targets = torch.tensor([1.0, 2.0, 3.0, 4.0])
+preds = torch.tensor([4.0, 3.0, 2.0, 1.0])
+deviance_score = TweedieDevianceScore(power=2)
+deviance_score(preds, targets)
+>>> tensor(1.2083)
+```
+### Pearson相关性系数
+Pearson相关性系数，即`Pearson Correlation Coefficient`，用于度量两组数据的变量X和Y之间的线性相关的程度，具体解释见[这里](https://zh.wikipedia.org/zh-cn/%E7%9A%AE%E5%B0%94%E9%80%8A%E7%A7%AF%E7%9F%A9%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0)，计算公式为：
+$$
+P_{corr}(x,y) = \frac{cov(x,y)}{\sigma_x \sigma_y}
+$$
+示例代码为：
+```python
+from torchmetrics import PearsonCorrCoef
+target = torch.tensor([3, -0.5, 2, 7])
+preds = torch.tensor([2.5, 0.0, 2, 8])
+pearson = PearsonCorrCoef()
+pearson(preds, target)
+>>> tensor(0.9849)
+```
+### Spearman相关性系数
+Spearman相关性系数，即`Spearman's rank correlation coefficient`，斯皮尔曼相关系数被定义成等级变量之间的皮尔逊相关系数，具体解释见[这里](https://zh.wikipedia.org/zh-cn/%E6%96%AF%E7%9A%AE%E5%B0%94%E6%9B%BC%E7%AD%89%E7%BA%A7%E7%9B%B8%E5%85%B3%E7%B3%BB%E6%95%B0)，计算公式为：
+$$
+r_s = = \frac{cov(rg_x, rg_y)}{\sigma_{rg_x} * \sigma_{rg_y}}
+$$
+示例代码为：
+```python
+from torchmetrics import SpearmanCorrCoef
+target = torch.tensor([3, -0.5, 2, 7])
+preds = torch.tensor([2.5, 0.0, 2, 8])
+spearman = SpearmanCorrCoef()
+spearman(preds, target)
+>>> tensor(1.0000)
+```
+### 决定系数
+决定系数，即$R^2$、`Coefficient of determination`，在统计学中用于度量因变量的变异中可由自变量解释部分所占的比例，以此来判断回归模型的解释力。具体解释见[这里](https://zh.wikipedia.org/zh-cn/%E5%86%B3%E5%AE%9A%E7%B3%BB%E6%95%B0)。计算公式为：
+$$
+R^2 = 1 - \frac{SS_{res}}{SS_{tot}}
+$$
+假设一数据集包括$y_1,...,y_n$共$n$个观察值，相对应的模型预测值分别为$f_1,...,f_n$。定义残差$e_i = y_i − f_i$，平均观察值为：
+$$
+\overline{y}=\frac{1}{n}\sum_{i=1}^n y_i
+$$
+于是得到总平方和为：
+$$
+SS_{tot}=\sum_i (y_i - \bar{y})^2
+$$
+残差平方和为：
+$$
+SS_{res}=\sum_i (y_i - \hat{y}_i)^2
+$$
+示例代码为：
+```python
+from torchmetrics import R2Score
+target = torch.tensor([3, -0.5, 2, 7])
+preds = torch.tensor([2.5, 0.0, 2, 8])
+r2score = R2Score()
+r2score(preds, target)
+>>> tensor(0.9486)
 ```
