@@ -462,6 +462,8 @@ r2score(preds, target)
 [【机器学习】逻辑回归（非常详细）](https://zhuanlan.zhihu.com/p/74874291)
 [二分类、多分类、多标签分类的基础、原理、算法和工具](https://zhuanlan.zhihu.com/p/270458779)
 [多分类模型Accuracy, Precision, Recall和F1-score的超级无敌深入探讨](https://zhuanlan.zhihu.com/p/147663370)
+
+表格汇总：
 | Type      | preds shape | preds dtype | target shape | target dtype |
 | ----------- | ----------- | ----------- | ----------- |----------- |
 | 二分类      | (N,)       |  float | (N,) | 二值，即0或1 |
