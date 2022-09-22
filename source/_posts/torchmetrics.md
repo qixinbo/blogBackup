@@ -463,19 +463,14 @@ r2score(preds, target)
 [二分类、多分类、多标签分类的基础、原理、算法和工具](https://zhuanlan.zhihu.com/p/270458779)
 [多分类模型Accuracy, Precision, Recall和F1-score的超级无敌深入探讨](https://zhuanlan.zhihu.com/p/147663370)
 
-表格汇总：
-| 标题1 | 标题2 | 标题3 |
-| :------ | :------ | :------ |
-| 文本好短 | 文本不短也不长 | 文本好长文本好长文本好长 |
-| 文本好长文本好长文本好长 | 文本好短 | 文本不短也不长 |
 ```python
-| Type      | preds shape | preds dtype | target shape | target dtype |
-| ----------- | ----------- | ----------- | ----------- |----------- |
-| 二分类      | (N,)       |  float | (N,) | 二值，即0或1 |
-| 多分类      | (N,)        | int | (N,) | int |
+| Type                                 | preds shape | preds dtype | target shape | target dtype |
+| -----------                          | ----------- | ----------- | ----------- |----------- |
+| 二分类                               | (N,)       |  float | (N,) | 二值，即0或1 |
+| 多分类                               | (N,)        | int | (N,) | int |
 | 带概率`p`或对数几率`logit`（$\text{logit}=ln\frac{p}{1-p}$）的多分类 | (N,C)        | float | (N,) | int |
-| 多标签      | (N,...)    | float | (N,...) | 二值 |
-| 多维多分类      | (N,...)   | int | (N,...) | int |
+| 多标签                               | (N,...)    | float | (N,...) | 二值 |
+| 多维多分类                           | (N,...)   | int | (N,...) | int |
 | 带概率`p`或对数几率`logit`的多维多分类 | (N,C,...)  | float | (N,...) | int |
 ```
 以下是一些例子：
