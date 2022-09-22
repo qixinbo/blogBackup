@@ -452,3 +452,276 @@ r2score = R2Score()
 r2score(preds, target)
 >>> tensor(0.9486)
 ```
+
+## 分类问题
+查看用于分类问题的各种指标之前，先看一下分类问题中指标计算时所需要的输入（包括预测值`predictions`和目标值`targets`）的形状和数据类型，其中`N`是批处理大小，`C`是类别数目。
+一些背景资料：
+[Logit](https://en.wikipedia.org/wiki/Logit)
+[What does the logit value actually mean?](https://stats.stackexchange.com/questions/52825/what-does-the-logit-value-actually-mean)
+[[原创] 用人话解释机器学习中的Logistic Regression（逻辑回归）](https://www.codelast.com/%E5%8E%9F%E5%88%9B-%E7%94%A8%E4%BA%BA%E8%AF%9D%E8%A7%A3%E9%87%8A%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84logistic-regression%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/)
+[【机器学习】逻辑回归（非常详细）](https://zhuanlan.zhihu.com/p/74874291)
+[二分类、多分类、多标签分类的基础、原理、算法和工具](https://zhuanlan.zhihu.com/p/270458779)
+[多分类模型Accuracy, Precision, Recall和F1-score的超级无敌深入探讨](https://zhuanlan.zhihu.com/p/147663370)
+| Type      | preds shape | preds dtype | target shape | target dtype |
+| ----------- | ----------- | ----------- | ----------- |----------- |
+| 二分类      | (N,)       |  float | (N,) | 二值，即0或1 |
+| 多分类      | (N,)        | int | (N,) | int |
+| 带概率`p`或对数几率`logit`（$\text{logit}=ln\frac{p}{1-p}$）的多分类 | (N,C)        | float | (N,) | int |
+| 多标签      | (N,...)    | float | (N,...) | 二值 |
+| 多维多分类      | (N,...)   | int | (N,...) | int |
+| 带概率`p`或对数几率`logit`的多维多分类 | (N,C,...)  | float | (N,...) | int |
+
+以下是一些例子：
+```python
+# Binary inputs
+binary_preds  = torch.tensor([0.6, 0.1, 0.9])
+binary_target = torch.tensor([1, 0, 2])
+
+# Multi-class inputs
+mc_preds  = torch.tensor([0, 2, 1])
+mc_target = torch.tensor([0, 1, 2])
+
+# Multi-class inputs with probabilities
+mc_preds_probs  = torch.tensor([[0.8, 0.2, 0], [0.1, 0.2, 0.7], [0.3, 0.6, 0.1]])
+mc_target_probs = torch.tensor([0, 1, 2])
+
+# Multi-label inputs
+ml_preds  = torch.tensor([[0.2, 0.8, 0.9], [0.5, 0.6, 0.1], [0.3, 0.1, 0.1]])
+ml_target = torch.tensor([[0, 1, 1], [1, 0, 0], [0, 0, 0]])
+```
+在某些情况下，可能有看起来是（多维）多类的输入，但实际上是二分类/多标签的输入——例如，如果预测和目标都是整型张量。或者相反的情形，想把二分类/多标签输入当作目前只显示二类的（多维）多类输入。
+对于这些情况，在设定指标时，需要使用`multiclass`参数。
+以`StatScores`指标为例看一下怎样使用这个参数。
+首先，考虑有2个类别的标签预测的情况：
+```python
+from torchmetrics.functional import stat_scores
+
+# These inputs are supposed to be binary, but appear as multi-class
+preds  = torch.tensor([0, 1, 0])
+target = torch.tensor([1, 1, 0])
+```
+由下面可以看出，默认是处理成“多分类”问题：
+```python
+stat_scores(preds, target, reduce='macro', num_classes=2)
+>>> tensor([[1, 1, 1, 0, 1],
+        [1, 0, 1, 1, 2]])
+```
+此时需要设定`multiclass=False`来使其处理成二分类问题。
+```python
+stat_scores(preds, target, reduce='macro', num_classes=1, multiclass=False)
+>>> tensor([[1, 0, 1, 1, 2]])
+```
+上述处理方式跟事先将预测值的类型转为`float`的效果是相同的：
+```python
+stat_scores(preds.float(), target, reduce='macro', num_classes=1)
+>>> tensor([[1, 0, 1, 1, 2]])
+```
+接下来考虑相反的情形：看起来像是二分类（因为预测值是`float`），但实际想处理成当前只有2类的多分类问题：
+```python
+preds  = torch.tensor([0.2, 0.7, 0.3])
+target = torch.tensor([1, 1, 0])
+```
+通过设置`multiclass=True`来实现正确的效果：
+```python
+stat_scores(preds, target, reduce='macro', num_classes=1)
+>>> tensor([[1, 0, 1, 1, 2]])
+stat_scores(preds, target, reduce='macro', num_classes=2, multiclass=True)
+>>> tensor([[1, 1, 1, 0, 1],
+        [1, 0, 1, 1, 2]])
+```
+### 混淆矩阵
+混淆矩阵，即`Confusion Matrix`，矩阵的每一列代表一个类的实例预测，而每一行表示一个实际的类的实例。之所以如此命名，是因为通过这个矩阵可以方便地看出机器是否将两个不同的类混淆了（比如说把一个类错当成了另一个）。 具体解释见[维基百科](https://en.wikipedia.org/wiki/Confusion_matrix)（中文版示例有些小错误）。
+示例代码有：
+（1）二分类：
+```python
+from torchmetrics import ConfusionMatrix
+target = torch.tensor([1, 1, 0, 0])
+preds = torch.tensor([0, 1, 0, 0])
+confmat = ConfusionMatrix(num_classes=2)
+confmat(preds, target)
+>>> tensor([[2, 0],
+>>>         [1, 1]])
+```
+（2）多分类：
+```python
+target = torch.tensor([2, 1, 0, 0])
+preds = torch.tensor([2, 1, 0, 1])
+confmat = ConfusionMatrix(num_classes=3)
+confmat(preds, target)
+>>> tensor([[1, 1, 0],
+>>>         [0, 1, 0],
+>>>         [0, 0, 1]])
+```
+（3）多标签：
+```python
+target = torch.tensor([[0, 1, 0], [1, 0, 1]])
+preds = torch.tensor([[0, 0, 1], [1, 0, 1]])
+confmat = ConfusionMatrix(num_classes=3, multilabel=True)
+confmat(preds, target)
+>>> tensor([[[1, 0],
+>>>          [0, 1]],
+>>> 
+>>>         [[1, 0],
+>>>          [1, 0]],
+>>> 
+>>>         [[0, 1],
+>>>          [0, 1]]])
+```
+### 准确率
+准确率，即`Accuracy`，表明了分类正确的概率，计算公式为：
+$$
+\text{Accuracy} = \frac{1}{N}\sum_i^N 1(y_i = \hat{y}_i)
+$$
+如果用混淆矩阵中的数据来表达就是：
+$$
+\text{Accuracy} = \frac{TP+TN}{TP+TN+FP+FN}
+$$
+对于带概率或对数几率的多分类和多维多分类数据，参数`top_k`可以将该指标泛化为为`Top-K`准确度指标：对于每个样本，考虑前K个概率或对数几率最高的类别来判断是否找到了正确的标签。
+对于多标签和多维多分类输入，该指标默认计算 "全局 "准确度，即单独计算所有标签或子样本。这可以通过设置`subset_accuracy=True`来改变为子集准确性（这需要样本中的所有标签或子样本都被正确预测）。
+示例代码有：
+（1）二分类：
+```python
+import torch
+from torchmetrics import Accuracy
+target = torch.tensor([0, 1, 2, 3])
+preds = torch.tensor([0, 2, 1, 3])
+accuracy = Accuracy()
+accuracy(preds, target)
+>>> tensor(0.5000)
+```
+（2）带概率的Top-K多分类：
+```python
+target = torch.tensor([0, 1, 2])
+preds = torch.tensor([[0.1, 0.9, 0], [0.3, 0.1, 0.6], [0.2, 0.5, 0.3]])
+accuracy = Accuracy(top_k=2)
+accuracy(preds, target)
+>>> tensor(0.6667)
+```
+
+### 精度
+精度，即`Precision`，计算公式为：
+$$
+\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+$$
+示例代码为：
+```python
+from torchmetrics import Precision
+preds  = torch.tensor([2, 0, 2, 1])
+target = torch.tensor([1, 1, 2, 0])
+precision = Precision(average='macro', num_classes=3)
+precision(preds, target)
+>>> tensor(0.1667)
+precision = Precision(average='micro')
+precision(preds, target)
+>>> tensor(0.2500)
+```
+
+
+### AUC
+`AUC`，即`Area Under the Curve (AUC)`，torchmetrics提供了使用梯形公式`trapezoidal rule`计算某条曲线下的面积的方法，计算公式为：
+$$
+\int_{a}^{b}f(x)dx \approx (b-a)\frac{f(a)+f(b)}{2}
+$$
+注意，在离散的点形成的向量上进行梯形公式计算，其实际是每两点之间就计算一次，详见[`torch.trapezoid`函数](https://pytorch.org/docs/stable/generated/torch.trapezoid.html#torch.trapezoid)。
+示例代码为：
+```python
+from torchmetrics.functional import auc
+x = torch.tensor([0, 1, 2, 3])
+y = torch.tensor([0, 1, 2, 2])
+auc(x, y)
+>>> tensor(4.)
+```
+### ROC
+`ROC`，即`Receiver Operating Characteristic`，接收者操作特征曲线，是一种坐标图式的分析工具，具体解释可参见[维基百科](https://zh.wikipedia.org/zh-cn/ROC%E6%9B%B2%E7%BA%BF)。
+`ROC`空间将伪阳性率（`FPR`、在所有实际为阴性的样本中，被错误地判断为阳性之比率）定义为 `X` 轴，真阳性率（`TPR`、在所有实际为阳性的样本中，被正确地判断为阳性之比率）定义为 `Y` 轴。
+$$
+TPR = \frac{TP}{TP+FN} \\
+FPR = \frac{FP}{TN+FP}
+$$
+将同一模型每个阈值 的 (FPR, TPR) 坐标都画在ROC空间里，就成为特定模型的ROC曲线。
+示例代码有：
+（1）二分类：
+```python
+from torchmetrics import ROC
+pred = torch.tensor([0, 1, 2, 3])
+target = torch.tensor([0, 1, 1, 1])
+roc = ROC(pos_label=1)
+fpr, tpr, thresholds = roc(pred, target)
+fpr
+>>> tensor([0., 0., 0., 0., 1.])
+tpr
+>>> tensor([0.0000, 0.3333, 0.6667, 1.0000, 1.0000])
+thresholds
+>>> tensor([4, 3, 2, 1, 0])
+```
+（2）多分类：
+```python
+pred = torch.tensor([[0.75, 0.05, 0.05, 0.05],
+                     [0.05, 0.75, 0.05, 0.05],
+                     [0.05, 0.05, 0.75, 0.05],
+                     [0.05, 0.05, 0.05, 0.75]])
+target = torch.tensor([0, 1, 3, 2])
+roc = ROC(num_classes=4)
+fpr, tpr, thresholds = roc(pred, target)
+fpr
+>>> [tensor([0., 0., 1.]),
+>>>  tensor([0., 0., 1.]),
+>>>  tensor([0.0000, 0.3333, 1.0000]),
+>>>  tensor([0.0000, 0.3333, 1.0000])]
+tpr
+>>> [tensor([0., 1., 1.]),
+>>>  tensor([0., 1., 1.]),
+>>>  tensor([0., 0., 1.]),
+>>>  tensor([0., 0., 1.])]
+thresholds
+>>> [tensor([1.7500, 0.7500, 0.0500]),
+>>>  tensor([1.7500, 0.7500, 0.0500]),
+>>>  tensor([1.7500, 0.7500, 0.0500]),
+>>>  tensor([1.7500, 0.7500, 0.0500])]
+```
+（3）多标签：
+```python
+pred = torch.tensor([[0.8191, 0.3680, 0.1138],
+                     [0.3584, 0.7576, 0.1183],
+                     [0.2286, 0.3468, 0.1338],
+                     [0.8603, 0.0745, 0.1837]])
+target = torch.tensor([[1, 1, 0], [0, 1, 0], [0, 0, 0], [0, 1, 1]])
+roc = ROC(num_classes=3, pos_label=1)
+fpr, tpr, thresholds = roc(pred, target)
+fpr
+>>> [tensor([0.0000, 0.3333, 0.3333, 0.6667, 1.0000]),
+>>>  tensor([0., 0., 0., 1., 1.]),
+>>>  tensor([0.0000, 0.0000, 0.3333, 0.6667, 1.0000])]
+tpr
+>>> [tensor([0., 0., 1., 1., 1.]),
+>>>  tensor([0.0000, 0.3333, 0.6667, 0.6667, 1.0000]),
+>>>  tensor([0., 1., 1., 1., 1.])]
+thresholds
+>>> [tensor([1.8603, 0.8603, 0.8191, 0.3584, 0.2286]),
+>>>  tensor([1.7576, 0.7576, 0.3680, 0.3468, 0.0745]),
+>>>  tensor([1.1837, 0.1837, 0.1338, 0.1183, 0.1138])]
+```
+### AUC ROC
+`AUC ROC`，即`Area under the Curve of ROC`，即`ROC`曲线下方的面积，具体解释可参见[维基百科](https://zh.wikipedia.org/zh-cn/ROC%E6%9B%B2%E7%BA%BF)，简单说：`AUC`值越大的分类器，正确率越高。
+示例代码有：
+（1）二分类：
+```python
+from torchmetrics import AUROC
+preds = torch.tensor([0.13, 0.26, 0.08, 0.19, 0.34])
+target = torch.tensor([0, 0, 1, 1, 1])
+auroc = AUROC(pos_label=1)
+auroc(preds, target)
+>>> tensor(0.5000)
+```
+（2）多分类：
+```python
+preds = torch.tensor([[0.90, 0.05, 0.05],
+                      [0.05, 0.90, 0.05],
+                      [0.05, 0.05, 0.90],
+                      [0.85, 0.05, 0.10],
+                      [0.10, 0.10, 0.80]])
+target = torch.tensor([0, 1, 1, 2, 2])
+auroc = AUROC(num_classes=3)
+auroc(preds, target)
+>>> tensor(0.7778)
+```
