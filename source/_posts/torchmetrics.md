@@ -467,11 +467,7 @@ r2score(preds, target)
 | Type      | preds shape | preds dtype | target shape | target dtype |
 | ----------- | ----------- | ----------- | ----------- |----------- |
 | 二分类      | (N,)       |  float | (N,) | 二值，即0或1 |
-| 多分类      | (N,)        | int | (N,) | int |
-| 带概率`p`或对数几率`logit`（$\text{logit}=ln\frac{p}{1-p}$）的多分类 | (N,C)        | float | (N,) | int |
-| 多标签      | (N,...)    | float | (N,...) | 二值 |
-| 多维多分类      | (N,...)   | int | (N,...) | int |
-| 带概率`p`或对数几率`logit`的多维多分类 | (N,C,...)  | float | (N,...) | int |
+
 
 以下是一些例子：
 ```python
