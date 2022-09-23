@@ -1,0 +1,216 @@
+---
+title: 项目汇总
+tags: [project]
+categories: machine learning 
+date: 2022-9-24
+---
+
+# 块状物体的传统机器学习
+时间：2019.12 -- 2022.9
+teams: 6 = 中国2:CX (DIP), me(ML+DL), 德国3: 2(磨损) + 1(data), 美国1: (data)
+
+## 随机森林
+随机森林是一种由决策树构成的集成算法。在解释随机森林前，需要先提一下决策树。决策树是一种很简单的算法，他的解释性强，也符合人类的直观思维。这是一种基于if-then-else规则的有监督学习算法。
+随机森林是由很多决策树构成的，不同决策树之间没有关联。
+当我们进行分类任务时，新的输入样本进入，就让森林中的每一棵决策树分别进行判断和分类，每个决策树会得到一个自己的分类结果，决策树的分类结果中哪一个分类最多，那么随机森林就会把这个结果当做最终的结果。
+
+构建随机森林的4个步骤：
+- 一个样本容量为N的样本，有放回的抽取N次，每次抽取1个，最终形成了N个样本。这选择好了的N个样本用来训练一个决策树，作为决策树根节点处的样本。
+- 当每个样本有M个属性时，在决策树的每个节点需要分裂时，随机从这M个属性中选取出m个属性，满足条件m << M。然后从这m个属性中采用某种策略（比如说信息增益）来选择1个属性作为该节点的分裂属性。
+- 决策树形成过程中每个节点都要按照步骤2来分裂（很容易理解，如果下一次该节点选出来的那一个属性是刚刚其父节点分裂时用过的属性，则该节点已经达到了叶子节点，无须继续分裂了）。一直到不能够再分裂为止。注意整个决策树形成过程中没有进行剪枝。
+- 按照步骤1~3建立大量的决策树，这样就构成了随机森林了。
+
+
+随机森林的参数：
+- estimators：随机森林中树的棵树，即要生成多少个基学习器（决策树）。
+- criterion：选择最优划分属性的准则，默认是"gini"，可选"entropy"。
+- max_depth：决策树的最大深度
+- max_features：随机抽取的候选划分属性集的最大特征数（属性采样）
+- min_samples_split：内部节点再划分所需最小样本数。默认是2，可设置为整数或浮点型小数。
+- min_samples_leaf：叶子节点最少样本数。默认是1，可设置为整数或浮点型小数。
+- max_leaf_nodes：最大叶子结点数。默认是不限制。
+
+
+https://www.devtalking.com/articles/machine-learning-15/
+熵在信息论中代表随机变量不确定的度量。
+- 熵越大，数据的不确定性越高。
+- 熵越小，数据的不确定性越低。
+
+两个问题：
+- 决策树每个节点在哪个维度做划分？
+- 某个维度在哪个值上做划分？
+
+那么我们要做的事情就是找到一个维度和一个阈值，使得通过该维度和阈值划分后的信息熵最低，此时这个划分才是最好的划分。
+用大白话解释一下就是，我们在所有数据中寻找到信息熵最低的维度和阈值，然后将数据划分为多个部分，再寻找划分后每部分信息熵最低的维度和阈值，继续划分下去，最终形成完整的决策树。
+最优划分的最基本思路就是遍历样本数据的每个维度，对该维度中每两个相邻的值求均值作为阈值，然后求出信息熵，最终找到最小的信息熵，此时计算出该信息熵的维度和阈值既是最优维度和最优阈值。
+
+https://www.devtalking.com/articles/machine-learning-16/
+gini基尼系数和信息熵的思路基本是一致的，只是判定数据随机性度量的公式不一样。
+
+随机森林的训练和梯度下降没有半毛钱关系，它就是根据设置的n_estimators参数【树的个数】，然后依据gini信息将树建完为止，正是因为不需要梯度下降所以省去了很多数据预处理的过程，使用起来还挺方便。最终的结果由每棵决策树综合给出：如果是分类问题，那么对于每个测试集，树都会预测出一个类别进行投票，最终统计票数多的那个类别为最终类别。看看，这算法俨然是一个遵循：“少数服从多数”的原则的小型民主社会；如果是回归问题，那就更简单了，各个树得到的结果相加求得一个平均值为最终回归结果。
+————————————————
+版权声明：本文为CSDN博主「xjh0929」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/x19979/article/details/121691747
+
+https://geek-docs.com/machine-learning/machine-learning-tutorial/random-forests.html
+
+传统图像特征：
+（高斯模糊次数）灰度、梯度sobel、各向异性（梯度结构张量）
+
+
+## cellpose-turbo
+（1）数据集：训练集540张+测试集60张
+（2）标注：逐像素标注 实例分割
+图像增广：random rotations (uniformly drawn from 0° to 360°), random scalings (scale augmentations between 0.5 and 1.5) and 
+random translations(a maximum amplitude of (lx − 224)/2 and (ly − 224)/2), and then sampled a 224 × 224 image from the center of the 
+resultant image. 
+（3）网络模型：
+unet:https://cuijiahua.com/blog/2019/12/dl-15.html
+UNet网络结构，最主要的两个特点是：U型网络结构和Skip Connection跳层连接。
+UNet是一个对称的网络结构，左侧为下采样，右侧为上采样。按照功能可以将左侧的一系列下采样操作称为encoder，将右侧的一系列上采样操作称为decoder。
+Skip Connection就是在上采样的过程中，融合下采样过程中的feature map。融合的操作也很简单，就是将feature map的通道进行叠加，俗称Concat。
+（a）从UNet网络中可以看出，不管是下采样过程还是上采样过程，每一层都会连续进行两次卷积操作，这种操作在UNet网络中重复很多次，可以单独写一个DoubleConv模块。
+卷积操作尺寸计算公式复习。
+（b）UNet网络一共有4次下采样过程，就是一个maxpool池化层。
+（c）上采样过程用到的最多的当然就是上采样了，除了常规的上采样操作，还有进行特征的融合。
+上采样，可以有两种方法：Upsample和ConvTranspose2d，也就是双线性插值和反卷积。
+在实际使用中，Concat融合的两个feature map的大小不一定相同。可以对小的feature map进行填充。
+（d）输出模块：UNet网络的输出需要根据分割数量，整合输出通道，操作很简单，就是channel的变换，上图展示的是分类为2的情况（通道为2）。
+
+cellpose对unet的改进：In addition, we used global average pooling on the smallest convolutional maps to obtain a representation of the ‘style’ of the image (for similar definitions of style, see refs. 19,31,32). We anticipated that images with different styles might need to be processed differently, and therefore fed the style vectors into all the upsampling stages on an image by image basis.
+
+cellpose矢量场的计算：To create a vector flow field with the properties described above, we turned to a heat diffusion simulation. We define the ‘center’ of each cell as the pixel in a cell that was closest to the median values of horizontal and vertical positions for pixels in that cell. In the heat diffusion simulation, we introduce a heat source at the center pixel, which adds a constant value of one to that pixel’s value at each iteration. Every pixel inside the cell gets assigned the average value of pixels in a 3 × 3 square surrounding it, including itself, at every iteration, with pixels outside of a mask being assigned to zero at every iteration. In other words, the boundaries of the cell mask are ‘leaky’. This process gets repeated for N iterations, where N is chosen for each mask as twice the sum of its horizontal and vertical range, to ensure that the heat dissipates to the furthest corners of the cell. The distribution of heat at the end of the simulation approaches the equilibrium distribution. We use this final distribution as an energy function, whose horizontal and vertical gradients represent the two vector fields of our auxiliary vector flow representation. We obtained similar, but very slightly worse, performance by using other definitions of ‘center’ such as the 2D medoid, and other ways to generate an energy function such as the solution of the Poisson equation57.
+
+（4）对网络模型的改进：对mask-vector转化和vector-mask重建的改进
+（5）loss函数：
+The first two of these were used to directly predict the horizontal and vertical gradients using an L2 loss. The third output map was passed through a sigmoid and used to predict the 
+probability that a pixel is inside or outside of a cell with a cross-entropy loss.
+
+CrossEntropy损失：对于Softmax回归，softmax运算将输出变换成一个合法的类别预测分布，然后就可以计算真实概率和预测概率之间的区别作为损失。但计算这个损失时，其实并不需要预测概率完全等于标签概率，只要预测的那个目标类别的概率比另外类别的概率大即可，此时使用平方损失就会过于严格，因此使用更适合衡量两个概率分布差异的测量函数，比如交叉熵损失函数
+
+https://zhuanlan.zhihu.com/p/35709485
+
+（6）训练：
+Adam: 使用指数加权移动平均值来估算梯度的动量和第二力矩。
+梯度下降：BGD、SGD、MBGD： https://zhuanlan.zhihu.com/p/25765735
+The networks were trained for 500 epochs with stochastic gradient descent with a learning rate of 0.2, a momentum of 0.9, batch size of eight images and a weight decay of 0.00001.
+学习率：CosineAnnealingLR余弦退火： https://zhuanlan.zhihu.com/p/93624972。
+
+（7）评价指标：
+IoU（包括目标检测和语义分割）: https://codeantenna.com/a/bjCjVRc5S9 （threshold）
+一般情况下对于检测框的判定都会存在一个阈值，也就是IoU的阈值，一般可以设置当IoU的值大于0.5的时候，则可认为检测到目标物体。
+
+目标检测指标：
+https://cloud.tencent.com/developer/article/1624811
+
+1. 正确率（accuracy） 正确率是我们最常⻅的评价指标，accuracy = (TP+TN)/(P+N)，正确率是被分对的样本数在所有样本数中的占⽐，通常来
+说，正确率越⾼，分类器越好。
+2. 错误率（error rate) 错误率则与正确率相反，描述被分类器错分的⽐例，error rate = (FP+FN)/(P+N)，对某⼀个实例来说，分对与分错是互斥
+事件，所以accuracy =1 - error rate。
+3. 灵敏度（sensitivity） sensitivity = TP/P，表⽰的是所有正例中被分对的⽐例，衡量了分类器对正例的识别能⼒。
+4. 特异性（specificity) specificity = TN/N，表⽰的是所有负例中被分对的⽐例，衡量了分类器对负例的识别能⼒。
+5. 精度（precision） precision=TP/(TP+FP)，精度是精确性的度量，表⽰被分为正例的⽰例中实际为正例的⽐例。
+6. 召回率（recall） 召回率是覆盖⾯的度量，度量有多个正例被分为正例，recall=TP/(TP+FN)=TP/P=sensitivity，可以看到召回率与灵敏度是⼀样
+的。
+7. 其他评价指标 计算速度：分类器训练和预测需要的时间； 鲁棒性：处理缺失值和异常值的能⼒； 可扩展性：处理⼤数据集的能⼒； 可解释
+性：分类器的预测标准的可理解性，像决策树产⽣的规则就是很容易理解的，⽽神经⽹络的⼀堆参数就不好理解，我们只好把它看成⼀个⿊盒
+⼦。
+
+cellpose评价指标是精度precision
+精度precision是从预测结果的角度来统计的，是说预测为正样本的数据中，有多少个是真正的正样本
+ precision =TP/(TP+FP)
+（cellpose 在iou阈值为0.5时，精度为91%，其他为80%）
+
+
+# 裂纹缺陷检测
+裂纹检测评价指标是召回率recall，也就是灵敏度，TP/P
+更关注对于已有裂纹的检测，误检没事，不能漏检。
+（假设在1000次预测中，共有5次预测发⽣了地震，真实情况中有⼀次发⽣了地震，其他4次则为误报。正确率由原来的999/1000=99.9下降为996/1000=99.6。召回率由0/1=0%上升为1/1=100%。对此解释为，虽然预测失误了4次，但真的地震发⽣前，分类器能预测对，没有错过，这样的分类器实际意义更为重⼤，正是我们想要的。）
+
+## YOLO
+android dev +2020.9 -- 2021.6
+Team5: mmq2: cx (DIP) +me (DL), SDT1: cds(report), IOT 2: (order)
+
+https://qixinbo.info/2021/09/25/yolo3/
+在RCNN算法日益成熟之后，Yolo算法却能横空出世，离不开其高性能和使用回归思想做物体检测的两个特点。
+YOLO的思路就是让锚框不会重叠，具体做法是将图片均匀分成S乘S个锚框，每个锚框预测多个边界框。
+
+数据集：郑州工厂、~1000张
+算法架构：
+Yolo的整个网络，吸取了Resnet、Densenet、FPN的精髓，可以说是融合了目标检测当前业界最有效的全部技巧。
+YOLOv3与YOLOv2和YOLOv1相比最大的改善就是对boundingbox进行了跨尺度预测(Prediction Across Scales)，提高YOLO模型对不同尺度对象的预测精度。
+
+Yolov3总共输出3个特征图，第一个特征图下采样32倍，第二个特征图下采样16倍，第三个下采样8倍。输入图像经过Darknet-53（无全连接层），再经过Yoloblock生成的特征图被当作两用，第一用为经过3乘3卷积层、1乘1卷积之后生成特征图一，第二用为经过1乘1卷积层加上采样层，与Darnet-53网络的中间层输出结果进行拼接，产生特征图二。同样的循环之后产生特征图三。
+
+Yolov3使用Darknet-53作为整个网络的分类骨干部分（见上图虚线部分）。（backbone部分由Yolov2时期的Darknet-19进化至Darknet-53，加深了网络层数，引入了Resnet中的跨层加和操作。Darknet-53处理速度每秒78张图，比Darknet-19慢不少，但是比同精度的ResNet快很多。Yolov3依然保持了高性能。）
+
+LOSS函数复习。
+
+移动端部署方式：TFLite（谷歌）、NCNN（tencent）、MNN（ali）
+
+# 其他知识点
+- ResNet：ResNet的目的就是使得添加更多的层，新模型和原模型同样有效，起码不会变差；且理论上原模型解的空间只是新模型解的空间的子空间，因此添加层会更容易降低训练误差。
+- 常用激活函数： https://www.jiqizhixin.com/graph/technologies/1697e627-30e7-48a6-b799-39e2338ffab5
+- 超参数调整：
+通常可以将超参数分为三类：⽹络参数、优化参数、正则化参数。
+(a)⽹络参数：可指⽹络层与层之间的交互⽅式（相加、相乘或者串接等）、卷积核数量和卷积核尺⼨、⽹络层数（也称深度）和激活函数等。
+(b)优化参数：⼀般指学习率（learning rate）、批样本数量（batch size）、不同优化器的参数以及部分损失函数的可调参数。
+(c)正则化：权重衰减系数，丢弃⽐率（dropout）。
+超参数的重要性顺序：
+（0）模型深度、架构等
+（1）学习率、损失函数上的可调参数。
+（2）批样本数量，优化器中的参数（比如权重衰减系数、动量）。
+（3）丢弃比率
+- 在合理范围内，增大Batch Size有何好处？
+（1）内存利用率提高了，大矩阵乘法的并行化效率提高。
+（2）跑完一次epoch （全数据集）所需的迭代次数减少，对于相同数据量的处理速度进一步加快。
+（3）在一定范围内，一般来说Batch Size越大，其确定的下降方向越准，引起训练震荡越小，收敛会变快。
+盲目增大Batch Size有何坏处？
+（1）内存利用率提高了，但是内存容量可能撑不住了。
+（2）跑完一次epoch （全数据集）所需的迭代次数减少，要想达到相同的精度，其所花费的时间大大增加了，从而对参数的修正也就显得更加缓慢。
+（3）Batch Size增大到一定程度，其确定的下降方向已经基本不再变化。
+- 降采样和升采样：降采样的理论意义，它可以增加对输入图像的一些小扰动的鲁棒性，比如图像平移，旋转等，减少过拟合的风险，降低运算量，和增加感受野的大小。升采样的最大的作用其实就是把抽象的特征再还原解码到原图的尺寸，最终得到分割结果。（对于特征提取阶段，浅层结构可以抓取图像的一些简单的特征，比如边界，颜色，而深层结构因为感受野大了，而且经过的卷积操作多了，能抓取到图像的一些说不清道不明的抽象特征，讲的越来越玄学了，总之，浅有浅的侧重，深有深的优势。）
+- 动手学视频笔记： https://qixinbo.info/2020/03/09/dive-into-dl-video/
+- 图像分析 = 图像 + 向量 + 图
+- 其他CNN网络：GAN、U2net、ViT
+- NMS
+https://zhuanlan.zhihu.com/p/37489043
+NMS的过程：（1）挑选出非背景类别的最大预测概率，如最大预测概率为0.99，对应类别为狗，所在预测边界框为A；（2）去掉所有和该预测边界框的IoU值大于阈值（如0.5）的预测，如某一预测边界框基本与边界框B重合，但预测概率为0.8，说明它俩都预测此处为狗，但我们只选A这个边界框；如果边界框C离A比较远，IoU小于该阈值，那么就不会删除它；（3）重复上述过程直到所有预测要么被选中，要么被删除。
+https://github.com/aladdinpersson/Machine-Learning-Collection/blob/a2ee9271b5280be6994660c7982d0f44c67c3b63/ML/Pytorch/object_detection/metrics/nms.py
+- kmeans
+- SIFT： https://qixinbo.info/2021/10/26/sift/
+- 分水岭： https://qixinbo.info/2019/12/20/imagepy_15/
+- 形态学处理： https://zhuanlan.zhihu.com/p/110787009
+(1) 开操作一般会平滑物体的轮廓、断开较窄的狭颈并消除较细的突出物。
+(2) 闭操作同样也会平滑轮廓的一部分，但与开操作相反，它通常会弥合较窄的间断和细长的沟壑，消除较小的孔洞，填补轮廓线中的断裂
+- Harris角点： https://qixinbo.info/2020/08/05/harris/
+- 连通域查找： https://zhuanlan.zhihu.com/p/145449066
+种子填充法从一个种子开始向领域周围搜索，发现有相等的像素值则标记为相同的label，然后继续在领域搜索，直到周围都没有相同的像素值后就找到一个联通区域。然后再以其他的种子，继续搜索下一个联通区域。这里的种子就是一个感兴趣的像素（值大于1）。
+3D连通域：6、18、26）
+- 霍夫检测：
+（1）直线检测：https://zhuanlan.zhihu.com/p/77196434
+对于直线检测来说， 所谓的霍夫变换可以理解为一种映射关系，（theta, r）与直线 y = kx + b的映射关系。且这种映射为一对一的映射。
+对于坐标系中的一个点，过该点的直线有无数条，我们每隔30度取一条直线（具体如何取样自己根据实际情况确定），近似认为代表了过该点的所有直线，且每条直线唯一对应一个（theta, r）。对于三个点来说，若三个点同时拥有同一个（theta, r）,则代表有一条直线同时经过这三个点。
+（2）圆检测：https://www.cnblogs.com/bjxqmy/p/12333022.html
+对于一个给定点（x0,y0），我们可以在三维直角坐标系中，绘出所有通过它的圆。最终我们将得到一条三维的曲线。
+我们可以对图像中所有的点进行上述操作。如果两个不同点进行上述操作后得到的曲线在空间 a - b - r 相交, 即它们有一组公共的（a，b，r），这就意味着它们在同一个圆上。
+越多曲线交于一点，也就意味着这个交点表示的圆由更多的点组成。我们可以设置一个阈值，来决定多少条曲线交于一点我们才认为检测到了一个圆。
+- HOG
+方向梯度直方图Histogram of Oriented Gradient，HOG：在HOG特征描述符中，梯度方向的分布，也就是梯度方向的直方图被视作特征
+https://zhuanlan.zhihu.com/p/85829145
+（1）图像预处理：
+可以对图像进行裁剪，并缩放到固定尺寸。
+灰度处理是可选操作，因为灰度图像和彩色图像都可以用于计算梯度图，对于彩色图像，先对三通道颜色值分别计算梯度，然后取梯度值最大的那个作为该像素的梯度。
+然后进行伽马矫正，调节图像对比度，减少光照对图像的影响（包括光照不均和局部阴影），使过曝或者欠曝的图像恢复正常，更接近人眼看到的图像。
+伽马矫正公式：
+img2=np.power(img/float(np.max(img)),1.5)
+即输出图像是输入图像的幂函数。
+（2）计算梯度图：使用Sobel算子计算水平梯度和垂直梯度，然后再计算合成梯度，包括梯度值和方向。
+（3）计算梯度直方图：
+在这一步，我们先把整个图像划分为若干个8x8的小单元，称为cell，并计算每个cell的梯度直方图。这个cell的尺寸也可以是其他值，根据具体的特征而定。
+这是因为对于一整张梯度图，其中的有效特征是非常稀疏的，不但运算量大，而且效果可能还不好。于是我们就使用特征描述符来表示一个更紧凑的特征。一个8x8的小单元就包含了8x8x2 = 128个值，因为每个像素包括梯度的大小和方向。
+现在我们要把这个8x8的小单元用长度为9的数组来表示，这个数组就是梯度直方图。这种表示方法不仅使得特征更加紧凑，而且对单个像素值的变化不敏感，也就是能够抗噪声干扰。（将这 8x8 的cell中所有像素的梯度值加到各自角度对应的bin中，就形成了长度为9的直方图）
+（4）Block归一化：HOG将8×8的一个区域作为一个cell，再以2×2个cell作为一组，称为block。由于每个cell有9个值，2×2个cell则有36个值，HOG是通过滑动窗口的方式来得到block的。对向量进行归一化可以消除整体光照的影响。现在来对block的梯度直方图进行归一化（注意不是cell），一个block有4个直方图，将这4个直方图拼接成长度为36的向量，然后对这个向量进行归一化。
+（5）计算HOG特征向量：
+终于可以计算整个图像的特征描述符了，每滑动一次，一个block就h得到一个长度为36的特征向量，那会得到多少个特征向量呢？
+比如将整幅图像划分成cell的个数为8x16，就是横向有8个cell，纵向有16个cell。每个block有2x2个cell的话，那么cell的个数为：(16-1)x(8-1)=105。即有7个水平block和15个竖直block。再将这105个block合并，就得到了整个图像的特征描述符，长度为 105×36=3780。
