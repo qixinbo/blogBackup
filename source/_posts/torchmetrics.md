@@ -463,6 +463,16 @@ r2score(preds, target)
 [二分类、多分类、多标签分类的基础、原理、算法和工具](https://zhuanlan.zhihu.com/p/270458779)
 [多分类模型Accuracy, Precision, Recall和F1-score的超级无敌深入探讨](https://zhuanlan.zhihu.com/p/147663370)
 
+
+| Type                                 | preds shape | preds dtype | target shape | target dtype |
+| -                          | - | - | - | - |
+| 二分类                               | (N,)       |  float | (N,) | 二值，即0或1 |
+| 多分类                               | (N,)        | int | (N,) | int |
+| 带概率`p`或对数几率`logit`（$\text{logit}=ln\frac{p}{1-p}$）的多分类 | (N,C)        | float | (N,) | int |
+| 多标签                               | (N,...)    | float | (N,...) | 二值 |
+| 多维多分类                           | (N,...)   | int | (N,...) | int |
+| 带概率`p`或对数几率`logit`的多维多分类 | (N,C,...)  | float | (N,...) | int |
+
 ```python
 | Type                                 | preds shape | preds dtype | target shape | target dtype |
 | -----------                          | ----------- | ----------- | ----------- |----------- |
@@ -726,4 +736,94 @@ target = torch.tensor([0, 1, 1, 2, 2])
 auroc = AUROC(num_classes=3)
 auroc(preds, target)
 >>> tensor(0.7778)
+```
+
+### 召回率
+召回率，即`Recall`，计算公式为：
+$$
+\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+$$
+示例代码有：
+```python
+from torchmetrics import Recall
+preds  = torch.tensor([2, 0, 2, 1])
+target = torch.tensor([1, 1, 2, 0])
+recall = Recall(average='macro', num_classes=3)
+recall(preds, target)
+>>> tensor(0.3333)
+recall = Recall(average='micro')
+recall(preds, target)
+>>> tensor(0.2500)
+```
+
+### F1分数
+F1分数，即`F1 score`，兼顾了分类模型的精确率和召回率，它是精确率和召回率的调和平均数：
+$$
+F1= \frac{2}{\frac{1}{Recall} + \frac{1}{Precision}}
+$$
+示例代码为：
+```python
+import torch
+from torchmetrics import F1Score
+target = torch.tensor([0, 1, 2, 0, 1, 2])
+preds = torch.tensor([0, 2, 1, 0, 0, 1])
+f1 = F1Score(num_classes=3)
+f1(preds, target)
+>>> tensor(0.3333)
+```
+### Dice系数
+`Dice`系数，是一种集合相似度度量函数，通常用于计算两个样本的相似度，具体解释可以参见[这里](https://zhuanlan.zhihu.com/p/86704421)和[这里](https://zh.wikipedia.org/zh-cn/Dice%E7%B3%BB%E6%95%B0)。
+基于分类问题，计算公式为：
+$$
+\text{Dice} = \frac{\text{2 * TP}}{\text{2 * TP} + \text{FP} + \text{FN}}
+$$
+示例代码为：
+```python
+import torch
+from torchmetrics import Dice
+preds  = torch.tensor([2, 0, 2, 1])
+target = torch.tensor([1, 1, 2, 0])
+dice = Dice(average='micro')
+dice(preds, target)
+>>> tensor(0.2500)
+```
+
+## 检测问题
+### mAP
+`mAP`，即`mean Average Precision`，可翻译为“全类平均精度”，是将所有类别检测的平均正确率（`AP`）进行综合加权平均而得到的。而`AP`是`PR`曲线（精度-召回率曲线）下面积。具体解释可见[这里](https://www.zhihu.com/question/53405779/answer/993913699)、[这里](https://jonathan-hui.medium.com/map-mean-average-precision-for-object-detection-45c121a31173)和[那里](https://towardsdatascience.com/map-mean-average-precision-might-confuse-you-5956f1bfa9e2)。
+示例代码：
+```python
+import torch
+from torchmetrics.detection.mean_ap import MeanAveragePrecision
+preds = [
+  dict(
+    boxes=torch.tensor([[258.0, 41.0, 606.0, 285.0]]),
+    scores=torch.tensor([0.536]),
+    labels=torch.tensor([0]),
+  )
+]
+target = [
+  dict(
+    boxes=torch.tensor([[214.0, 41.0, 562.0, 285.0]]),
+    labels=torch.tensor([0]),
+  )
+]
+metric = MeanAveragePrecision()
+metric.update(preds, target)
+from pprint import pprint
+pprint(metric.compute())
+>>> {'map': tensor(0.6000),
+>>>  'map_50': tensor(1.),
+>>>  'map_75': tensor(1.),
+>>>  'map_large': tensor(0.6000),
+>>>  'map_medium': tensor(-1.),
+>>>  'map_per_class': tensor(-1.),
+>>>  'map_small': tensor(-1.),
+>>>  'mar_1': tensor(0.6000),
+>>>  'mar_10': tensor(0.6000),
+>>>  'mar_100': tensor(0.6000),
+>>>  'mar_100_per_class': tensor(-1.),
+>>>  'mar_large': tensor(0.6000),
+>>>  'mar_medium': tensor(-1.),
+>>>  'mar_small': tensor(-1.)}
 ```
