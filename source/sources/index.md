@@ -4,6 +4,7 @@ date: 2016-01-13 10:37:25
 ---
 
 # Search
+- [开发者搜索](https://kaifa.baidu.com/)
 - [Sci-hub可用链接](http://tool.yovisun.com/scihub/)
 - [专业书籍原文传递 | 读秀](http://www.duxiu.com/)
 - [全国图书馆参考咨询联盟](http://www.ucdrs.superlib.net)
