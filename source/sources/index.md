@@ -68,6 +68,7 @@ date: 2016-01-13 10:37:25
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
 
 # 仓库精选
+- [Jina | Neural Search](https://github.com/jina-ai/jina)
 - [jsPlumb | Visual connectivity for webapps](https://github.com/jsplumb/jsplumb)
 - [jsPlumb中文教程](https://github.com/wangduanduan/jsplumb-chinese-tutorial)
 - [DataEase | 人人可用的开源数据可视化分析工具](https://github.com/dataease/dataease)

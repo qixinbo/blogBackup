@@ -51,6 +51,7 @@ date: 2016-01-13 08:41:43
 - [医学图像开源数据集汇总（二）](https://mp.weixin.qq.com/s/KirzDH92S8Eog7f4AY53QQ)
 
 # 好文推荐
+- [万字长文详解静态图和动态图中的自动求导机制](https://zhuanlan.zhihu.com/p/563322163)
 - [时序异常检测综述整理](https://mp.weixin.qq.com/s/KNeSAPx-6B-wo5jzCM17YQ)
 - [时序资料汇总：模型和常见库对比](https://mp.weixin.qq.com/s/rb6iAVV1Tx4F_z9PU2Aeeg)
 - [计算机视觉深度学习训练推理框架](https://mp.weixin.qq.com/s/bXsSdQMsLTCQCSkXNrNPow)
