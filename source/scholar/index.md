@@ -96,6 +96,7 @@ date: 2016-01-13 08:41:43
 - [Python getattr() 使用方法及示例](https://www.cainiaojc.com/python/python-methods-built-in-getattr.html)
 
 ## 其他
+- [可能是目前最全的 RSS 源，公众号也有！](https://www.runningcheese.com/rss-subscriptions)
 - [一文看懂：什么是数据库、数据湖、数据仓库、湖仓一体、智能湖仓？](https://www.smartcity.team/consultingskills/experience/shujukuyushujuhu/)
 - [Git教材](https://git-scm.com/book/zh/v2)
 - [图文详解基于角色的权限控制模型RBAC](https://juejin.cn/post/6844904004179230733)

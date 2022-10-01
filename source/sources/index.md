@@ -27,6 +27,7 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | books43](http://www.books43.com/)
 
 # Widgets
+- [好用的免费API汇总](https://www.runningcheese.com/api)
 - [promptoMANIA | AI art community with an online prompt builder](https://promptomania.com/)
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
 - 英语语法检查 [Ginger](http://www.gingersoftware.com/zh), [Grammarly](https://www.grammarly.com/)
@@ -68,6 +69,7 @@ date: 2016-01-13 10:37:25
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
 
 # 仓库精选
+- [RSSHub | 一个开源、简单易用、易于扩展的 RSS 生成器](https://github.com/DIYgod/RSSHub)
 - [Huginn | Create agents that monitor and act on your behalf](https://github.com/huginn/huginn)
 - [Jina | Neural Search](https://github.com/jina-ai/jina)
 - [jsPlumb | Visual connectivity for webapps](https://github.com/jsplumb/jsplumb)
