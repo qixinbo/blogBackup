@@ -4,6 +4,8 @@ date: 2016-01-13 10:37:25
 ---
 
 # Search
+- [千帆搜索 | 聚合网盘搜索引擎](https://pan.qianfan.app/)
+- [Crx搜搜 | 一个牛X的扩展和应用商店](https://www.crxsoso.com)
 - [开发者搜索](https://kaifa.baidu.com/)
 - [Sci-hub可用链接](http://tool.yovisun.com/scihub/)
 - [专业书籍原文传递 | 读秀](http://www.duxiu.com/)
@@ -69,6 +71,9 @@ date: 2016-01-13 10:37:25
 - [Distributions of Linux and BSD | DistroWatch](http://distrowatch.com/)
 - [PowerPoint插件](http://islide.cc/)
 - [NDM-类IDM下载工具](http://www.neatdownloadmanager.com/index.php/en/)
+
+# 软件
+- [Fig | 终端智能补全工具](https://fig.io)
 
 # 仓库精选
 - [RSSHub | 一个开源、简单易用、易于扩展的 RSS 生成器](https://github.com/DIYgod/RSSHub)
