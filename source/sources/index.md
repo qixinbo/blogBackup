@@ -27,6 +27,7 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | books43](http://www.books43.com/)
 
 # Widgets
+- [最简单方法创建README](https://readme.so/cn)
 - [好用的免费API汇总](https://www.runningcheese.com/api)
 - [promptoMANIA | AI art community with an online prompt builder](https://promptomania.com/)
 - [在线LaTeX 公式编辑器 - CodeCogs](https://www.codecogs.com/latex/eqneditor.php?lang=zh-cn)
