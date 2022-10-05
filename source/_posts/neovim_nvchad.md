@@ -72,24 +72,22 @@ rd -r ~\AppData\Local\nvim-data
 - `lua/custom/init.lua`在`init.lua`主文件的最后被加载，可以在这里添加自定义的命令等。
 - `lua/custom/chadrc.lua`用于覆盖`lua/core/default_config.lua`并基本上控制整个`nvchad`，因此必须采用跟`default_config.lua`一样的代码结构。
 
-~~`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中：~~
-```sh
-mkdir lua/custom
-cp examples/init.lua lua/custom/init.lua
-cp examples/chadrc.lua lua/custom/chadrc.lua
-```
+~~`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中。~~
+`NvChad`提供了一个[example_config库](https://github.com/NvChad/example_config)，可以将其直接复制到`lua`文件夹下，作为起始的自定义配置文件（注意删掉`.git`文件夹）。
+
 ## 安装Treesitter解析器
 [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)提供了代码高亮、缩进和折叠等功能。
-`nvim-treesitter`的正常运行需要满足以下条件：
+`nvim-treesitter`在`NvChad`中是默认配置安装的，但是其正常运行需要满足以下条件：
 - 在环境变量中能找到`tar`和`curl`命令（或者`git`命令）
 - 在环境变量中有`C`编译器和`libstdc++`
 在`Linux`系统中，使用`sudo apt install build-essential`即可安装相应依赖，在`Windows`系统中，可查看[该详细教程](https://github.com/nvim-treesitter/nvim-treesitter/wiki/Windows-support)
 
-
+所以要保证`nvim-treesitter`的正常使用，需要提前配置好以上依赖。待`treesitter`安装好后，接下来就是安装其针对于不同编程语言的解析器。
 安装解析器使用以下命令（以`Python`为例）：
 ```sh
 :TSInstall python
 ```
+可以通过`:TSModuleInfo`查看安装情况。
 
 ## 安装Node.JS
 `Node.js`对于后面的`LSP`是有用的，比如安装`pyright`时需要用到`npm`，所以这里也可以事先安装。
@@ -101,6 +99,10 @@ curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
+`mac`系统的话直接用`brew`安装即可：
+```sh
+brew install node
+```
 
 # Lua简明教程
 ## Print
@@ -318,7 +320,7 @@ Neovim中的配置文件和插件都可以使用`Lua`进行编写，具体的教
 │   │   ├── default_config.lua
 │   │   ├── mappings.lua
 │   │   ├── options.lua
-│   │   ├── packer.lua  -- (bootstrap packer & installs plugins)
+│   │   ├── packer.lua  -- (新版删除了。。bootstrap packer & installs plugins)
 │   │   ├── utils.lua  -- (core util functions) (i)
 │   │   └── init.lua  -- (autocmds)
 │   │
@@ -379,7 +381,55 @@ Neovim中的配置文件和插件都可以使用`Lua`进行编写，具体的教
    },
 ```
 
-### 安装插件
+## 安装、卸载和重载插件
+```lua
+-- chadrc
+M.plugins = require "custom.plugins"
+```
+
+```lua
+-- custom/plugins/init.lua
+-- we're basically returning a table!
+return {
+
+  -- Install plugin
+  ["Pocco81/TrueZen.nvim"] = {},
+
+  -- Override plugin definition options
+  ["goolord/alpha-nvim"] = {
+    disable = false,
+    cmd = "Alpha",
+  },
+
+  -- Override plugin config
+  ["williamboman/mason.nvim"] = {
+    override_options = {
+          ensure_installed = { "html-lsp", "clangd" }
+      }
+  },
+   
+   -- Override plugin config if it has a module called
+   -- If you wish to call a module, which is 'cmp' in this case
+   ["hrsh7th/nvim-cmp"] = {
+    override_options = function()
+      local cmp = require "cmp"
+
+      return {
+        mapping = {
+          ["<C-d>"] = cmp.mapping.scroll_docs(-8),
+        },
+      }
+    end,
+  },
+
+  -- remove plugin
+  ["neovim/nvim-lspconfig"] = false
+}
+```
+以上格式不需要硬记，可以查看[NvChad/example_config: example custom config](https://github.com/NvChad/example_config)这个库。
+
+## ~~安装插件~~
+
 首先创建`lua/custom/plugins/init.lua`，按以下格式添加插件：
 ```lua
 -- custom/plugins/init.lua has to return a table
