@@ -75,6 +75,40 @@ rd -r ~\AppData\Local\nvim-data
 ~~`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中。~~
 `NvChad`提供了一个[example_config库](https://github.com/NvChad/example_config)，可以将其直接复制到`lua`文件夹下，作为起始的自定义配置文件（注意删掉`.git`文件夹）。
 
+`NvChad`提前预置了很多常用的插件及其配置，但是每个人有不同的喜好，因此通常情况下需要自己配置`custom`目录来进一步定制化`NvChad`。[NvChad/example_config: example custom config](https://github.com/NvChad/example_config) 该库已经提供了很好的模板，可以在此基础上进行配置。
+那么怎样对自己定制的部分也进行同步呢，就像`NvChad`主库那样存储在`GitHub`上，需要时直接拉取下来即可。
+一个可行的方法是像[NvChad/example_config: example custom config](https://github.com/NvChad/example_config) 这样，为`custom`文件夹单独建立一个仓库，在安装好`NvChad`主库后，再将这个库给拉取并合并进去。
+但是这里有一个问题：`NvChad`库更新是比较频繁的，有时候其`API`变动比较剧烈，可能当前的配置需要与特定版本的主库对应才行。如果将`custom`和主库分离，就会遇到两者版本不一致的情形。
+因此建议通过下面这种方式进行定制化及同步：
+（1）对`NvChad`主库进行`Fork`，如我的这个库[qixinbo/NvChad](https://github.com/qixinbo/NvChad)
+（2）创建一个`custom`分支，该分支相对于`main`分支就是添加了`custom`目录及其自定义的文件。
+（3）同理，本地也会有这两个分支，对自定义部分的改动是发生在`custom`分支上。
+
+当`NvChad`主库有更新时，
+（1）在`GitHub`的网页上，通过`Sync fork`按钮将`NvChad`主库与自己`fork`版本的`main`分支进行同步
+（2）在本地，首先切换分支到`main`：
+```sh
+git checkout main
+```
+（3）本地`main`与远程`main`同步：
+```sh
+git pull
+```
+（4）切换到`custom`分支并将`main`分支`merge`进来：
+```sh
+git checkout custom
+git merge main
+```
+（5）将本地`custom`分支推送到远程：
+```sh
+git push
+```
+那么，最终的效果就是，在[qixinbo/NvChad](https://github.com/qixinbo/NvChad) 仓库中：
+对于`main`分支，它始终与`NvChad`主库保持同步；
+对于`custom`分支，它始终比`NvChad`主库要多若干个`commits`（因为要自定义开发）。
+在不同电脑进行配置时，只需要克隆`custom`分支即可，这样既能保证`NvChad`是最新的，也能自动同步自己的自定义配置。
+
+
 ## 安装Treesitter解析器
 [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)提供了代码高亮、缩进和折叠等功能。
 `nvim-treesitter`在`NvChad`中是默认配置安装的，但是其正常运行需要满足以下条件：
