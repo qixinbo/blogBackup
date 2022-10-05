@@ -382,6 +382,7 @@ Neovim中的配置文件和插件都可以使用`Lua`进行编写，具体的教
 ```
 
 ## 安装、卸载和重载插件
+以下格式不需要硬记，可以参考[NvChad/example_config: example custom config](https://github.com/NvChad/example_config)这个库。
 ```lua
 -- chadrc
 M.plugins = require "custom.plugins"
@@ -426,9 +427,10 @@ return {
   ["neovim/nvim-lspconfig"] = false
 }
 ```
-以上格式不需要硬记，可以查看[NvChad/example_config: example custom config](https://github.com/NvChad/example_config)这个库。
 
-## ~~安装插件~~
+新版`NvChad`对插件的编写进一步简化，与旧版有了显著区别。下面的是旧版的插件操作方式，可以不用看了。
+
+## ~~旧版的插件安装、重载和卸载~~
 
 首先创建`lua/custom/plugins/init.lua`，按以下格式添加插件：
 ```lua
