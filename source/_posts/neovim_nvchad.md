@@ -5,8 +5,11 @@ categories: coding
 date: 2022-8-11
 ---
 
+------------更新日志------------
+2022.10.5 更新：简化了plugin
+
 # 简介
-`vim`是一个非常强大的文本编辑器，而`Neovim`是对原`vim`的一个分叉，不过最简单的`Neovim`显得太过朴素，不过它提供了强大的插件系统，可以通过各种插件将其由一个简约的文本编辑器转化为强大的代码开发IDE。
+`vim`是一个非常强大的文本编辑器，而`Neovim`是对原`vim`的一个分叉，不过最简单的`Neovim`显得太过朴素，只提供了基本的编辑器功能；然而有赖于它提供了强大的插件系统，可以通过各种插件将其由一个简约的文本编辑器转化为强大的代码开发IDE。
 [`NvChad`](https://nvchad.github.io/)就是一个`Neovim`的预配置库，可以使得`Neovim`开箱即获得各种强大的功能：
 - `NvChad`是一个用`lua`编写的`neovim`配置，旨在提供一个具有非常漂亮的用户界面和极快的启动时间的基本配置（在基础硬件上约0.02秒至0.07秒）；
 - 懒加载的机制使得插件不会被默认加载，只有在需要的时候才会被加载，包括特定的命令和vim事件等。这有助于减少启动时间，从而使启动时间比平时快；
@@ -16,7 +19,7 @@ date: 2022-8-11
 ## 前提条件
 在使用`NvChad`之前，要有一些前提依赖：
 - 终端
-即`Neovim`运行的环境，`Linux`系统推荐[`Terminator`](https://github.com/gnome-terminator/terminator)，`Windows`推荐[`Windows Terminal`](https://github.com/microsoft/terminal)，`Mac OS`推荐[`iterm2`](https://iterm2.com/)。
+即`Neovim`运行的环境，`Linux`系统推荐[`Terminator`](https://github.com/gnome-terminator/terminator)，`Windows`推荐[`Windows Terminal`](https://github.com/microsoft/terminal)，`Mac OS`推荐[`iTerm2`](https://iterm2.com/)。
 - `Neovim 0.7.2`及以上
 安装教程在[这里](https://github.com/neovim/neovim/wiki/Installing-Neovim)。
 - 字体及图标：
@@ -69,13 +72,13 @@ rd -r ~\AppData\Local\nvim-data
 - `lua/custom/init.lua`在`init.lua`主文件的最后被加载，可以在这里添加自定义的命令等。
 - `lua/custom/chadrc.lua`用于覆盖`lua/core/default_config.lua`并基本上控制整个`nvchad`，因此必须采用跟`default_config.lua`一样的代码结构。
 
-`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中：
+~~`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中：
 ```sh
 mkdir lua/custom
 cp examples/init.lua lua/custom/init.lua
 cp examples/chadrc.lua lua/custom/chadrc.lua
 ```
-
+~~
 ## 安装Treesitter解析器
 [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)提供了代码高亮、缩进和折叠等功能。
 `nvim-treesitter`的正常运行需要满足以下条件：
