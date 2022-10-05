@@ -72,13 +72,12 @@ rd -r ~\AppData\Local\nvim-data
 - `lua/custom/init.lua`在`init.lua`主文件的最后被加载，可以在这里添加自定义的命令等。
 - `lua/custom/chadrc.lua`用于覆盖`lua/core/default_config.lua`并基本上控制整个`nvchad`，因此必须采用跟`default_config.lua`一样的代码结构。
 
-~~`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中：
+~~`NvChad`在`examples`文件夹中提供了`init.lua`和`chadrc.lua`，可以将其作为默认初始的自定义配置文件，将其复制到`custom`文件夹中：~~
 ```sh
 mkdir lua/custom
 cp examples/init.lua lua/custom/init.lua
 cp examples/chadrc.lua lua/custom/chadrc.lua
 ```
-~~
 ## 安装Treesitter解析器
 [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)提供了代码高亮、缩进和折叠等功能。
 `nvim-treesitter`的正常运行需要满足以下条件：
