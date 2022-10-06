@@ -29,6 +29,7 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | books43](http://www.books43.com/)
 
 # Widgets
+- [Unicode字符集](https://unicode-table.com/en/)
 - [PPTist | 一个基于 Vue3.x + TypeScript 的在线演示文稿（幻灯片）应用](https://github.com/pipipi-pikachu/PPTist)
 - [最简单方法创建README](https://readme.so/cn)
 - [好用的免费API汇总](https://www.runningcheese.com/api)
