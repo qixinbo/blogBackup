@@ -75,7 +75,8 @@ date: 2016-01-13 10:37:25
 
 # 软件
 - [Fig | 终端智能补全工具](https://fig.io)
-- [MacWk | 只收录精品Mac应用](https://www.macwk.com/)
+- [~~MacWk | 只收录精品Mac应用~~](https://www.macwk.com/)
+- [XXMac - 苹果电脑软件下载](https://www.xxmac.com/) 
 
 # 仓库精选
 - [RSSHub | 一个开源、简单易用、易于扩展的 RSS 生成器](https://github.com/DIYgod/RSSHub)
