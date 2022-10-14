@@ -4,6 +4,7 @@ date: 2016-01-13 10:37:25
 ---
 
 # Search
+- [工具达人](https://dartools.com/)
 - [千帆搜索 | 聚合网盘搜索引擎](https://pan.qianfan.app/)
 - [Crx搜搜 | 一个牛X的扩展和应用商店](https://www.crxsoso.com)
 - [开发者搜索](https://kaifa.baidu.com/)
