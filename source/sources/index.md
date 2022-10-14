@@ -81,6 +81,7 @@ date: 2016-01-13 10:37:25
 - [扩展迷 | Chrome插件推荐与下载](https://www.extfans.com/)
 
 # 仓库精选
+- [halo | ✍ 一款现代化的开源博客& CMS 系统](https://github.com/halo-dev/halo)
 - [RSSHub | 一个开源、简单易用、易于扩展的 RSS 生成器](https://github.com/DIYgod/RSSHub)
 - [Huginn | Create agents that monitor and act on your behalf](https://github.com/huginn/huginn)
 - [Jina | Neural Search](https://github.com/jina-ai/jina)
