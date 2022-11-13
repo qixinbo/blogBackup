@@ -84,6 +84,7 @@ date: 2016-01-13 08:41:43
 ## Linux相关
 - [Linux Mint 忘记的root密码怎么办？三步搞定！](https://linux265.com/news/7478.html)
 - [在 Linux 上使用 Clash 作代理 ](https://einverne.github.io/post/2021/03/linux-use-clash.html)
+- [搭建x-ui最稳妥的网上冲浪节点](https://blog.upx8.com/3085)
 
 ## Python相关
 - [numpy max vs amax vs maximum](https://stackoverflow.com/questions/33569668/numpy-max-vs-amax-vs-maximum)

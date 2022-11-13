@@ -10,6 +10,8 @@ date: 2016-01-13 10:37:25
 - [Crx搜搜 | 一个牛X的扩展和应用商店](https://www.crxsoso.com)
 - [开发者搜索](https://kaifa.baidu.com/)
 - [Sci-hub可用链接](http://tool.yovisun.com/scihub/)
+- [Sci-hub可用链接2](https://www.ooopn.com/tool/scihub/)
+- [Libgen可用链接](https://www.ooopn.com/tool/libgen/)
 - [中国科学院文献情报中心-OAuth-所友邮箱登录](https://webvpn.las.ac.cn)
 - [iData知识检索-cnki下载](https://www.cn-ki.net)
 - [论文驿站 - 师大云端图书馆下载站，一站式论文、专利下载平台](https://www.lunwenyizhan.com/)
