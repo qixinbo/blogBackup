@@ -17,6 +17,7 @@ date: 2016-01-13 08:41:43
 - [Y. Chen, D.Z. Li, B. Billia, H. Nguyen-Thi, X.B. Qi, N.M. Xiao. Quantitative phase-field simulation of dendritic equiaxed growth and comparison with in situ observation on Al-4wt.% Cu alloy by means of synchrotron X-ray radiography, ISIJ Int. 54 (2014) 445-451. (IF: 0.96)](https://www.jstage.jst.go.jp/article/isijinternational/54/2/54_445/_article)
 
 # 实用工具
+- [Mathics | Mathematica开源替代](https://github.com/Mathics3/mathics-core)
 - [Text Renderer](https://github.com/Sanster/text_renderer)
 - [PPOCRLabel | 适用于OCR领域的半自动化图形标注工具](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.6/PPOCRLabel/README_ch.md)
 - [交互式分割标注软件EISeg](https://github.com/PaddlePaddle/PaddleSeg/tree/release/2.5/EISeg)
