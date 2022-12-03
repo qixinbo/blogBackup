@@ -19,11 +19,11 @@ date: 2016-01-13 10:37:25
 - [SciHub学术导航](https://www.scihub.net.cn/)
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
 - [库问搜索-千万级文献免费下载](http://www.koovin.com/)
-- [SOCKBOOM 科学上网](https://sockboom.vip)
+- [小火箭吧](https://www.xiaohuojian8.com/)
+- [猫熊网络加速器](https://mxwljsq.top/auth/register)
+- [一元机场](https://xn--4gq62f52gdss.com/#/register?code=VPYoaYMp)
 - [iKuuu 科学上网](https://ikuuu.co)
 - [Jiasu.im 科学上网](http://i.jiasu.im/app.js)
-- [CordCloud](https://www.cordcloud.site/auth/register1?code=pfeoniCxO2mAJoy5CrwtKFPvYwEn5rDj)
-- [加速度](https://jsdcloud.xyz/auth/register)
 - [u9un](https://cp.u9un.com)
 
 # 电子书下载
