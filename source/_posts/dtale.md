@@ -164,7 +164,7 @@ outliers = s[(s < iqr_lower) | (s > iqr_upper)]
 ## 高亮显示Dtypes
 这是一个快速检查的方法，看看数据是否被正确归类了。通过点击这个菜单选项，它将为特定数据类型的每一列分配一个特定的背景颜色。
 |category|timedelta|float|int|date|string|bool|
-|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
+|-|-|-|-|-|-|-|
 |purple|orange|green|light blue|pink|white|yellow
 
 ![image](https://user-images.githubusercontent.com/6218739/208245622-8f2e5ec5-2b0d-4507-843a-3341c9fbf0e7.png)
