@@ -21,6 +21,8 @@ date: 2016-01-13 10:37:25
 - [库问搜索-千万级文献免费下载](http://www.koovin.com/)
 
 # 机场
+- [免费1](https://lncn.org/)
+- [免费2](https://github.com/Alvin9999/new-pac/wiki/ss%E5%85%8D%E8%B4%B9%E8%B4%A6%E5%8F%B7)
 - [小火箭吧](https://www.xiaohuojian8.com/)
 - [猫熊网络加速器](https://mxwljsq.top/auth/register)
 - [一元机场](https://xn--4gq62f52gdss.com/#/register?code=VPYoaYMp)
