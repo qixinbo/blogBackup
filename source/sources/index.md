@@ -4,6 +4,8 @@ date: 2016-01-13 10:37:25
 ---
 
 # Search
+- [提问的智慧](https://lmstfy.net/%E6%8F%90%E9%97%AE%E7%9A%84%E6%99%BA%E6%85%A7.pdf)
+- [让我帮你百度一下](https://lmstfy.net/baidu/)
 - [工具达人](https://dartools.com/)
 - [千帆搜索 | 聚合网盘搜索引擎](https://pan.qianfan.app/)
 - [毕方铺 | 网盘资源搜索](https://www.iizhi.cn/)
@@ -19,6 +21,10 @@ date: 2016-01-13 10:37:25
 - [SciHub学术导航](https://www.scihub.net.cn/)
 - [搜索快人一步 | 快搜](http://search.chongbuluo.com/)
 - [库问搜索-千万级文献免费下载](http://www.koovin.com/)
+- [A姐分享](https://www.ahhhhfs.com/)
+
+# 影视
+- 天空影视 [1](https://tkznp.com/), [2](http://tkys.vip/)
 
 # 机场
 - [免费1](https://lncn.org/)
