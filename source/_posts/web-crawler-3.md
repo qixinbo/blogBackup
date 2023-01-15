@@ -279,6 +279,7 @@ exists(RESULTS_DIR)&nbsp;<span class="hljs-keyword">or</span>&nbsp;makedirs(RESU
 <h3 data-nodeid="97797">总结</h3>
 <p data-nodeid="97798">本课时我们通过一个案例来体会了 Ajax 分析和爬取的基本流程，希望你能够对 Ajax 的分析和爬取的实现更加熟悉。</p>
 <p data-nodeid="97799">另外我们也可以观察到，由于 Ajax 接口大部分返回的是 JSON 数据，所以在一定程度上可以避免一些数据提取的工作，减轻我们的工作量。</p>
+
 # Selenium的基本使用
 <p data-nodeid="108788" class="">上个课时我们讲解了 Ajax 的分析方法，利用 Ajax 接口我们可以非常方便地完成数据的爬取。只要我们能找到 Ajax 接口的规律，就可以通过某些参数构造出对应的的请求，数据自然就能被轻松爬取到。</p>
 <p data-nodeid="110453" class="">但是，在很多情况下，Ajax 请求的接口通常会包含加密的参数，如 token、sign 等，如：<a href="https://dynamic2.scrape.center/" data-nodeid="110457">https://dynamic2.scrape.center/</a>，它的 Ajax 接口是包含一个 token 参数的，如图所示。</p>
@@ -791,6 +792,7 @@ browser.get_screenshot_as_file(<span class="hljs-string">'preview.png'</span>)
 <p data-nodeid="108971"><img src="https://s0.lgstatic.com/i/image3/M01/7D/12/Cgq2xl59oBeAdYtPAACc0m2Jx3Y415.png" alt="" data-nodeid="109327"></p>
 <p data-nodeid="108972">这样我们就在无头模式下完成了页面的抓取和截图操作。</p>
 <p data-nodeid="108973">现在，我们基本对 Selenium 的常规用法有了大体的了解。使用 Selenium，处理 JavaScript 渲染的页面不再是难事。</p>
+
 # Selenium爬取实战
 <p data-nodeid="123809" class="">在上一课时我们学习了 Selenium 的基本用法，本课时我们就来结合一个实际的案例来体会一下 Selenium 的适用场景以及使用方法。</p>
 <h3 data-nodeid="123810">准备工作</h3>
