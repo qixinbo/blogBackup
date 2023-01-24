@@ -1683,22 +1683,9 @@ scrapy genspider book dynamic5.scrape.center
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 <p data-nodeid="163585">首先我们构造列表页的初始请求，实现一个 start_requests 方法，如下所示：</p>
 <pre class="lang-go" data-nodeid="191096"><code data-language="go"># -*- coding: utf<span class="hljs-number">-8</span> -*-
 from scrapy <span class="hljs-keyword">import</span> Request, Spider
-​
-​
 class BookSpider(Spider):
  &nbsp; &nbsp;name = <span class="hljs-string">'book'</span>
  &nbsp; &nbsp;allowed_domains = [<span class="hljs-string">'dynamic5.scrape.center'</span>]
@@ -1714,33 +1701,6 @@ class BookSpider(Spider):
  &nbsp; &nbsp;def parse_index(self, response):
  &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-built_in">print</span>(response.text)
 </code></pre>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <p data-nodeid="192069">这时如果我们直接运行这个 Spider，在 parse_index 方法里面打印输出 Response 的内容，结果如下：</p>
@@ -1764,8 +1724,6 @@ class BookSpider(Spider):
 <pre class="lang-go" data-nodeid="197569"><code data-language="go"># -*- coding: utf<span class="hljs-number">-8</span> -*-
 from gerapy_pyppeteer <span class="hljs-keyword">import</span> PyppeteerRequest
 from scrapy <span class="hljs-keyword">import</span> Request, Spider
-​
-​
 class BookSpider(Spider):
  &nbsp; &nbsp;name = <span class="hljs-string">'book'</span>
  &nbsp; &nbsp;allowed_domains = [<span class="hljs-string">'dynamic5.scrape.center'</span>]
@@ -1851,9 +1809,7 @@ from twisted.internet.defer <span class="hljs-keyword">import</span> Deferred
 <pre class="lang-dart" data-nodeid="210618"><code data-language="dart"><span class="hljs-keyword">import</span> sys
 from twisted.internet.asyncioreactor <span class="hljs-keyword">import</span> AsyncioSelectorReactor
 <span class="hljs-keyword">import</span> twisted.internet
-​
 reactor = AsyncioSelectorReactor(asyncio.get_event_loop())
-​
 # install AsyncioSelectorReactor
 twisted.internet.reactor = reactor
 sys.modules[<span class="hljs-string">'twisted.internet.reactor'</span>] = reactor
@@ -2003,19 +1959,6 @@ sys.modules[<span class="hljs-string">'twisted.internet.reactor'</span>] = react
  &nbsp; &nbsp; &nbsp; &nbsp;request=request
  &nbsp;  )
 </code></pre>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <p data-nodeid="218858">代码内容比较多，我们慢慢来说。</p>
