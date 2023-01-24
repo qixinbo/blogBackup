@@ -1782,3 +1782,22 @@ GERAPY_PYPPETEER_HEADLESS = False
 <p data-nodeid="202102">这样我们就借助 GerapyPyppeteer 完成了 JavaScript 渲染页面的爬取。</p>
 
 
+<h4 data-nodeid="202878" class="">原理分析</h4>
+<p data-nodeid="163608">但上面仅仅是我们借助 GerapyPyppeteer 实现了 Scrapy 和 Pyppeteer 的对接，但其背后的原理是怎样的呢？</p>
+<p data-nodeid="163609">我们可以详细分析它的源码，其 GitHub 地址为 <a href="https://github.com/Gerapy/GerapyPyppeteer" data-nodeid="163749">https://github.com/Gerapy/GerapyPyppeteer</a>。</p>
+<p data-nodeid="163610">首先通过分析可以发现其最核心的内容就是实现了一个 PyppeteerMiddleware，这是一个 Downloader Middleware，这里最主要的就是 process_request  的实现，核心代码如下所示：</p>
+<pre class="lang-java" data-nodeid="203394"><code data-language="java"><span class="hljs-function">def <span class="hljs-title">process_request</span><span class="hljs-params">(self, request, spider)</span>:
+ &nbsp; &nbsp;logger.<span class="hljs-title">debug</span><span class="hljs-params">(<span class="hljs-string">'processing request %s'</span>, request)</span> &nbsp;
+ &nbsp; &nbsp;return <span class="hljs-title">as_deferred</span><span class="hljs-params">(self._process_request(request, spider)</span>)
+</span></code></pre>
+
+<p data-nodeid="204424">这里其实就是调用了一个 _process_request 方法，这个方法的返回结果被 as_deferred 方法调用了。</p>
+<p data-nodeid="204425">这个 as_deferred 是怎么定义的呢？代码如下：</p>
+
+<pre class="lang-java" data-nodeid="203909"><code data-language="java"><span class="hljs-keyword">import</span> asyncio
+from twisted.internet.defer <span class="hljs-keyword">import</span> Deferred
+​
+<span class="hljs-function">def <span class="hljs-title">as_deferred</span><span class="hljs-params">(f)</span>:
+ &nbsp; &nbsp;return Deferred.<span class="hljs-title">fromFuture</span><span class="hljs-params">(asyncio.ensure_future(f)</span>)
+</span></code></pre>
+
