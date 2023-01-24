@@ -178,6 +178,7 @@ date: 2023-1-25
 </ul>
 <p data-nodeid="1314">好了，到现在为止我们就大体知道了 Scrapy 的基本架构并实操创建了一个 Scrapy 项目，后面我们会详细了解 Scrapy 的用法，感受它的强大，下节课见。</p>
 
+
 # 初窥门路Scrapy的基本使用
 <p data-nodeid="1060">接下来介绍一个简单的项目，完成一遍 Scrapy 抓取流程。通过这个过程，我们可以对 Scrapy 的基本用法和原理有大体了解。</p>
 
@@ -1002,6 +1003,7 @@ AttributeError: <span class="hljs-string">'HtmlResponse'</span> object has no at
 <p data-nodeid="65552">以上内容便是 Scrapy 选择器的用法，它包括两个常用选择器和正则匹配功能。如果你熟练掌握 XPath 语法、CSS 选择器语法、正则表达式语法可以大大提高数据提取效率。</p>
 
 
+
 # 功能强大的Middleware的用法
 <p data-nodeid="328225" class="">我们在 Scrapy 架构中，可以看到有一个叫作 Middleware 的概念，中文翻译过来就叫作中间件，在 Scrapy 中有两种 Middleware，一种是 Spider Middleware，另一种是 Downloader Middleware，本节课我们分别来介绍下。</p>
 <h3 data-nodeid="328226">Spider Middleware 的用法</h3>
@@ -1376,6 +1378,7 @@ class <span class="hljs-title">HttpbinSpider</span><span class="hljs-params">(sc
 <p data-nodeid="328426" class="">本节讲解了 Spider Middleware 和 Downloader Middleware 的基本用法。利用它们我们可以方便地实现爬虫逻辑的灵活处理，需要好好掌握。</p>
 
 
+
 # 哪都能存——Item Pipeline的用法
 <p data-nodeid="1449" class="">在前面的示例中我们已经了解了 Item Pipeline 项目管道的基本概念，本节课我们就深入详细讲解它的用法。</p>
 <p data-nodeid="1450">首先我们看看 Item Pipeline 在 Scrapy 中的架构，如图所示。</p>
@@ -1664,10 +1667,10 @@ class <span class="hljs-title">ImagePipeline</span><span class="hljs-params">(Im
 <h3 data-nodeid="1591">10. 结语</h3>
 <p data-nodeid="1592" class="">Item Pipeline 是 Scrapy 非常重要的组件，数据存储几乎都是通过此组件实现的。请你务必认真掌握此内容。</p>
 
+
+
 # 遇到动态页面怎么办——详解渲染页面爬取
 <p data-nodeid="165308">前面我们已经介绍了 Scrapy 的一些常见用法，包括服务端渲染页面的抓取和 API 的抓取，Scrapy 发起 Request 之后，返回的 Response 里面就包含了想要的结果。</p>
-
-
 
 <p data-nodeid="163554">但是现在越来越多的网页都已经演变为 SPA 页面，其页面在浏览器中呈现的结果是经过 JavaScript 渲染得到的，如果我们使用 Scrapy 直接对其进行抓取的话，其结果和使用 requests 没有什么区别。</p>
 <p data-nodeid="163555">那我们真的要使用 Scrapy 完成对 JavaScript 渲染页面的抓取应该怎么办呢？</p>
