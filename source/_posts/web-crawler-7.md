@@ -133,6 +133,7 @@ IDA：<a href="https://www.hex-rays.com/">https://www.hex-rays.com/</a></p>
 <li><a href="https://github.com/WooyunDota/DroidDrops/blob/master/2018/SSL.Pinning.Practice.md">https://github.com/WooyunDota/DroidDrops/blob/master/2018/SSL.Pinning.Practice.md</a></li>
 </ul>
 
+
 # 抓包利器Charle的使用
 <p data-nodeid="39471" class="">本课时我们主要学习如何使用 Charles。</p>
 <p data-nodeid="39472">Charles 是一个网络抓包工具，我们可以用它来做 App 的抓包分析，得到 App 运行过程中发生的所有网络请求和响应内容，这就和 Web 端浏览器的开发者工具 Network 部分看到的结果一致。</p>
@@ -218,6 +219,8 @@ data {<span class="hljs-string">'count'</span>: <span class="hljs-number">100</s
 <p data-nodeid="39534">以上内容便是通过 Charles 抓包分析 App 请求的过程。通过 Charles，我们成功抓取 App 中流经的网络数据包，捕获原始的数据，还可以修改原始请求和重新发起修改后的请求进行接口测试。</p>
 <p data-nodeid="39535">知道了请求和响应的具体信息，如果我们可以分析得到请求的 URL 和参数的规律，直接用程序模拟即可批量抓取，这当然最好不过了。</p>
 <p data-nodeid="39536" class="">但是随着技术的发展，App 接口往往会带有密钥或者无法抓包，后面我们会继续讲解此类情形的处理操作。</p>
+
+
 # 实时处理利器mitmproxy的使用
 <p>在上一节课我们讲解了 Charles 的使用，它可以帮助我们抓取 HTTP 和 HTTPS 的数据包，抓到请求之后，我们如果能够分析出接口请求的一些规律，就能轻松通过 Python 脚本来进行改写。可是当请求里面包含一些无规律的参数的时候，可能就束手无策了。本节课我们介绍一个叫作 mitmproxy 的工具，它可以对抓包的结果通过脚本进行实时处理和保存，接下来我们来一起了解下吧。</p>
 <h3>介绍</h3>
@@ -438,6 +441,8 @@ def <span class="hljs-title">response</span><span class="hljs-params">(flow)</sp
 </code></pre>
 <p>可以看到这就是我们在 Charles 中看到的返回结果中的一条电影数据的内容，我们通过 mitmdump 对接实时处理脚本实现了分析和保存。</p>
 <p>以上便是 mitmproxy 和 mitmdump 的基本用法。</p>
+
+
 # 可见即可爬——Appium的使用
 <p>本课时我们主要学习如何使用 Appium。</p>
 <p>Appium 是一个跨平台移动端自动化测试工具，可以非常便捷地为 iOS 和 Android 平台创建自动化测试用例。它可以模拟 App 内部的各种操作，如点击、滑动、文本输入等，只要我们手工操作的动作 Appium 都可以完成。在前面我们了解过 Selenium，它是一个网页端的自动化测试工具。Appium 实际上继承了 Selenium，Appium 也是利用 WebDriver 来实现 App 的自动化测试的。对 iOS 设备来说，Appium 使用 UIAutomation 来实现驱动。对于 Android 来说，它使用 UiAutomator 和 Selendroid 来实现驱动。</p>
@@ -684,6 +689,8 @@ a2.press(els[<span class="hljs-number">1</span>]).move_to(x=<span class="hljs-nu
 更多的 API 操作可以参考 <a href="https://testerhome.com/topics/3711">https://testerhome.com/topics/3711</a>。</p>
 <h3>结语</h3>
 <p>本节中，我们主要了解了 Appium 的操作 App 的基本用法以及常用 API 的用法。利用它我们就可以对 App 进行可视化操作并像 Selenium 一样提取页面信息了。</p>
+
+
 # 更好用的自动化工具airtest的使用
 <p>在上一节课我们了解了 Appium 的用法，利用 Appium 可以方便地完成 App 的自动化控制，但在使用过程中或多或少还会有些不方便的地方，比如响应速度慢，提供的 API 功能有限等。</p>
 <p>本课时我们再介绍另外一个更好用的自动化测试工具，叫作 airtest，它提供了一些更好用的 API，同时提供了非常强大的 IDE，开发效率和响应速度相比 Appium 也有提升。</p>
@@ -917,6 +924,7 @@ current_count, last_count = len(viewed), len(viewed)
 <p>最后所有的电影名称就被我们提取出来了。</p>
 <h3>总结</h3>
 <p>以上我们便讲解了 AirtestIDE、Airtest、Poco 的基本用法，并用它们来完成了一个 App 数据的简单爬取。</p>
+
 
 # 无所不能的Xposed的使用
 <p>如果你对逆向有所涉猎的话，可能听说过 Hook，利用 Hook 技术我们可以在某一逻辑的前后加入自定义的逻辑处理代码，几乎可以实现任意逻辑的修改。</p> 
