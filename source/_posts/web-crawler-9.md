@@ -1622,25 +1622,4 @@ class <span class="hljs-title">ImagePipeline</span><span class="hljs-params">(Im
 <p data-nodeid="163554">但是现在越来越多的网页都已经演变为 SPA 页面，其页面在浏览器中呈现的结果是经过 JavaScript 渲染得到的，如果我们使用 Scrapy 直接对其进行抓取的话，其结果和使用 requests 没有什么区别。</p>
 <p data-nodeid="163555">那我们真的要使用 Scrapy 完成对 JavaScript 渲染页面的抓取应该怎么办呢？</p>
 <p data-nodeid="163556">之前我们介绍了 Selenium 和 Pyppeteer 都可以实现 JavaScript 渲染页面的抓取，那用了 Scrapy 之后应该这么办呢？Scrapy 能和 Selenium 或 Pyppeteer 一起使用吗？答案是肯定的，我们可以将 Selenium 或 Pyppeteer 通过 Downloader Middleware 和 Scrapy 融合起来，实现 JavaScript 渲染页面的抓取，本节我们就来了解下它的实现吧。</p>
-<h3 data-nodeid="165800" class="">回顾</h3>
-
-<p data-nodeid="163558">在前面我们介绍了 Downloader Middleware 的用法，在 Downloader Middleware 中有三个我们可以实现的方法 process_request、process_response 以及 process_exception 方法。</p>
-<p data-nodeid="163559">我们再看下 process_request 方法和其不同的返回值的效果：</p>
-<ul data-nodeid="163560">
-<li data-nodeid="163561">
-<p data-nodeid="163562">当返回为 None 时，Scrapy 将继续处理该 Request，接着执行其他 Downloader Middleware 的 process_request 方法，一直到 Downloader 把 Request 执行完后得到 Response 才结束。这个过程其实就是修改 Request 的过程，不同的 Downloader Middleware 按照设置的优先级顺序依次对 Request 进行修改，最后送至 Downloader 执行。</p>
-</li>
-<li data-nodeid="163563">
-<p data-nodeid="163564">当返回为 Response 对象时，更低优先级的 Downloader Middleware 的 process_request 和 process_exception 方法就不会被继续调用，每个 Downloader Middleware 的 process_response 方法转而被依次调用。调用完毕之后，直接将 Response 对象发送给 Spider 来处理。</p>
-</li>
-<li data-nodeid="163565">
-<p data-nodeid="163566">当返回为 Request 对象时，更低优先级的 Downloader Middleware 的 process_request 方法会停止执行。这个 Request 会重新放到调度队列里，其实它就是一个全新的 Request，等待被调度。如果被 Scheduler 调度了，那么所有的 Downloader Middleware 的 process_request 方法都会被重新按照顺序执行。</p>
-</li>
-<li data-nodeid="163567">
-<p data-nodeid="163568">如果 IgnoreRequest 异常抛出，则所有的 Downloader Middleware 的 process_exception 方法会依次执行。如果没有一个方法处理这个异常，那么 Request 的 errorback 方法就会回调。如果该异常还没有被处理，那么它便会被忽略。</p>
-</li>
-</ul>
-<p data-nodeid="163569">这里我们注意到第二个选项，当返回结果为 Response 对象时，低优先级的 process_request 方法就不会被继续调用了，这个 Response 对象会直接经由 process_response 方法处理后转交给 Spider 来解析。</p>
-<p data-nodeid="163570">然后再接着想一想，process_request 接收的参数是 request，即 Request 对象，怎么会返回 Response 对象呢？原因可想而知了，这个 Request 对象不再经由 Scrapy 的 Downloader 来处理了，而是在 process_request 方法里面直接就完成了 Request 的发送操作，然后在得到了对应的 Response 结果后再将其返回就好了。</p>
-<p data-nodeid="163571">那么对于 JavaScript 渲染的页面来说，照这个方法来做，我们就可以把 Selenium 或 Pyppeteer 加载页面的过程在 process_request 方法里面实现，得到网页渲染完后的源代码后直接构造 Response 返回即可，这样我们就完成了借助 Downloader Middleware 实现 Scrapy 爬取动态渲染页面的过程。</p>
 
