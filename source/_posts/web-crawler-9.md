@@ -227,18 +227,6 @@ tutorial &nbsp; &nbsp; &nbsp; &nbsp; <span class="hljs-comment"># 项目的模�
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 <h3 data-nodeid="16093" class="">创建 Spider</h3>
 
 <p data-nodeid="24">Spider 是自己定义的类，Scrapy 用它从网页里抓取内容，并解析抓取的结果。不过这个类必须继承 Scrapy 提供的 Spider 类 scrapy.Spider，还要定义 Spider 的名称和起始请求，以及怎样处理爬取后的结果的方法。</p>
@@ -246,25 +234,6 @@ tutorial &nbsp; &nbsp; &nbsp; &nbsp; <span class="hljs-comment"># 项目的模�
 <pre class="lang-java" data-nodeid="31472"><code data-language="java">cd tutorial
 scrapy genspider quotes &nbsp; &nbsp; 
 </code></pre>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -279,18 +248,6 @@ scrapy genspider quotes &nbsp; &nbsp;
  &nbsp; &nbsp;<span class="hljs-title">def</span> <span class="hljs-title">parse</span>(<span class="hljs-title">self</span>, <span class="hljs-title">response</span>):
  &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-title">pass</span>
 </span></code></pre>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <p data-nodeid="29">这里有三个属性——name、allowed_domains 和 start_urls，还有一个方法 parse。</p>
@@ -321,13 +278,6 @@ scrapy genspider quotes &nbsp; &nbsp;
  &nbsp; &nbsp;<span class="hljs-title">author</span> = <span class="hljs-title">scrapy</span>.<span class="hljs-title">Field</span>()
  &nbsp; &nbsp;<span class="hljs-title">tags</span> = <span class="hljs-title">scrapy</span>.<span class="hljs-title">Field</span>()
 </span></code></pre>
-
-
-
-
-
-
-
 
 
 <p data-nodeid="44">这里定义了三个字段，将类的名称修改为 QuoteItem，接下来爬取时我们会使用到这个 Item。</p>
@@ -1005,6 +955,7 @@ AttributeError: <span class="hljs-string">'HtmlResponse'</span> object has no at
 
 
 # 功能强大的Middleware的用法
+
 <p data-nodeid="328225" class="">我们在 Scrapy 架构中，可以看到有一个叫作 Middleware 的概念，中文翻译过来就叫作中间件，在 Scrapy 中有两种 Middleware，一种是 Spider Middleware，另一种是 Downloader Middleware，本节课我们分别来介绍下。</p>
 <h3 data-nodeid="328226">Spider Middleware 的用法</h3>
 <p data-nodeid="328227">Spider Middleware 是介入 Scrapy 的 Spider 处理机制的钩子框架。</p>
@@ -1380,6 +1331,7 @@ class <span class="hljs-title">HttpbinSpider</span><span class="hljs-params">(sc
 
 
 # 哪都能存——Item Pipeline的用法
+
 <p data-nodeid="1449" class="">在前面的示例中我们已经了解了 Item Pipeline 项目管道的基本概念，本节课我们就深入详细讲解它的用法。</p>
 <p data-nodeid="1450">首先我们看看 Item Pipeline 在 Scrapy 中的架构，如图所示。</p>
 <p data-nodeid="1451"><img src="https://s0.lgstatic.com/i/image/M00/32/C9/Ciqc1F8OyNqAAbnKAAJygBiwVD4320.png" alt="Drawing 0.png" data-nodeid="1597"></p>
@@ -1670,6 +1622,7 @@ class <span class="hljs-title">ImagePipeline</span><span class="hljs-params">(Im
 
 
 # 遇到动态页面怎么办——详解渲染页面爬取
+
 <p data-nodeid="165308">前面我们已经介绍了 Scrapy 的一些常见用法，包括服务端渲染页面的抓取和 API 的抓取，Scrapy 发起 Request 之后，返回的 Response 里面就包含了想要的结果。</p>
 
 <p data-nodeid="163554">但是现在越来越多的网页都已经演变为 SPA 页面，其页面在浏览器中呈现的结果是经过 JavaScript 渲染得到的，如果我们使用 Scrapy 直接对其进行抓取的话，其结果和使用 requests 没有什么区别。</p>
