@@ -1326,3 +1326,828 @@ class <span class="hljs-title">HttpbinSpider</span><span class="hljs-params">(sc
 <h3 data-nodeid="328425">结语</h3>
 <p data-nodeid="328426" class="">本节讲解了 Spider Middleware 和 Downloader Middleware 的基本用法。利用它们我们可以方便地实现爬虫逻辑的灵活处理，需要好好掌握。</p>
 
+
+# 哪都能存，Item Pipeline的用法
+<p data-nodeid="1449" class="">在前面的示例中我们已经了解了 Item Pipeline 项目管道的基本概念，本节课我们就深入详细讲解它的用法。</p>
+<p data-nodeid="1450">首先我们看看 Item Pipeline 在 Scrapy 中的架构，如图所示。</p>
+<p data-nodeid="1451"><img src="https://s0.lgstatic.com/i/image/M00/32/C9/Ciqc1F8OyNqAAbnKAAJygBiwVD4320.png" alt="Drawing 0.png" data-nodeid="1597"></p>
+<p data-nodeid="1452">图中的最左侧即为 Item Pipeline，它的调用发生在 Spider 产生 Item 之后。当 Spider 解析完 Response 之后，Item 就会传递到 Item Pipeline，被定义的 Item Pipeline 组件会顺次调用，完成一连串的处理过程，比如数据清洗、存储等。</p>
+<p data-nodeid="1453">它的主要功能有：</p>
+<ul data-nodeid="1454">
+<li data-nodeid="1455">
+<p data-nodeid="1456">清洗 HTML 数据；</p>
+</li>
+<li data-nodeid="1457">
+<p data-nodeid="1458">验证爬取数据，检查爬取字段；</p>
+</li>
+<li data-nodeid="1459">
+<p data-nodeid="1460">查重并丢弃重复内容；</p>
+</li>
+<li data-nodeid="1461">
+<p data-nodeid="1462">将爬取结果储存到数据库。</p>
+</li>
+</ul>
+<h3 data-nodeid="1463">1. 核心方法</h3>
+<p data-nodeid="1464">我们可以自定义 Item Pipeline，只需要实现指定的方法就可以，其中必须要实现的一个方法是：</p>
+<ul data-nodeid="1465">
+<li data-nodeid="1466">
+<p data-nodeid="1467">process_item(item, spider)</p>
+</li>
+</ul>
+<p data-nodeid="1468">另外还有几个比较实用的方法，它们分别是：</p>
+<ul data-nodeid="1469">
+<li data-nodeid="1470">
+<p data-nodeid="1471">open_spider(spider)</p>
+</li>
+<li data-nodeid="1472">
+<p data-nodeid="1473">close_spider(spider)</p>
+</li>
+<li data-nodeid="1474">
+<p data-nodeid="1475">from_crawler(cls, crawler)</p>
+</li>
+</ul>
+<p data-nodeid="1476">下面我们对这几个方法的用法做下详细的介绍：</p>
+<h4 data-nodeid="1477">process_item(item, spider)</h4>
+<p data-nodeid="1478">process_item() 是必须要实现的方法，被定义的 Item Pipeline 会默认调用这个方法对 Item 进行处理。比如，我们可以进行数据处理或者将数据写入数据库等操作。它必须返回 Item 类型的值或者抛出一个 DropItem 异常。</p>
+<p data-nodeid="1479">process_item() 方法的参数有如下两个：</p>
+<ul data-nodeid="1480">
+<li data-nodeid="1481">
+<p data-nodeid="1482">item，是 Item 对象，即被处理的 Item；</p>
+</li>
+<li data-nodeid="1483">
+<p data-nodeid="1484">spider，是 Spider 对象，即生成该 Item 的 Spider。</p>
+</li>
+</ul>
+<p data-nodeid="1485">下面对该方法的返回类型归纳如下：</p>
+<ul data-nodeid="1486">
+<li data-nodeid="1487">
+<p data-nodeid="1488">如果返回的是 Item 对象，那么此 Item 会被低优先级的 Item Pipeline 的 process_item() 方法进行处理，直到所有的方法被调用完毕。</p>
+</li>
+<li data-nodeid="1489">
+<p data-nodeid="1490">如果抛出的是 DropItem 异常，那么此 Item 就会被丢弃，不再进行处理。</p>
+</li>
+</ul>
+<h4 data-nodeid="1491">open_spider(self, spider)</h4>
+<p data-nodeid="1492">open_spider() 方法是在 Spider 开启的时候被自动调用的，在这里我们可以做一些初始化操作，如开启数据库连接等。其中参数 spider 就是被开启的 Spider 对象。</p>
+<h4 data-nodeid="1493">close_spider(spider)</h4>
+<p data-nodeid="1494">close_spider() 方法是在 Spider 关闭的时候自动调用的，在这里我们可以做一些收尾工作，如关闭数据库连接等，其中参数 spider 就是被关闭的 Spider 对象。</p>
+<h4 data-nodeid="1495">from_crawler(cls, crawler)</h4>
+<p data-nodeid="1496">from_crawler() 方法是一个类方法，用 @classmethod 标识，是一种依赖注入的方式。它的参数是 crawler，通过 crawler 对象，我们可以拿到 Scrapy 的所有核心组件，如全局配置的每个信息，然后创建一个 Pipeline 实例。参数 cls 就是 Class，最后返回一个 Class 实例。</p>
+<p data-nodeid="1497">下面我们用一个实例来加深对 Item Pipeline 用法的理解。</p>
+<h3 data-nodeid="1498">2. 本节目标</h3>
+<p data-nodeid="1499">我们以爬取 360 摄影美图为例，来分别实现 MongoDB 存储、MySQL 存储、Image 图片存储的三个 Pipeline。</p>
+<h3 data-nodeid="1500">3. 准备工作</h3>
+<p data-nodeid="1501">请确保已经安装好 MongoDB 和 MySQL 数据库，安装好 Python 的 PyMongo、PyMySQL、Scrapy 框架，另外需要安装 pillow 图像处理库，如果没有安装可以参考前文的安装说明。</p>
+<h3 data-nodeid="1502">4. 抓取分析</h3>
+<p data-nodeid="1503">我们这次爬取的目标网站为：<a href="https://image.so.com" data-nodeid="1671">https://image.so.com</a>。打开此页面，切换到摄影页面，网页中呈现了许许多多的摄影美图。我们打开浏览器开发者工具，过滤器切换到 XHR 选项，然后下拉页面，可以看到下面就会呈现许多 Ajax 请求，如图所示。</p>
+<p data-nodeid="1504"><img src="https://s0.lgstatic.com/i/image/M00/32/D4/CgqCHl8OyPCATwEaAA4FKjXCH38464.png" alt="Drawing 1.png" data-nodeid="1675"></p>
+<p data-nodeid="1505">我们查看一个请求的详情，观察返回的数据结构，如图所示。</p>
+<p data-nodeid="1506"><img src="https://s0.lgstatic.com/i/image/M00/32/C9/Ciqc1F8OyPiAHQO_AAKWgKacbAY613.png" alt="Drawing 2.png" data-nodeid="1679"></p>
+<p data-nodeid="1507">返回格式是 JSON。其中 list 字段就是一张张图片的详情信息，包含了 30 张图片的 ID、名称、链接、缩略图等信息。另外观察 Ajax 请求的参数信息，有一个参数 sn 一直在变化，这个参数很明显就是偏移量。当 sn 为 30 时，返回的是前 30 张图片，sn 为 60 时，返回的就是第 31~60 张图片。另外，ch 参数是摄影类别，listtype 是排序方式，temp 参数可以忽略。</p>
+<p data-nodeid="1508">所以我们抓取时只需要改变 sn 的数值就好了。下面我们用 Scrapy 来实现图片的抓取，将图片的信息保存到 MongoDB、MySQL，同时将图片存储到本地。</p>
+<h3 data-nodeid="1509">5. 新建项目</h3>
+<p data-nodeid="1510">首先新建一个项目，命令如下：</p>
+<pre class="lang-java" data-nodeid="1511"><code data-language="java">scrapy startproject images360
+</code></pre>
+<p data-nodeid="1512">接下来新建一个 Spider，命令如下：</p>
+<pre class="lang-java" data-nodeid="1513"><code data-language="java">scrapy genspider images images.so.com
+</code></pre>
+<p data-nodeid="1514">这样我们就成功创建了一个 Spider。</p>
+<h3 data-nodeid="1515">6. 构造请求</h3>
+<p data-nodeid="1516">接下来定义爬取的页数。比如爬取 50 页、每页 30 张，也就是 1500 张图片，我们可以先在 settings.py 里面定义一个变量 MAX_PAGE，添加如下定义：</p>
+<pre class="lang-java" data-nodeid="1517"><code data-language="java">MAX_PAGE = <span class="hljs-number">50</span>
+</code></pre>
+<p data-nodeid="1518">定义 start_requests() 方法，用来生成 50 次请求，如下所示：</p>
+<pre class="lang-java" data-nodeid="1519"><code data-language="java"><span class="hljs-function">def <span class="hljs-title">start_requests</span><span class="hljs-params">(self)</span>:
+ &nbsp; &nbsp;data </span>= {<span class="hljs-string">'ch'</span>: <span class="hljs-string">'photography'</span>, <span class="hljs-string">'listtype'</span>: <span class="hljs-string">'new'</span>}
+ &nbsp; &nbsp;base_url = <span class="hljs-string">'https://image.so.com/zjl?'</span>
+ &nbsp; &nbsp;<span class="hljs-function"><span class="hljs-keyword">for</span> page in <span class="hljs-title">range</span><span class="hljs-params">(<span class="hljs-number">1</span>, self.settings.get(<span class="hljs-string">'MAX_PAGE'</span>)</span> + 1):
+ &nbsp; &nbsp; &nbsp; &nbsp;data['sn'] </span>= page * <span class="hljs-number">30</span>
+ &nbsp; &nbsp; &nbsp; &nbsp;params = urlencode(data)
+ &nbsp; &nbsp; &nbsp; &nbsp;url = base_url + <span class="hljs-function">params
+ &nbsp; &nbsp; &nbsp; &nbsp;yield <span class="hljs-title">Request</span><span class="hljs-params">(url, self.parse)</span>
+</span></code></pre>
+<p data-nodeid="1520">在这里我们首先定义了初始的两个参数，sn 参数是遍历循环生成的。然后利用 urlencode 方法将字典转化为 URL 的 GET 参数，构造出完整的 URL，构造并生成 Request。</p>
+<p data-nodeid="1521">还需要引入 scrapy.Request 和 urllib.parse 模块，如下所示：</p>
+<pre class="lang-java" data-nodeid="1522"><code data-language="java">from scrapy <span class="hljs-keyword">import</span> Spider, Request
+from urllib.parse <span class="hljs-keyword">import</span> urlencode
+</code></pre>
+<p data-nodeid="1523">再修改 settings.py 中的 ROBOTSTXT_OBEY 变量，将其设置为 False，否则无法抓取，如下所示：</p>
+<pre class="lang-java" data-nodeid="1524"><code data-language="java">ROBOTSTXT_OBEY = False
+</code></pre>
+<p data-nodeid="1525">运行爬虫，即可以看到链接都请求成功，执行命令如下所示：</p>
+<pre class="lang-java" data-nodeid="1526"><code data-language="java">scrapy crawl images
+</code></pre>
+<p data-nodeid="1527">运行示例结果如图所示。</p>
+<p data-nodeid="1528"><img src="https://s0.lgstatic.com/i/image/M00/32/C9/Ciqc1F8OyReAWgKjAAGstwAqxoU157.png" alt="Drawing 3.png" data-nodeid="1708"></p>
+<p data-nodeid="1529">所有请求的状态码都是 200，这就证明图片信息爬取成功了。</p>
+<h3 data-nodeid="1530">7. 提取信息</h3>
+<p data-nodeid="1531">首先定义一个叫作 ImageItem 的 Item，如下所示：</p>
+<pre class="lang-java" data-nodeid="1532"><code data-language="java">from scrapy <span class="hljs-keyword">import</span> Item, <span class="hljs-function">Field
+class <span class="hljs-title">ImageItem</span><span class="hljs-params">(Item)</span>:
+ &nbsp; &nbsp;collection </span>= table = <span class="hljs-string">'images'</span>
+ &nbsp; &nbsp;id = Field()
+ &nbsp; &nbsp;url = Field()
+ &nbsp; &nbsp;title = Field()
+ &nbsp; &nbsp;thumb = Field()
+</code></pre>
+<p data-nodeid="1533">在这里我们定义了 4 个字段，包括图片的 ID、链接、标题、缩略图。另外还有两个属性 collection 和 table，都定义为 images 字符串，分别代表 MongoDB 存储的 Collection 名称和 MySQL 存储的表名称。<br>
+接下来我们提取 Spider 里有关信息，将 parse 方法改写为如下所示：</p>
+<pre class="lang-java" data-nodeid="1534"><code data-language="java"><span class="hljs-function">def <span class="hljs-title">parse</span><span class="hljs-params">(self, response)</span>:
+    result </span>= json.loads(response.text)
+    <span class="hljs-keyword">for</span> image in result.get(<span class="hljs-string">'list'</span>):
+        item = ImageItem()
+        item[<span class="hljs-string">'id'</span>] = image.get(<span class="hljs-string">'id'</span>)
+        item[<span class="hljs-string">'url'</span>] = image.get(<span class="hljs-string">'qhimg_url'</span>)
+        item[<span class="hljs-string">'title'</span>] = image.get(<span class="hljs-string">'title'</span>)
+        item[<span class="hljs-string">'thumb'</span>] = image.get(<span class="hljs-string">'qhimg_thumb'</span>)
+        yield item
+</code></pre>
+<p data-nodeid="1535">首先解析 JSON，遍历其 list 字段，取出一个个图片信息，然后再对 ImageItem 进行赋值，生成 Item 对象。<br>
+这样我们就完成了信息的提取。</p>
+<h3 data-nodeid="1536">8. 存储信息</h3>
+<p data-nodeid="1537">接下来我们需要将图片的信息保存到 MongoDB、MySQL 中，同时将图片保存到本地。</p>
+<h4 data-nodeid="1538">MongoDB</h4>
+<p data-nodeid="1539">首先确保 MongoDB 已经正常安装并且能够正常运行。</p>
+<p data-nodeid="1540">我们用一个 MongoPipeline 将信息保存到 MongoDB 中，在 pipelines.py 里添加如下类的实现：</p>
+<pre class="lang-java" data-nodeid="1541"><code data-language="java"><span class="hljs-function"><span class="hljs-keyword">import</span> pymongo
+class <span class="hljs-title">MongoPipeline</span><span class="hljs-params">(object)</span>:
+    def <span class="hljs-title">__init__</span><span class="hljs-params">(self, mongo_uri, mongo_db)</span>:
+        self.mongo_uri </span>= mongo_uri
+        self.mongo_db = mongo_db
+
+    <span class="hljs-meta">@classmethod</span>
+    <span class="hljs-function">def <span class="hljs-title">from_crawler</span><span class="hljs-params">(cls, crawler)</span>:
+        return <span class="hljs-title">cls</span><span class="hljs-params">(mongo_uri=crawler.settings.get(<span class="hljs-string">'MONGO_URI'</span>)</span>,
+            mongo_db</span>=crawler.settings.get(<span class="hljs-string">'MONGO_DB'</span>)
+        )
+    <span class="hljs-function">def <span class="hljs-title">open_spider</span><span class="hljs-params">(self, spider)</span>:
+        self.client </span>= pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+    <span class="hljs-function">def <span class="hljs-title">process_item</span><span class="hljs-params">(self, item, spider)</span>:
+        self.db[item.collection].<span class="hljs-title">insert</span><span class="hljs-params">(dict(item)</span>)
+        return item
+    def <span class="hljs-title">close_spider</span><span class="hljs-params">(self, spider)</span>:
+        self.client.<span class="hljs-title">close</span><span class="hljs-params">()</span>
+</span></code></pre>
+<p data-nodeid="1542">这里需要用到两个变量，MONGO_URI 和 MONGO_DB，即存储到 MongoDB 的链接地址和数据库名称。我们在 settings.py 里添加这两个变量，如下所示：</p>
+<pre class="lang-java" data-nodeid="1543"><code data-language="java">MONGO_URI = <span class="hljs-string">'localhost'</span>
+MONGO_DB = <span class="hljs-string">'images360'</span>
+</code></pre>
+<p data-nodeid="1544">这样一个保存到 MongoDB 的 Pipeline 的就创建好了。这里最主要的方法是 process_item()，直接调用 Collection 对象的 insert 方法即可完成数据的插入，最后返回 Item 对象。</p>
+<h4 data-nodeid="1545">MySQL</h4>
+<p data-nodeid="1546">首先需要确保 MySQL 已经正确安装并且正常运行。</p>
+<p data-nodeid="1547">新建一个数据库，名字还是 images360，SQL 语句如下所示：</p>
+<pre class="lang-java" data-nodeid="1548"><code data-language="java">CREATE DATABASE images360 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci
+</code></pre>
+<p data-nodeid="1549">新建一个数据表，包含 id、url、title、thumb 四个字段，SQL 语句如下所示：</p>
+<pre class="lang-java" data-nodeid="1550"><code data-language="java"><span class="hljs-function">CREATE TABLE <span class="hljs-title">images</span> <span class="hljs-params">(id VARCHAR(<span class="hljs-number">255</span>)</span> NULL PRIMARY KEY, url <span class="hljs-title">VARCHAR</span><span class="hljs-params">(<span class="hljs-number">255</span>)</span> NULL , title <span class="hljs-title">VARCHAR</span><span class="hljs-params">(<span class="hljs-number">255</span>)</span> NULL , thumb <span class="hljs-title">VARCHAR</span><span class="hljs-params">(<span class="hljs-number">255</span>)</span> NULL)
+</span></code></pre>
+<p data-nodeid="1551">执行完 SQL 语句之后，我们就成功创建好了数据表。接下来就可以往表里存储数据了。</p>
+<p data-nodeid="1552">接下来我们实现一个 MySQLPipeline，代码如下所示：</p>
+<pre class="lang-java" data-nodeid="1553"><code data-language="java"><span class="hljs-function"><span class="hljs-keyword">import</span> pymysql
+class <span class="hljs-title">MysqlPipeline</span><span class="hljs-params">()</span>:
+    def <span class="hljs-title">__init__</span><span class="hljs-params">(self, host, database, user, password, port)</span>:
+        self.host </span>= host
+        self.database = database
+        self.user = user
+        self.password = password
+        self.port = port
+
+    <span class="hljs-meta">@classmethod</span>
+    <span class="hljs-function">def <span class="hljs-title">from_crawler</span><span class="hljs-params">(cls, crawler)</span>:
+        return <span class="hljs-title">cls</span><span class="hljs-params">(host=crawler.settings.get(<span class="hljs-string">'MYSQL_HOST'</span>)</span>,
+            database</span>=crawler.settings.get(<span class="hljs-string">'MYSQL_DATABASE'</span>),
+            user=crawler.settings.get(<span class="hljs-string">'MYSQL_USER'</span>),
+            password=crawler.settings.get(<span class="hljs-string">'MYSQL_PASSWORD'</span>),
+            port=crawler.settings.get(<span class="hljs-string">'MYSQL_PORT'</span>),
+        )
+
+    <span class="hljs-function">def <span class="hljs-title">open_spider</span><span class="hljs-params">(self, spider)</span>:
+        self.db </span>= pymysql.connect(self.host, self.user, self.password, self.database, charset=<span class="hljs-string">'utf8'</span>, port=self.port)
+        self.cursor = self.db.cursor()
+
+    <span class="hljs-function">def <span class="hljs-title">close_spider</span><span class="hljs-params">(self, spider)</span>:
+        self.db.<span class="hljs-title">close</span><span class="hljs-params">()</span>
+
+    def <span class="hljs-title">process_item</span><span class="hljs-params">(self, item, spider)</span>:
+        data </span>= dict(item)
+        keys = <span class="hljs-string">', '</span>.join(data.keys())
+        values = <span class="hljs-string">', '</span>.join([<span class="hljs-string">'% s'</span>] * len(data))
+        sql = <span class="hljs-string">'insert into % s (% s) values (% s)'</span> % (item.table, keys, values)
+        self.cursor.execute(sql, tuple(data.values()))
+        self.db.commit()
+        <span class="hljs-keyword">return</span> item
+</code></pre>
+<p data-nodeid="1554">如前所述，这里用到的数据插入方法是一个动态构造 SQL 语句的方法。</p>
+<p data-nodeid="1555">这里还需要几个 MySQL 的配置，我们在 settings.py 里添加几个变量，如下所示：</p>
+<pre class="lang-java" data-nodeid="1556"><code data-language="java">MYSQL_HOST = <span class="hljs-string">'localhost'</span>
+MYSQL_DATABASE = <span class="hljs-string">'images360'</span>
+MYSQL_PORT = <span class="hljs-number">3306</span>
+MYSQL_USER = <span class="hljs-string">'root'</span>
+MYSQL_PASSWORD = <span class="hljs-string">'123456'</span>
+</code></pre>
+<p data-nodeid="1557">这里分别定义了 MySQL 的地址、数据库名称、端口、用户名、密码。这样，MySQL Pipeline 就完成了。</p>
+<h4 data-nodeid="1558">Image Pipeline</h4>
+<p data-nodeid="1559">Scrapy 提供了专门处理下载的 Pipeline，包括文件下载和图片下载。下载文件和图片的原理与抓取页面的原理一样，因此下载过程支持异步和多线程，十分高效。下面我们来看看具体的实现过程。</p>
+<p data-nodeid="1560">官方文档地址为：<a href="https://doc.scrapy.org/en/latest/topics/media-pipeline.html" data-nodeid="1749">https://doc.scrapy.org/en/latest/topics/media-pipeline.html</a>。</p>
+<p data-nodeid="1561">首先定义存储文件的路径，需要定义一个 IMAGES_STORE 变量，在 settings.py 中添加如下代码：</p>
+<pre class="lang-java" data-nodeid="1562"><code data-language="java">IMAGES_STORE = <span class="hljs-string">'./images'</span>
+</code></pre>
+<p data-nodeid="1563">在这里我们将路径定义为当前路径下的 images 子文件夹，即下载的图片都会保存到本项目的 images 文件夹中。</p>
+<p data-nodeid="1564">内置的 ImagesPipeline 会默认读取 Item 的 image_urls 字段，并认为该字段是一个列表形式，它会遍历 Item 的 image_urls 字段，然后取出每个 URL 进行图片下载。</p>
+<p data-nodeid="1565">但是现在生成的 Item 的图片链接字段并不是 image_urls 字段表示的，也不是列表形式，而是单个的 URL。所以为了实现下载，我们需要重新定义下载的部分逻辑，即需要自定义 ImagePipeline，继承内置的 ImagesPipeline，重写方法。</p>
+<p data-nodeid="1566">我们定义 ImagePipeline，如下所示：</p>
+<pre class="lang-java" data-nodeid="1567"><code data-language="java">from scrapy <span class="hljs-keyword">import</span> Request
+from scrapy.exceptions <span class="hljs-keyword">import</span> DropItem
+from scrapy.pipelines.<span class="hljs-function">images <span class="hljs-keyword">import</span> ImagesPipeline
+class <span class="hljs-title">ImagePipeline</span><span class="hljs-params">(ImagesPipeline)</span>:
+    def <span class="hljs-title">file_path</span><span class="hljs-params">(self, request, response=None, info=None)</span>:
+        url </span>= request.url
+        file_name = url.split(<span class="hljs-string">'/'</span>)[-<span class="hljs-number">1</span>]
+        <span class="hljs-keyword">return</span> <span class="hljs-function">file_name
+
+    def <span class="hljs-title">item_completed</span><span class="hljs-params">(self, results, item, info)</span>:
+        image_paths </span>= [x[<span class="hljs-string">'path'</span>] <span class="hljs-keyword">for</span> ok, x in results <span class="hljs-keyword">if</span> ok]
+        <span class="hljs-keyword">if</span> not image_paths:
+            <span class="hljs-function">raise <span class="hljs-title">DropItem</span><span class="hljs-params">(<span class="hljs-string">'Image Downloaded Failed'</span>)</span>
+        return item
+
+    def <span class="hljs-title">get_media_requests</span><span class="hljs-params">(self, item, info)</span>:
+        yield <span class="hljs-title">Request</span><span class="hljs-params">(item[<span class="hljs-string">'url'</span>])</span>
+</span></code></pre>
+<p data-nodeid="1568">在这里我们实现了 ImagePipeline，继承 Scrapy 内置的 ImagesPipeline，重写了下面几个方法。</p>
+<ul data-nodeid="1569">
+<li data-nodeid="1570">
+<p data-nodeid="1571">get_media_requests()。它的第一个参数 item 是爬取生成的 Item 对象。我们将它的 url 字段取出来，然后直接生成 Request 对象。此 Request 加入调度队列，等待被调度，执行下载。</p>
+</li>
+<li data-nodeid="1572">
+<p data-nodeid="1573">file_path()。它的第一个参数 request 就是当前下载对应的 Request 对象。这个方法用来返回保存的文件名，直接将图片链接的最后一部分当作文件名即可。它利用 split() 函数分割链接并提取最后一部分，返回结果。这样此图片下载之后保存的名称就是该函数返回的文件名。</p>
+</li>
+<li data-nodeid="1574">
+<p data-nodeid="1575">item_completed()，它是当单个 Item 完成下载时的处理方法。因为并不是每张图片都会下载成功，所以我们需要分析下载结果并剔除下载失败的图片。如果某张图片下载失败，那么我们就不需保存此 Item 到数据库。该方法的第一个参数 results 就是该 Item 对应的下载结果，它是一个列表形式，列表每一个元素是一个元组，其中包含了下载成功或失败的信息。这里我们遍历下载结果找出所有成功的下载列表。如果列表为空，那么该 Item 对应的图片下载失败，随即抛出异常 DropItem，该 Item 忽略。否则返回该 Item，说明此 Item 有效。</p>
+</li>
+</ul>
+<p data-nodeid="1576">现在为止，三个 Item Pipeline 的定义就完成了。最后只需要启用就可以了，修改 settings.py，设置 ITEM_PIPELINES，如下所示：</p>
+<pre class="lang-java" data-nodeid="1577"><code data-language="java">ITEM_PIPELINES = {
+    <span class="hljs-string">'images360.pipelines.ImagePipeline'</span>: <span class="hljs-number">300</span>,
+    <span class="hljs-string">'images360.pipelines.MongoPipeline'</span>: <span class="hljs-number">301</span>,
+    <span class="hljs-string">'images360.pipelines.MysqlPipeline'</span>: <span class="hljs-number">302</span>,
+}
+</code></pre>
+<p data-nodeid="1578">这里注意调用的顺序。我们需要优先调用 ImagePipeline 对 Item 做下载后的筛选，下载失败的 Item 就直接忽略，它们就不会保存到 MongoDB 和 MySQL 里。随后再调用其他两个存储的 Pipeline，这样就能确保存入数据库的图片都是下载成功的。<br>
+接下来运行程序，执行爬取，如下所示：</p>
+<pre class="lang-java" data-nodeid="1579"><code data-language="java">scrapy crawl images
+</code></pre>
+<p data-nodeid="1580">爬虫一边爬取一边下载，下载速度非常快，对应的输出日志如图所示。</p>
+<p data-nodeid="1581"><img src="https://s0.lgstatic.com/i/image/M00/32/D5/CgqCHl8OyV2AWLyNAAGALb5Nqd8706.png" alt="Drawing 4.png" data-nodeid="1785"></p>
+<p data-nodeid="1582">查看本地 images 文件夹，发现图片都已经成功下载，如图所示。</p>
+<p data-nodeid="1583"><img src="https://s0.lgstatic.com/i/image/M00/32/D5/CgqCHl8OyWWAY76eAAKKY0ouxBs666.png" alt="Drawing 5.png" data-nodeid="1789"></p>
+<p data-nodeid="1584">查看 MySQL，下载成功的图片信息也已成功保存，如图所示。</p>
+<p data-nodeid="1585"><img src="https://s0.lgstatic.com/i/image/M00/32/CA/Ciqc1F8OyXaAdJc7ACY7Z4cSzuE317.png" alt="Drawing 6.png" data-nodeid="1793"></p>
+<p data-nodeid="1586">查看 MongoDB，下载成功的图片信息同样已成功保存，如图所示。</p>
+<p data-nodeid="1587"><img src="https://s0.lgstatic.com/i/image/M00/32/CA/Ciqc1F8OydSAD3T6ABH5qD8uKgM923.png" alt="Drawing 7.png" data-nodeid="1797"></p>
+<p data-nodeid="1588">这样我们就可以成功实现图片的下载并把图片的信息存入数据库了。</p>
+<h3 data-nodeid="1589">9. 本节代码</h3>
+<p data-nodeid="1811" class="te-preview-highlight">本节代码地址为：<br>
+<a href="https://github.com/Python3WebSpider/Images360" data-nodeid="1816">https://github.com/Python3WebSpider/Images360</a>。</p>
+
+<h3 data-nodeid="1591">10. 结语</h3>
+<p data-nodeid="1592" class="">Item Pipeline 是 Scrapy 非常重要的组件，数据存储几乎都是通过此组件实现的。请你务必认真掌握此内容。</p>
+
+# 遇到动态页面怎么办，详解渲染页面爬取
+<p data-nodeid="165308">前面我们已经介绍了 Scrapy 的一些常见用法，包括服务端渲染页面的抓取和 API 的抓取，Scrapy 发起 Request 之后，返回的 Response 里面就包含了想要的结果。</p>
+
+
+
+<p data-nodeid="163554">但是现在越来越多的网页都已经演变为 SPA 页面，其页面在浏览器中呈现的结果是经过 JavaScript 渲染得到的，如果我们使用 Scrapy 直接对其进行抓取的话，其结果和使用 requests 没有什么区别。</p>
+<p data-nodeid="163555">那我们真的要使用 Scrapy 完成对 JavaScript 渲染页面的抓取应该怎么办呢？</p>
+<p data-nodeid="163556">之前我们介绍了 Selenium 和 Pyppeteer 都可以实现 JavaScript 渲染页面的抓取，那用了 Scrapy 之后应该这么办呢？Scrapy 能和 Selenium 或 Pyppeteer 一起使用吗？答案是肯定的，我们可以将 Selenium 或 Pyppeteer 通过 Downloader Middleware 和 Scrapy 融合起来，实现 JavaScript 渲染页面的抓取，本节我们就来了解下它的实现吧。</p>
+<h3 data-nodeid="165800" class="">回顾</h3>
+
+<p data-nodeid="163558">在前面我们介绍了 Downloader Middleware 的用法，在 Downloader Middleware 中有三个我们可以实现的方法 process_request、process_response 以及 process_exception 方法。</p>
+<p data-nodeid="163559">我们再看下 process_request 方法和其不同的返回值的效果：</p>
+<ul data-nodeid="163560">
+<li data-nodeid="163561">
+<p data-nodeid="163562">当返回为 None 时，Scrapy 将继续处理该 Request，接着执行其他 Downloader Middleware 的 process_request 方法，一直到 Downloader 把 Request 执行完后得到 Response 才结束。这个过程其实就是修改 Request 的过程，不同的 Downloader Middleware 按照设置的优先级顺序依次对 Request 进行修改，最后送至 Downloader 执行。</p>
+</li>
+<li data-nodeid="163563">
+<p data-nodeid="163564">当返回为 Response 对象时，更低优先级的 Downloader Middleware 的 process_request 和 process_exception 方法就不会被继续调用，每个 Downloader Middleware 的 process_response 方法转而被依次调用。调用完毕之后，直接将 Response 对象发送给 Spider 来处理。</p>
+</li>
+<li data-nodeid="163565">
+<p data-nodeid="163566">当返回为 Request 对象时，更低优先级的 Downloader Middleware 的 process_request 方法会停止执行。这个 Request 会重新放到调度队列里，其实它就是一个全新的 Request，等待被调度。如果被 Scheduler 调度了，那么所有的 Downloader Middleware 的 process_request 方法都会被重新按照顺序执行。</p>
+</li>
+<li data-nodeid="163567">
+<p data-nodeid="163568">如果 IgnoreRequest 异常抛出，则所有的 Downloader Middleware 的 process_exception 方法会依次执行。如果没有一个方法处理这个异常，那么 Request 的 errorback 方法就会回调。如果该异常还没有被处理，那么它便会被忽略。</p>
+</li>
+</ul>
+<p data-nodeid="163569">这里我们注意到第二个选项，当返回结果为 Response 对象时，低优先级的 process_request 方法就不会被继续调用了，这个 Response 对象会直接经由 process_response 方法处理后转交给 Spider 来解析。</p>
+<p data-nodeid="163570">然后再接着想一想，process_request 接收的参数是 request，即 Request 对象，怎么会返回 Response 对象呢？原因可想而知了，这个 Request 对象不再经由 Scrapy 的 Downloader 来处理了，而是在 process_request 方法里面直接就完成了 Request 的发送操作，然后在得到了对应的 Response 结果后再将其返回就好了。</p>
+<p data-nodeid="163571">那么对于 JavaScript 渲染的页面来说，照这个方法来做，我们就可以把 Selenium 或 Pyppeteer 加载页面的过程在 process_request 方法里面实现，得到网页渲染完后的源代码后直接构造 Response 返回即可，这样我们就完成了借助 Downloader Middleware 实现 Scrapy 爬取动态渲染页面的过程。</p>
+<h3 data-nodeid="166292" class="">案例</h3>
+
+<p data-nodeid="163573">本节我们就用实例来讲解一下 Scrapy 和 Pyppeteer 实现 JavaScript 渲染页面抓取的流程。</p>
+<p data-nodeid="167272">本节使用的实例网站为 <a href="https://dynamic5.scrape.center/" data-nodeid="167277">https://dynamic5.scrape.center/</a>，这是一个 JavaScript 渲染页面，其内容是一本本的图书信息。</p>
+<p data-nodeid="167273" class=""><img src="https://s0.lgstatic.com/i/image/M00/34/22/Ciqc1F8RXwWARdOHABEEvYwMNOY314.png" alt="image.png" data-nodeid="167281"></p>
+
+
+
+<p data-nodeid="163576">同时这个网站的页面带有分页功能，只需要在 URL 加上 <code data-backticks="1" data-nodeid="163693">/page/</code> 和页码就可以跳转到下一页，如 <a href="https://dynamic5.scrape.center/page/2" data-nodeid="163697">https://dynamic5.scrape.center/page/2</a> 就是第二页内容，<a href="https://dynamic5.scrape.center/page/3" data-nodeid="163701">https://dynamic5.scrape.center/page/3</a> 就是第三页内容。</p>
+<p data-nodeid="163577">那我们这个案例就来试着爬取前十页的图书信息吧。</p>
+<h3 data-nodeid="167772" class="">实现</h3>
+
+<p data-nodeid="163579">首先我们来新建一个项目，叫作 scrapypyppeteer，命令如下：</p>
+<pre class="lang-java" data-nodeid="169737"><code data-language="java">scrapy startproject scrapypyppeteer
+</code></pre>
+
+
+
+
+<p data-nodeid="163581">接着进入项目，然后新建一个 Spider，名称为 book，命令如下：</p>
+<pre class="lang-java" data-nodeid="170228"><code data-language="java">cd scrapypyppeteer
+scrapy genspider book dynamic5.scrape.center
+</code></pre>
+
+<p data-nodeid="163583">这时候可以发现在项目的 spiders 文件夹下就出现了一个名为 spider.py 的文件，内容如下：</p>
+<pre class="lang-dart" data-nodeid="176857"><code data-language="dart"># -*- coding: utf<span class="hljs-number">-8</span> -*-
+<span class="hljs-keyword">import</span> scrapy
+​
+​
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BookSpider</span>(<span class="hljs-title">scrapy</span>.<span class="hljs-title">Spider</span>):
+ &nbsp; &nbsp;<span class="hljs-title">name</span> = '<span class="hljs-title">book</span>'
+ &nbsp; &nbsp;<span class="hljs-title">allowed_domains</span> = ['<span class="hljs-title">dynamic5</span>.<span class="hljs-title">scrape</span>.<span class="hljs-title">center</span>']
+ &nbsp; &nbsp;<span class="hljs-title">start_urls</span> = ['<span class="hljs-title">http</span>://<span class="hljs-title">dynamic5</span>.<span class="hljs-title">scrape</span>.<span class="hljs-title">center</span>/']
+​
+ &nbsp; &nbsp;<span class="hljs-title">def</span> <span class="hljs-title">parse</span>(<span class="hljs-title">self</span>, <span class="hljs-title">response</span>):
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-title">pass</span>
+</span></code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p data-nodeid="163585">首先我们构造列表页的初始请求，实现一个 start_requests 方法，如下所示：</p>
+<pre class="lang-go" data-nodeid="191096"><code data-language="go"># -*- coding: utf<span class="hljs-number">-8</span> -*-
+from scrapy <span class="hljs-keyword">import</span> Request, Spider
+​
+​
+class BookSpider(Spider):
+ &nbsp; &nbsp;name = <span class="hljs-string">'book'</span>
+ &nbsp; &nbsp;allowed_domains = [<span class="hljs-string">'dynamic5.scrape.center'</span>]
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;base_url = <span class="hljs-string">'https://dynamic5.scrape.center/page/{page}'</span>
+ &nbsp; &nbsp;max_page = <span class="hljs-number">10</span>
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;def start_requests(self):
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">for</span> page in <span class="hljs-keyword">range</span>(<span class="hljs-number">1</span>, self.max_page + <span class="hljs-number">1</span>):
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;url = self.base_url.format(page=page)
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;yield Request(url, callback=self.parse_index)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;def parse_index(self, response):
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-built_in">print</span>(response.text)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p data-nodeid="192069">这时如果我们直接运行这个 Spider，在 parse_index 方法里面打印输出 Response 的内容，结果如下：</p>
+<p data-nodeid="192070" class=""><img src="https://s0.lgstatic.com/i/image/M00/34/2D/CgqCHl8RX0iADQnIAAJk6NIEDak825.png" alt="image (1).png" data-nodeid="192080"></p>
+
+
+<p data-nodeid="163589">我们可以发现所得到的内容并不是页面渲染后的真正 HTML 代码。此时如果我们想要获取 HTML 渲染结果的话就得使用 Downloader Middleware 实现了。</p>
+<p data-nodeid="163590">这里我们直接以一个我已经写好的组件来演示了，组件的名称叫作 GerapyPyppeteer，组件里已经写好了 Scrapy 和 Pyppeteer 结合的中间件，下面我们来详细介绍下。</p>
+<p data-nodeid="163591">我们可以借助于 pip3 来安装组件，命令如下：</p>
+<pre class="lang-java" data-nodeid="192579"><code data-language="java">pip3 install gerapy-pyppeteer
+</code></pre>
+
+<p data-nodeid="163593">GerapyPyppeteer 提供了两部分内容，一部分是 Downloader Middleware，一部分是 Request。<br>
+首先我们需要开启中间件，在 settings 里面开启 PyppeteerMiddleware，配置如下：</p>
+<pre class="lang-java" data-nodeid="193078"><code data-language="java">DOWNLOADER_MIDDLEWARES = {
+ &nbsp; &nbsp;<span class="hljs-string">'gerapy_pyppeteer.downloadermiddlewares.PyppeteerMiddleware'</span>: <span class="hljs-number">543</span>,
+}
+</code></pre>
+
+<p data-nodeid="163595">然后我们把上文定义的 Request 修改为 PyppeteerRequest 即可：</p>
+<pre class="lang-go" data-nodeid="197569"><code data-language="go"># -*- coding: utf<span class="hljs-number">-8</span> -*-
+from gerapy_pyppeteer <span class="hljs-keyword">import</span> PyppeteerRequest
+from scrapy <span class="hljs-keyword">import</span> Request, Spider
+​
+​
+class BookSpider(Spider):
+ &nbsp; &nbsp;name = <span class="hljs-string">'book'</span>
+ &nbsp; &nbsp;allowed_domains = [<span class="hljs-string">'dynamic5.scrape.center'</span>]
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;base_url = <span class="hljs-string">'https://dynamic5.scrape.center/page/{page}'</span>
+ &nbsp; &nbsp;max_page = <span class="hljs-number">10</span>
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;def start_requests(self):
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">for</span> page in <span class="hljs-keyword">range</span>(<span class="hljs-number">1</span>, self.max_page + <span class="hljs-number">1</span>):
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;url = self.base_url.format(page=page)
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;yield PyppeteerRequest(url, callback=self.parse_index, wait_for=<span class="hljs-string">'.item .name'</span>)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;def parse_index(self, response):
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-built_in">print</span>(response.text)
+</code></pre>
+
+
+
+
+
+
+
+
+
+<p data-nodeid="163597">这样其实就完成了 Pyppeteer 的对接了，非常简单。<br>
+这里 PyppeteerRequest 和原本的 Request 多提供了一个参数，就是 wait_for，通过这个参数我们可以指定 Pyppeteer 需要等待特定的内容加载出来才算结束，然后才返回对应的结果。</p>
+<p data-nodeid="163598">为了方便观察效果，我们把并发限制修改得小一点，然后把 Pyppeteer 的 Headless 模式设置为 False：</p>
+<pre class="lang-java" data-nodeid="198068"><code data-language="java">CONCURRENT_REQUESTS = <span class="hljs-number">3</span>
+GERAPY_PYPPETEER_HEADLESS = False
+</code></pre>
+
+<p data-nodeid="199057">这时我们重新运行 Spider，就可以看到在爬取的过程中，Pyppeteer 对应的 Chromium 浏览器就弹出来了，并逐个加载对应的页面内容，加载完成之后浏览器关闭。<br>
+另外观察下控制台，我们发现对应的结果也就被提取出来了，如图所示：</p>
+<p data-nodeid="199058" class=""><img src="https://s0.lgstatic.com/i/image/M00/34/2D/CgqCHl8RX2SAAVD5AAK2ktEbgAQ066.png" alt="image (2).png" data-nodeid="199068"></p>
+
+
+<p data-nodeid="163602">这时候我们再重新修改下 parse_index 方法，提取对应的每本书的名称和作者即可：</p>
+<pre class="lang-java" data-nodeid="201096"><code data-language="java"><span class="hljs-function">def <span class="hljs-title">parse_index</span><span class="hljs-params">(self, response)</span>:
+ &nbsp; &nbsp;<span class="hljs-keyword">for</span> item in response.<span class="hljs-title">css</span><span class="hljs-params">(<span class="hljs-string">'.item'</span>)</span>:
+ &nbsp; &nbsp; &nbsp; &nbsp;name </span>= item.css(<span class="hljs-string">'.name::text'</span>).extract_first()
+ &nbsp; &nbsp; &nbsp; &nbsp;authors = item.css(<span class="hljs-string">'.authors::text'</span>).extract_first()
+ &nbsp; &nbsp; &nbsp; &nbsp;name = name.strip() <span class="hljs-keyword">if</span> name <span class="hljs-keyword">else</span> None
+ &nbsp; &nbsp; &nbsp; &nbsp;authors = authors.strip() <span class="hljs-keyword">if</span> authors <span class="hljs-keyword">else</span> None
+ &nbsp; &nbsp; &nbsp; &nbsp;yield {
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'name'</span>: name,
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'authors'</span>: authors
+ &nbsp; &nbsp; &nbsp;  }
+</code></pre>
+
+
+
+
+<p data-nodeid="202354">重新运行，即可发现对应的名称和作者就被提取出来了，运行结果如下：</p>
+<p data-nodeid="202355" class=""><img src="https://s0.lgstatic.com/i/image/M00/34/2E/CgqCHl8RX4OAK3y6AAOIS7PLohc610.png" alt="image (3).png" data-nodeid="202363"></p>
+
+<p data-nodeid="202102">这样我们就借助 GerapyPyppeteer 完成了 JavaScript 渲染页面的爬取。</p>
+
+
+
+<h4 data-nodeid="202878" class="">原理分析</h4>
+
+<p data-nodeid="163608">但上面仅仅是我们借助 GerapyPyppeteer 实现了 Scrapy 和 Pyppeteer 的对接，但其背后的原理是怎样的呢？</p>
+<p data-nodeid="163609">我们可以详细分析它的源码，其 GitHub 地址为 <a href="https://github.com/Gerapy/GerapyPyppeteer" data-nodeid="163749">https://github.com/Gerapy/GerapyPyppeteer</a>。</p>
+<p data-nodeid="163610">首先通过分析可以发现其最核心的内容就是实现了一个 PyppeteerMiddleware，这是一个 Downloader Middleware，这里最主要的就是 process_request  的实现，核心代码如下所示：</p>
+<pre class="lang-java" data-nodeid="203394"><code data-language="java"><span class="hljs-function">def <span class="hljs-title">process_request</span><span class="hljs-params">(self, request, spider)</span>:
+ &nbsp; &nbsp;logger.<span class="hljs-title">debug</span><span class="hljs-params">(<span class="hljs-string">'processing request %s'</span>, request)</span> &nbsp;
+ &nbsp; &nbsp;return <span class="hljs-title">as_deferred</span><span class="hljs-params">(self._process_request(request, spider)</span>)
+</span></code></pre>
+
+<p data-nodeid="204424">这里其实就是调用了一个 _process_request 方法，这个方法的返回结果被 as_deferred 方法调用了。</p>
+<p data-nodeid="204425">这个 as_deferred 是怎么定义的呢？代码如下：</p>
+
+<pre class="lang-java" data-nodeid="203909"><code data-language="java"><span class="hljs-keyword">import</span> asyncio
+from twisted.internet.defer <span class="hljs-keyword">import</span> Deferred
+​
+<span class="hljs-function">def <span class="hljs-title">as_deferred</span><span class="hljs-params">(f)</span>:
+ &nbsp; &nbsp;return Deferred.<span class="hljs-title">fromFuture</span><span class="hljs-params">(asyncio.ensure_future(f)</span>)
+</span></code></pre>
+
+<p data-nodeid="204950">这个方法接收的就是一个 asyncio 库的 Future 对象，然后通过 fromFuture 方法转化成了 twisted 里面的 Deferred 对象。这是因为 Scrapy 本身的异步是借助 twisted 实现的，一个个的异步任务对应的就是一个个 Deferred 对象，而 Pyppeteer 又是基于 asyncio 的，它的异步任务是 Future 对象，所以这里我们需要借助 Deferred 的 fromFuture 方法将 Future 转为 Deferred 对象。</p>
+<p data-nodeid="204951">另外为了支持这个功能，我们还需要在 Scrapy 中修改 reactor 对象，修改为 AsyncioSelectorReactor，实现如下：</p>
+
+<pre class="lang-dart" data-nodeid="210618"><code data-language="dart"><span class="hljs-keyword">import</span> sys
+from twisted.internet.asyncioreactor <span class="hljs-keyword">import</span> AsyncioSelectorReactor
+<span class="hljs-keyword">import</span> twisted.internet
+​
+reactor = AsyncioSelectorReactor(asyncio.get_event_loop())
+​
+# install AsyncioSelectorReactor
+twisted.internet.reactor = reactor
+sys.modules[<span class="hljs-string">'twisted.internet.reactor'</span>] = reactor
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<p data-nodeid="163616">这段代码已经在 PyppeteerMiddleware 里面定义好了，在 Scrapy 正式开始爬取之前这段代码就会被执行，将 Scrapy 中的 reactor 修改为 AsyncioSelectorReactor，从而实现 Future 的调度。<br>
+接下来我们再来看下 _process_request 方法，实现如下：</p>
+<pre class="lang-dart" data-nodeid="218343"><code data-language="dart"><span class="hljs-keyword">async</span> def _process_request(self, request: PyppeteerRequest, spider):
+ &nbsp; &nbsp;<span class="hljs-string">"""
+ &nbsp;  use pyppeteer to process spider
+ &nbsp;  :param request:
+ &nbsp;  :param spider:
+ &nbsp;  :return:
+ &nbsp;  """</span>
+ &nbsp; &nbsp;options = {
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'headless'</span>: self.headless,
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'dumpio'</span>: self.dumpio,
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'devtools'</span>: self.devtools,
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'args'</span>: [
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;f<span class="hljs-string">'--window-size={self.window_width},{self.window_height}'</span>,
+ &nbsp; &nbsp; &nbsp;  ]
+ &nbsp;  }
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.executable_path: options[<span class="hljs-string">'executable_path'</span>] = self.executable_path
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.disable_extensions: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--disable-extensions'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.hide_scrollbars: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--hide-scrollbars'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.mute_audio: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--mute-audio'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.no_sandbox: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--no-sandbox'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.disable_setuid_sandbox: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--disable-setuid-sandbox'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> self.disable_gpu: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--disable-gpu'</span>)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# <span class="hljs-keyword">set</span> proxy
+ &nbsp; &nbsp;proxy = request.proxy
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> not proxy:
+ &nbsp; &nbsp; &nbsp; &nbsp;proxy = request.meta.<span class="hljs-keyword">get</span>(<span class="hljs-string">'proxy'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> proxy: options[<span class="hljs-string">'args'</span>].append(f<span class="hljs-string">'--proxy-server={proxy}'</span>)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;logger.debug(<span class="hljs-string">'set options %s'</span>, options)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;browser = <span class="hljs-keyword">await</span> launch(options)
+ &nbsp; &nbsp;page = <span class="hljs-keyword">await</span> browser.newPage()
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.setViewport({<span class="hljs-string">'width'</span>: self.window_width, <span class="hljs-string">'height'</span>: self.window_height})
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# <span class="hljs-keyword">set</span> cookies
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> isinstance(request.cookies, dict):
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.setCookie(*[
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  {<span class="hljs-string">'name'</span>: k, <span class="hljs-string">'value'</span>: v}
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> request.cookies.items()
+ &nbsp; &nbsp; &nbsp;  ])
+ &nbsp; &nbsp;<span class="hljs-keyword">else</span>:
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.setCookie(request.cookies)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# the headers must be <span class="hljs-keyword">set</span> using request interception
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.setRequestInterception(True)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;<span class="hljs-meta">@page</span>.<span class="hljs-keyword">on</span>(<span class="hljs-string">'request'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">async</span> def _handle_interception(pu_request):
+ &nbsp; &nbsp; &nbsp; &nbsp;# handle headers
+ &nbsp; &nbsp; &nbsp; &nbsp;overrides = {
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'headers'</span>: {
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;k.decode(): <span class="hljs-string">','</span>.join(map(lambda v: v.decode(), v))
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> request.headers.items()
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  }
+ &nbsp; &nbsp; &nbsp;  }
+ &nbsp; &nbsp; &nbsp; &nbsp;# handle resource types
+ &nbsp; &nbsp; &nbsp; &nbsp;_ignore_resource_types = self.ignore_resource_types
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">if</span> request.ignore_resource_types <span class="hljs-keyword">is</span> not None:
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;_ignore_resource_types = request.ignore_resource_types
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">if</span> pu_request.resourceType <span class="hljs-keyword">in</span> _ignore_resource_types:
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> pu_request.abort()
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">else</span>:
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> pu_request.continue_(overrides)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;timeout = self.download_timeout
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> request.timeout <span class="hljs-keyword">is</span> not None:
+ &nbsp; &nbsp; &nbsp; &nbsp;timeout = request.timeout
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;logger.debug(<span class="hljs-string">'crawling %s'</span>, request.url)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;response = None
+ &nbsp; &nbsp;<span class="hljs-keyword">try</span>:
+ &nbsp; &nbsp; &nbsp; &nbsp;options = {
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'timeout'</span>: <span class="hljs-number">1000</span> * timeout,
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'waitUntil'</span>: request.wait_until
+ &nbsp; &nbsp; &nbsp;  }
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.debug(<span class="hljs-string">'request %s with options %s'</span>, request.url, options)
+ &nbsp; &nbsp; &nbsp; &nbsp;response = <span class="hljs-keyword">await</span> page.goto(
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;request.url,
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;options=options
+ &nbsp; &nbsp; &nbsp;  )
+ &nbsp; &nbsp;except (PageError, TimeoutError):
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.error(<span class="hljs-string">'error rendering url %s using pyppeteer'</span>, request.url)
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.close()
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> browser.close()
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">return</span> self._retry(request, <span class="hljs-number">504</span>, spider)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> request.wait_for:
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">try</span>:
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;logger.debug(<span class="hljs-string">'waiting for %s finished'</span>, request.wait_for)
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.waitFor(request.wait_for)
+ &nbsp; &nbsp; &nbsp; &nbsp;except TimeoutError:
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;logger.error(<span class="hljs-string">'error waiting for %s of %s'</span>, request.wait_for, request.url)
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.close()
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> browser.close()
+ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">return</span> self._retry(request, <span class="hljs-number">504</span>, spider)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# evaluate script
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> request.script:
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.debug(<span class="hljs-string">'evaluating %s'</span>, request.script)
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.evaluate(request.script)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# sleep
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> request.sleep <span class="hljs-keyword">is</span> not None:
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.debug(<span class="hljs-string">'sleep for %ss'</span>, request.sleep)
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">await</span> asyncio.sleep(request.sleep)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;content = <span class="hljs-keyword">await</span> page.content()
+ &nbsp; &nbsp;body = str.encode(content)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# close page and browser
+ &nbsp; &nbsp;logger.debug(<span class="hljs-string">'close pyppeteer'</span>)
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.close()
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> browser.close()
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;<span class="hljs-keyword">if</span> not response:
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.error(<span class="hljs-string">'get null response by pyppeteer of url %s'</span>, request.url)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;# Necessary to bypass the compression middleware (?)
+ &nbsp; &nbsp;response.headers.pop(<span class="hljs-string">'content-encoding'</span>, None)
+ &nbsp; &nbsp;response.headers.pop(<span class="hljs-string">'Content-Encoding'</span>, None)
+ &nbsp; &nbsp;
+ &nbsp; &nbsp;<span class="hljs-keyword">return</span> HtmlResponse(
+ &nbsp; &nbsp; &nbsp; &nbsp;page.url,
+ &nbsp; &nbsp; &nbsp; &nbsp;status=response.status,
+ &nbsp; &nbsp; &nbsp; &nbsp;headers=response.headers,
+ &nbsp; &nbsp; &nbsp; &nbsp;body=body,
+ &nbsp; &nbsp; &nbsp; &nbsp;encoding=<span class="hljs-string">'utf-8'</span>,
+ &nbsp; &nbsp; &nbsp; &nbsp;request=request
+ &nbsp;  )
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p data-nodeid="218858">代码内容比较多，我们慢慢来说。</p>
+<p data-nodeid="218859">首先最开始的部分是定义 Pyppeteer 的一些启动参数：</p>
+
+<pre class="lang-java" data-nodeid="219376"><code data-language="java">options = {
+ &nbsp; &nbsp;<span class="hljs-string">'headless'</span>: self.headless,
+ &nbsp; &nbsp;<span class="hljs-string">'dumpio'</span>: self.dumpio,
+ &nbsp; &nbsp;<span class="hljs-string">'devtools'</span>: self.devtools,
+ &nbsp; &nbsp;<span class="hljs-string">'args'</span>: [
+ &nbsp; &nbsp; &nbsp; &nbsp;f<span class="hljs-string">'--window-size={self.window_width},{self.window_height}'</span>,
+ &nbsp;  ]
+}
+<span class="hljs-keyword">if</span> self.executable_path: options[<span class="hljs-string">'executable_path'</span>] = self.executable_path
+<span class="hljs-keyword">if</span> self.disable_extensions: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--disable-extensions'</span>)
+<span class="hljs-keyword">if</span> self.hide_scrollbars: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--hide-scrollbars'</span>)
+<span class="hljs-keyword">if</span> self.mute_audio: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--mute-audio'</span>)
+<span class="hljs-keyword">if</span> self.no_sandbox: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--no-sandbox'</span>)
+<span class="hljs-keyword">if</span> self.disable_setuid_sandbox: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--disable-setuid-sandbox'</span>)
+<span class="hljs-keyword">if</span> self.disable_gpu: options[<span class="hljs-string">'args'</span>].append(<span class="hljs-string">'--disable-gpu'</span>)
+</code></pre>
+
+<p data-nodeid="219891">这些参数来自 from_crawler 里面读取项目 settings 的内容，如配置 Pyppeteer 对应浏览器的无头模式、窗口大小、是否隐藏滚动条、是否弃用沙箱，等等。</p>
+<p data-nodeid="219892">紧接着就是利用 options 来启动 Pyppeteer：</p>
+
+<pre class="lang-java" data-nodeid="220411"><code data-language="java">browser = <span class="hljs-function">await <span class="hljs-title">launch</span><span class="hljs-params">(options)</span>
+page </span>= await browser.newPage()
+await page.setViewport({<span class="hljs-string">'width'</span>: self.window_width, <span class="hljs-string">'height'</span>: self.window_height})
+</code></pre>
+
+<p data-nodeid="220926">这里启动了 Pyppeteer 对应的浏览器，将其赋值为 browser，然后新建了一个选项卡，赋值为 page，然后通过 setViewport 方法设定了窗口的宽高。</p>
+<p data-nodeid="220927">接下来就是对一些 Cookies 进行处理，如果 Request 带有 Cookies 的话会被赋值到 Pyppeteer 中：</p>
+
+<pre class="lang-dart" data-nodeid="226594"><code data-language="dart"># <span class="hljs-keyword">set</span> cookies
+<span class="hljs-keyword">if</span> isinstance(request.cookies, dict):
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.setCookie(*[
+ &nbsp; &nbsp; &nbsp;  {<span class="hljs-string">'name'</span>: k, <span class="hljs-string">'value'</span>: v}
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> request.cookies.items()
+ &nbsp;  ])
+<span class="hljs-keyword">else</span>:
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.setCookie(request.cookies)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<p data-nodeid="163624">再然后关键的步骤就是进行页面的加载了：</p>
+<pre class="lang-java" data-nodeid="227109"><code data-language="java"><span class="hljs-keyword">try</span>:
+ &nbsp; &nbsp;options = {
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'timeout'</span>: <span class="hljs-number">1000</span> * timeout,
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-string">'waitUntil'</span>: request.wait_until
+ &nbsp;  }
+ &nbsp; &nbsp;logger.debug(<span class="hljs-string">'request %s with options %s'</span>, request.url, options)
+ &nbsp; &nbsp;response = await page.goto(
+ &nbsp; &nbsp; &nbsp; &nbsp;request.url,
+ &nbsp; &nbsp; &nbsp; &nbsp;options=options
+ &nbsp;  )
+except (PageError, TimeoutError):
+ &nbsp; &nbsp;logger.error(<span class="hljs-string">'error rendering url %s using pyppeteer'</span>, request.url)
+ &nbsp; &nbsp;await page.close()
+ &nbsp; &nbsp;await browser.close()
+ &nbsp; &nbsp;<span class="hljs-keyword">return</span> self._retry(request, <span class="hljs-number">504</span>, spider)
+</code></pre>
+
+<p data-nodeid="227624">这里我们首先制定了加载超时时间 timeout 还有要等待完成的事件 waitUntil，接着调用 page 的 goto 方法访问对应的页面，同时进行了异常检测，如果发生错误就关闭浏览器并重新发起一次重试请求。</p>
+<p data-nodeid="227625">在页面加载出来之后，我们还需要判定我们期望的结果是不是加载出来了，所以这里又增加了 waitFor 的调用：</p>
+
+<pre class="lang-java" data-nodeid="228142"><code data-language="java"><span class="hljs-keyword">if</span> request.wait_for:
+ &nbsp; &nbsp;<span class="hljs-keyword">try</span>:
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.debug(<span class="hljs-string">'waiting for %s finished'</span>, request.wait_for)
+ &nbsp; &nbsp; &nbsp; &nbsp;await page.waitFor(request.wait_for)
+ &nbsp; &nbsp;except TimeoutError:
+ &nbsp; &nbsp; &nbsp; &nbsp;logger.error(<span class="hljs-string">'error waiting for %s of %s'</span>, request.wait_for, request.url)
+ &nbsp; &nbsp; &nbsp; &nbsp;await page.close()
+ &nbsp; &nbsp; &nbsp; &nbsp;await browser.close()
+ &nbsp; &nbsp; &nbsp; &nbsp;<span class="hljs-keyword">return</span> self._retry(request, <span class="hljs-number">504</span>, spider)
+</code></pre>
+
+<p data-nodeid="228657">这里 request 有个 wait_for 属性，就可以定义想要加载的节点的选择器，如 <code data-backticks="1" data-nodeid="228662">.item .name</code> 等，这样如果页面在规定时间内加载出来就会继续向下执行，否则就会触发 TimeoutError 并被捕获，关闭浏览器并重新发起一次重试请求。</p>
+<p data-nodeid="228658">等想要的结果加载出来之后，我们还可以执行一些自定义的 JavaScript 代码完成我们想要自定义的功能：</p>
+
+<pre class="lang-dart" data-nodeid="234329"><code data-language="dart"># evaluate script
+<span class="hljs-keyword">if</span> request.script:
+ &nbsp; &nbsp;logger.debug(<span class="hljs-string">'evaluating %s'</span>, request.script)
+ &nbsp; &nbsp;<span class="hljs-keyword">await</span> page.evaluate(request.script)
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<p data-nodeid="163630">最后关键的一步就是将当前页面的源代码打印出来，然后构造一个 HtmlResponse 返回即可：</p>
+<pre class="lang-dart te-preview-highlight" data-nodeid="239994"><code data-language="dart">content = <span class="hljs-keyword">await</span> page.content()
+body = str.encode(content)
+​
+# close page and browser
+logger.debug(<span class="hljs-string">'close pyppeteer'</span>)
+<span class="hljs-keyword">await</span> page.close()
+<span class="hljs-keyword">await</span> browser.close()
+​
+<span class="hljs-keyword">if</span> not response:
+ &nbsp; &nbsp;logger.error(<span class="hljs-string">'get null response by pyppeteer of url %s'</span>, request.url)
+​
+# Necessary to bypass the compression middleware (?)
+response.headers.pop(<span class="hljs-string">'content-encoding'</span>, None)
+response.headers.pop(<span class="hljs-string">'Content-Encoding'</span>, None)
+​
+<span class="hljs-keyword">return</span> HtmlResponse(
+ &nbsp; &nbsp;page.url,
+ &nbsp; &nbsp;status=response.status,
+ &nbsp; &nbsp;headers=response.headers,
+ &nbsp; &nbsp;body=body,
+ &nbsp; &nbsp;encoding=<span class="hljs-string">'utf-8'</span>,
+ &nbsp; &nbsp;request=request
+)
+</code></pre>
+
+
+<p data-nodeid="164806">所以，如果代码可以执行到最后，返回到就是一个 Response 对象，这个 Resposne 对象的 body 就是 Pyppeteer  渲染页面后的结果，因此这个 Response 对象再传给 Spider 解析，就是 JavaScript 渲染后的页面结果了。</p>
+<p data-nodeid="164807">这样我们就通过 Downloader Middleware 通过对接 Pyppeteer 完成 JavaScript 动态渲染页面的抓取了。</p>
+
