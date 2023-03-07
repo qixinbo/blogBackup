@@ -3,6 +3,12 @@ title: sources
 date: 2016-01-13 10:37:25
 ---
 
+# ChatGPT专区
+- [ChatGPT本尊](https://chat.openai.com/)
+- [AI with Light Speed：基于ChatGPT api的光速问答](https://ai.ci/)
+- [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
+- [CatGPT: 聊天+翻译](http://ai.okmiku.com/)
+
 # Search
 - [提问的智慧](https://lmstfy.net/%E6%8F%90%E9%97%AE%E7%9A%84%E6%99%BA%E6%85%A7.pdf)
 - [让我帮你百度一下](https://lmstfy.net/baidu/)
