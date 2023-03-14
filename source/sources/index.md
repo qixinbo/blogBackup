@@ -10,9 +10,12 @@ date: 2016-01-13 10:37:25
 - [CatGPT: 聊天+翻译](http://ai.okmiku.com/)
 - [chatgpt API套壳1: freegpt](https://freegpt.one/)
 - [chatgpt API套壳2: BAI Chat](https://chat.theb.ai/#/chat)
+- [chatgpt API套壳3：chatgpt-35-turbo](https://chatgpt-35-turbo.com/)
+- [chatgpt API套壳4：tgbot](https://chat.tgbot.co/)
 - [基于 ChatGPT API，且允许配置自己的 API key 的工具和应用的精选列表](https://github.com/reorx/awesome-chatgpt-api/blob/master/README.cn.md)
 - [ChatGPT快捷指令](https://newzone.top/chatgpt/)
 - [Poe: Quora开发的网站，集成了多款AI问答，包括ChatGPT（须开全局proxy）](https://poe.com/)
+- [在线chatgpt集合](https://www.ahhhhfs.com/39418/)
 
 # Search
 - [提问的智慧](https://lmstfy.net/%E6%8F%90%E9%97%AE%E7%9A%84%E6%99%BA%E6%85%A7.pdf)
