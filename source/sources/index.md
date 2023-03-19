@@ -8,6 +8,7 @@ date: 2016-01-13 10:37:25
 - [AI with Light Speed：基于ChatGPT api的光速问答](https://ai.ci/)
 - [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
 - [CatGPT: 聊天+翻译](http://ai.okmiku.com/)
+- [用大白话写SQL](https://www.ai2sql.cn/)
 - [chatgpt API套壳1: freegpt](https://freegpt.one/)
 - [chatgpt API套壳2: BAI Chat](https://chat.theb.ai/#/chat)
 - [chatgpt API套壳3：chatgpt-35-turbo](https://chatgpt-35-turbo.com/)
@@ -121,6 +122,7 @@ date: 2016-01-13 10:37:25
 - [~~MacWk | 只收录精品Mac应用~~](https://www.macwk.com/)
 - [XXMac - 苹果电脑软件下载](https://www.xxmac.com/) 
 - [扩展迷 | Chrome插件推荐与下载](https://www.extfans.com/)
+- [Clash for Android](https://github.com/Kr328/ClashForAndroid/releases)
 
 # 仓库精选
 - [Upscayl | Free and Open Source AI Image Upscaler](https://github.com/upscayl/upscayl)
