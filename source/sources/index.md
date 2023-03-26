@@ -7,12 +7,14 @@ date: 2016-01-13 10:37:25
 - [ChatGPT本尊](https://chat.openai.com/)
 - [AI with Light Speed：基于ChatGPT api的光速问答](https://ai.ci/)
 - [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
+- [开源的类ChatPDF](https://github.com/mayooear/gpt4-pdf-chatbot-langchain)
 - [CatGPT: 聊天+翻译](http://ai.okmiku.com/)
 - [用大白话写SQL](https://www.ai2sql.cn/)
 - [chatgpt API套壳1: freegpt](https://freegpt.one/)
 - [chatgpt API套壳2: BAI Chat](https://chat.theb.ai/#/chat)
 - [chatgpt API套壳3：chatgpt-35-turbo](https://chatgpt-35-turbo.com/)
 - [chatgpt API套壳4：tgbot](https://chat.tgbot.co/)
+- [自己做套壳，一键部署到Vercel](https://github.com/ourongxing/chatgpt-vercel)
 - [基于 ChatGPT API，且允许配置自己的 API key 的工具和应用的精选列表](https://github.com/reorx/awesome-chatgpt-api/blob/master/README.cn.md)
 - [ChatGPT快捷指令](https://newzone.top/chatgpt/)
 - [Poe: Quora开发的网站，集成了多款AI问答，包括ChatGPT（须开全局proxy）](https://poe.com/)
@@ -123,6 +125,10 @@ date: 2016-01-13 10:37:25
 - [XXMac - 苹果电脑软件下载](https://www.xxmac.com/) 
 - [扩展迷 | Chrome插件推荐与下载](https://www.extfans.com/)
 - [Clash for Android](https://github.com/Kr328/ClashForAndroid/releases)
+
+# 爬虫相关
+- [可视化爬虫Portia](https://github.com/scrapinghub/portia)
+- [类八爪鱼的开源爬虫DS](https://gitee.com/Vanishi/DS)
 
 # 仓库精选
 - [Upscayl | Free and Open Source AI Image Upscaler](https://github.com/upscayl/upscayl)
