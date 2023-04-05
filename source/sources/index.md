@@ -5,11 +5,14 @@ date: 2016-01-13 10:37:25
 
 # ChatGPT专区
 - [ChatGPT本尊](https://chat.openai.com/)
+- [ChatGPT Apps](https://ossinsight.io/collections/chat-gpt-apps/)
 - [AI with Light Speed：基于ChatGPT api的光速问答](https://ai.ci/)
 - [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
 - [开源的类ChatPDF](https://github.com/mayooear/gpt4-pdf-chatbot-langchain)
 - [CatGPT: 聊天+翻译](http://ai.okmiku.com/)
 - [用大白话写SQL](https://www.ai2sql.cn/)
+- [AI-Powered Regular Expression Solver](https://regex.ai/)
+- [Free ChatGPT Site List](https://github.com/xx025/carrot)
 - [chatgpt API套壳1: freegpt](https://freegpt.one/)
 - [chatgpt API套壳2: BAI Chat](https://chat.theb.ai/#/chat)
 - [chatgpt API套壳3：chatgpt-35-turbo](https://chatgpt-35-turbo.com/)
@@ -71,6 +74,7 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | Library Genesis](http://gen.lib.rus.ec/)
 - [电子书下载 | books43](http://www.books43.com/)
 # Widgets
+- [图片背景消除](https://www.remove.bg/zh)
 - [GeoGebra | 免费的课堂活动数字工具, 用于绘图计算, 几何作图, 白板协作等等](https://www.geogebra.org/)
 - [RunCode | 在线代码编辑器](https://r.xjq.icu/)
 - [石墨文档 web+微信小程序实现多端文字互传](https://shimo.im/)
@@ -127,8 +131,10 @@ date: 2016-01-13 10:37:25
 - [Clash for Android](https://github.com/Kr328/ClashForAndroid/releases)
 
 # 爬虫相关
+- [基于python的网页自动化工具。既能控制浏览器，也能收发数据包](https://github.com/g1879/DrissionPage)
 - [可视化爬虫Portia](https://github.com/scrapinghub/portia)
 - [类八爪鱼的开源爬虫DS](https://gitee.com/Vanishi/DS)
+- [一个可视化爬虫软件EasySpider](https://github.com/NaiboWang/EasySpider)
 
 # 仓库精选
 - [Upscayl | Free and Open Source AI Image Upscaler](https://github.com/upscayl/upscayl)
