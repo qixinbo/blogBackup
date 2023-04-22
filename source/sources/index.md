@@ -135,6 +135,8 @@ date: 2016-01-13 10:37:25
 - [可视化爬虫Portia](https://github.com/scrapinghub/portia)
 - [类八爪鱼的开源爬虫DS](https://gitee.com/Vanishi/DS)
 - [一个可视化爬虫软件EasySpider](https://github.com/NaiboWang/EasySpider)
+- [SuperSpider](https://github.com/Saferman/Super-Spider)
+- [nicegui](https://github.com/zauberzeug/nicegui)
 
 # 仓库精选
 - [Upscayl | Free and Open Source AI Image Upscaler](https://github.com/upscayl/upscayl)
