@@ -22,6 +22,7 @@ date: 2016-01-13 10:37:25
 - [ChatGPT快捷指令](https://newzone.top/chatgpt/)
 - [Poe: Quora开发的网站，集成了多款AI问答，包括ChatGPT（须开全局proxy）](https://poe.com/)
 - [在线chatgpt集合](https://www.ahhhhfs.com/39418/)
+- [LangFlow](https://github.com/logspace-ai/langflow)
 
 # Search
 - [提问的智慧](https://lmstfy.net/%E6%8F%90%E9%97%AE%E7%9A%84%E6%99%BA%E6%85%A7.pdf)
