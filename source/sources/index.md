@@ -4,14 +4,10 @@ date: 2016-01-13 10:37:25
 ---
 
 # ChatGPT专区
+## 本体应用
 - [ChatGPT本尊](https://chat.openai.com/)
-- [ChatGPT Apps](https://ossinsight.io/collections/chat-gpt-apps/)
 - [AI with Light Speed：基于ChatGPT api的光速问答](https://ai.ci/)
-- [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
-- [开源的类ChatPDF](https://github.com/mayooear/gpt4-pdf-chatbot-langchain)
 - [CatGPT: 聊天+翻译](http://ai.okmiku.com/)
-- [用大白话写SQL](https://www.ai2sql.cn/)
-- [AI-Powered Regular Expression Solver](https://regex.ai/)
 - [Free ChatGPT Site List](https://github.com/xx025/carrot)
 - [chatgpt API套壳1: freegpt](https://freegpt.one/)
 - [chatgpt API套壳2: BAI Chat](https://chat.theb.ai/#/chat)
@@ -22,7 +18,34 @@ date: 2016-01-13 10:37:25
 - [ChatGPT快捷指令](https://newzone.top/chatgpt/)
 - [Poe: Quora开发的网站，集成了多款AI问答，包括ChatGPT（须开全局proxy）](https://poe.com/)
 - [在线chatgpt集合](https://www.ahhhhfs.com/39418/)
+## 二次应用
+- [ChatGPT Apps](https://ossinsight.io/collections/chat-gpt-apps/)
+- [ChatGPT学术优化](https://github.com/binary-husky/chatgpt_academic)
+- [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
+- [phind: The AI search engine for developers.](https://www.phind.com/)
+- [开源的类ChatPDF](https://github.com/mayooear/gpt4-pdf-chatbot-langchain)
+- [用大白话写SQL](https://www.ai2sql.cn/)
+- [AI-Powered Regular Expression Solver](https://regex.ai/)
+- [⚡Building applications with LLMs through composability⚡](https://github.com/hwchase17/langchain)
 - [LangFlow](https://github.com/logspace-ai/langflow)
+- [在线搞定面试](https://github.com/leetcode-mafia/cheetah)
+- [babyapi: AI-powered task management system](https://github.com/yoheinakajima/babyagi)
+- [AutoGPT: make GPT-4 fully autonomous](https://github.com/Significant-Gravitas/Auto-GPT)
+- [AgentGPT: Assemble, configure, and deploy autonomous AI Agents in your browser](https://agentgpt.reworkd.ai/)
+
+# AIGC图像专区
+- [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything)
+- [Automatically Detect , Segment and Generate Anything with Image, Text, and Audio Inputs](https://github.com/IDEA-Research/Grounded-Segment-Anything)
+- [Cleanup - Remove object, defect, people, or text from your pictures in seconds](https://clipdrop.co/cleanup)
+- [Remove background - Remove background online in 1 click](https://clipdrop.co/remove-background)
+- [Relight - Relight your photos & drawings in seconds](https://clipdrop.co/relight)
+- [Image upscaler - Upscale, denoise and enhance your images in seconds](https://clipdrop.co/image-upscaler)
+- [Stable Diffusion XL - Generate images from text](https://clipdrop.co/stable-diffusion)
+- [Replace background - Teleport anything, anywhere with AI](https://clipdrop.co/replace-background)
+- [Text remover - Remove text from any image](https://clipdrop.co/text-remover)
+- [Stable Diffusion reimagine - Create multiple variations from a single image](https://clipdrop.co/stable-diffusion-reimagine)
+- [图片背景消除](https://www.remove.bg/zh)
+- [脸部重建——老照片修复，超分](https://github.com/sczhou/CodeFormer)
 
 # Search
 - [提问的智慧](https://lmstfy.net/%E6%8F%90%E9%97%AE%E7%9A%84%E6%99%BA%E6%85%A7.pdf)
@@ -75,7 +98,6 @@ date: 2016-01-13 10:37:25
 - [电子书下载 | Library Genesis](http://gen.lib.rus.ec/)
 - [电子书下载 | books43](http://www.books43.com/)
 # Widgets
-- [图片背景消除](https://www.remove.bg/zh)
 - [GeoGebra | 免费的课堂活动数字工具, 用于绘图计算, 几何作图, 白板协作等等](https://www.geogebra.org/)
 - [RunCode | 在线代码编辑器](https://r.xjq.icu/)
 - [石墨文档 web+微信小程序实现多端文字互传](https://shimo.im/)
