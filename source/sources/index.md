@@ -13,11 +13,13 @@ date: 2016-01-13 10:37:25
 - [chatgpt API套壳2: BAI Chat](https://chat.theb.ai/#/chat)
 - [chatgpt API套壳3：chatgpt-35-turbo](https://chatgpt-35-turbo.com/)
 - [chatgpt API套壳4：tgbot](https://chat.tgbot.co/)
+- [chatgpt API套壳5：BAI Chat2](https://chatbot.theb.ai/)
 - [自己做套壳，一键部署到Vercel](https://github.com/ourongxing/chatgpt-vercel)
 - [基于 ChatGPT API，且允许配置自己的 API key 的工具和应用的精选列表](https://github.com/reorx/awesome-chatgpt-api/blob/master/README.cn.md)
 - [ChatGPT快捷指令](https://newzone.top/chatgpt/)
 - [Poe: Quora开发的网站，集成了多款AI问答，包括ChatGPT（须开全局proxy）](https://poe.com/)
 - [在线chatgpt集合](https://www.ahhhhfs.com/39418/)
+
 ## 二次应用
 - [ChatGPT Apps](https://ossinsight.io/collections/chat-gpt-apps/)
 - [ChatGPT学术优化](https://github.com/binary-husky/chatgpt_academic)
@@ -25,6 +27,7 @@ date: 2016-01-13 10:37:25
 - [phind: The AI search engine for developers.](https://www.phind.com/)
 - [开源的类ChatPDF](https://github.com/mayooear/gpt4-pdf-chatbot-langchain)
 - [用大白话写SQL](https://www.ai2sql.cn/)
+- [AI法律助手](https://law.ai2045.com/)
 - [AI-Powered Regular Expression Solver](https://regex.ai/)
 - [⚡Building applications with LLMs through composability⚡](https://github.com/hwchase17/langchain)
 - [LangFlow](https://github.com/logspace-ai/langflow)
@@ -32,20 +35,36 @@ date: 2016-01-13 10:37:25
 - [babyapi: AI-powered task management system](https://github.com/yoheinakajima/babyagi)
 - [AutoGPT: make GPT-4 fully autonomous](https://github.com/Significant-Gravitas/Auto-GPT)
 - [AgentGPT: Assemble, configure, and deploy autonomous AI Agents in your browser](https://agentgpt.reworkd.ai/)
+- [Lamini: The LLM engine for rapidly customizing models 🦙，微调即服务](https://github.com/lamini-ai/lamini)
 
 # AIGC图像专区
-- [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything)
-- [Automatically Detect , Segment and Generate Anything with Image, Text, and Audio Inputs](https://github.com/IDEA-Research/Grounded-Segment-Anything)
+## 图像编辑
 - [Cleanup - Remove object, defect, people, or text from your pictures in seconds](https://clipdrop.co/cleanup)
 - [Remove background - Remove background online in 1 click](https://clipdrop.co/remove-background)
 - [Relight - Relight your photos & drawings in seconds](https://clipdrop.co/relight)
 - [Image upscaler - Upscale, denoise and enhance your images in seconds](https://clipdrop.co/image-upscaler)
-- [Stable Diffusion XL - Generate images from text](https://clipdrop.co/stable-diffusion)
 - [Replace background - Teleport anything, anywhere with AI](https://clipdrop.co/replace-background)
 - [Text remover - Remove text from any image](https://clipdrop.co/text-remover)
-- [Stable Diffusion reimagine - Create multiple variations from a single image](https://clipdrop.co/stable-diffusion-reimagine)
 - [图片背景消除](https://www.remove.bg/zh)
 - [脸部重建——老照片修复，超分](https://github.com/sczhou/CodeFormer)
+
+## 文生图
+- [https://playgroundai.com/](https://playgroundai.com/)
+- [https://dreamstudio.ai/generate](https://dreamstudio.ai/generate)
+- [https://pixlr.com/cn/x/#generator](https://pixlr.com/cn/x/#generator)
+- [https://app.leonardo.ai/ai-generations](https://app.leonardo.ai/ai-generations)
+- [https://designer.microsoft.com/](https://designer.microsoft.com/)
+- [https://www.craiyon.com/](https://www.craiyon.com/)
+
+## Stable Diffusion专区
+- [https://github.com/AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+- [Stable Diffusion XL - Generate images from text](https://clipdrop.co/stable-diffusion)
+- [Stable Diffusion reimagine - Create multiple variations from a single image](https://clipdrop.co/stable-diffusion-reimagine)
+
+## 图像分割
+- [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything)
+- [Automatically Detect , Segment and Generate Anything with Image, Text, and Audio Inputs](https://github.com/IDEA-Research/Grounded-Segment-Anything)
+- [👀SEEM: Segment Everything Everywhere All at Once](https://github.com/UX-Decoder/Segment-Everything-Everywhere-All-At-Once)
 
 # Search
 - [提问的智慧](https://lmstfy.net/%E6%8F%90%E9%97%AE%E7%9A%84%E6%99%BA%E6%85%A7.pdf)
