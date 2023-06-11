@@ -18,6 +18,7 @@ date: 2016-01-13 10:37:25
 - [基于 ChatGPT API，且允许配置自己的 API key 的工具和应用的精选列表](https://github.com/reorx/awesome-chatgpt-api/blob/master/README.cn.md)
 - [ChatGPT快捷指令](https://newzone.top/chatgpt/)
 - [Poe: Quora开发的网站，集成了多款AI问答，包括ChatGPT（须开全局proxy）](https://poe.com/)
+- [Perplexity: AI+网络资料整合](https://www.perplexity.ai/)
 - [在线chatgpt集合](https://www.ahhhhfs.com/39418/)
 
 ## 二次应用
@@ -36,6 +37,8 @@ date: 2016-01-13 10:37:25
 - [AutoGPT: make GPT-4 fully autonomous](https://github.com/Significant-Gravitas/Auto-GPT)
 - [AgentGPT: Assemble, configure, and deploy autonomous AI Agents in your browser](https://agentgpt.reworkd.ai/)
 - [Lamini: The LLM engine for rapidly customizing models 🦙，微调即服务](https://github.com/lamini-ai/lamini)
+- [Copilot Hub: 基于ChatGPT创建个人的知识库AI](https://app.copilothub.ai)
+- [向量脉络 VectorVein: 利用AI的力量构建您的个人知识库+自动化工作流程](https://github.com/AndersonBY/vector-vein)
 
 # AIGC图像专区
 ## 图像编辑
@@ -47,6 +50,7 @@ date: 2016-01-13 10:37:25
 - [Text remover - Remove text from any image](https://clipdrop.co/text-remover)
 - [图片背景消除](https://www.remove.bg/zh)
 - [脸部重建——老照片修复，超分](https://github.com/sczhou/CodeFormer)
+- [DragGAN](https://github.com/XingangPan/DragGAN)
 
 ## 文生图
 - [https://playgroundai.com/](https://playgroundai.com/)
@@ -55,6 +59,10 @@ date: 2016-01-13 10:37:25
 - [https://app.leonardo.ai/ai-generations](https://app.leonardo.ai/ai-generations)
 - [https://designer.microsoft.com/](https://designer.microsoft.com/)
 - [https://www.craiyon.com/](https://www.craiyon.com/)
+- [https://fusionbrain.ai/diffusion](https://fusionbrain.ai/diffusion)
+
+## 图生文
+- [Recognize Anything: A Strong Image Tagging Model](https://github.com/xinyu1205/Recognize_Anything-Tag2Text)
 
 ## Stable Diffusion专区
 - [https://github.com/AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
@@ -113,6 +121,8 @@ date: 2016-01-13 10:37:25
 - [全国图书馆参考咨询联盟](http://www.ucdrs.superlib.net)
 - [书格 | 古籍图书馆](https://new.shuge.org/)
 ## 外文
+- [zlib个人tg bot](https://t.me/zlibrary_official/6)
+- [zlib个人域名](https://singlelogin.re/),[2](https://t.me/zlibrary_official/8)
 - [pdfdrive](https://www.pdfdrive.com/)
 - [电子书下载 | Library Genesis](http://gen.lib.rus.ec/)
 - [电子书下载 | books43](http://www.books43.com/)

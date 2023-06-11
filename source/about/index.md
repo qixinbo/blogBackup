@@ -6,11 +6,11 @@ date: 2016-01-12 22:40:47
 # Self-Introduction:
 
 Xin Bo Qi
-- 2022.10 - now, 2012 Lab, Huawei Technologies Co., Ltd
+- 2022.10 - now, 2012 Lab, Huawei Digital Technologies Co., Ltd
 - 2019.9 - 2022.9, Lead Research Scientist in Corporate Technology, Siemens Ltd. China
 - 2017.9 - 2019.9, Postdoc in Department of Mechanical Engineering, Tsinghua University
-- 2011.9 - 2017.6, PhD in Division of Materials Processing Modeling, Institute of Metal Research, Chinese Academy of Sciences
-- 2007.9 - 2011.6, Bachelor in School of Materials Science & Engineering, Shandong University
+- 2011.9 - 2017.6, PhD in Computational Fuild Dynamics, Institute of Metal Research, Chinese Academy of Sciences
+- 2007.9 - 2011.6, Bachelor in First Principle Calculation, Shandong University
 
 # Skills:
 - Programming languages: C/C++, Mathematica, Python
