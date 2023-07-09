@@ -22,6 +22,7 @@ date: 2016-01-13 10:37:25
 - [在线chatgpt集合](https://www.ahhhhfs.com/39418/)
 
 ## 二次应用
+- [AI Watch](aiwatch.ai)
 - [ChatGPT Apps](https://ossinsight.io/collections/chat-gpt-apps/)
 - [ChatGPT学术优化](https://github.com/binary-husky/chatgpt_academic)
 - [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
@@ -31,19 +32,25 @@ date: 2016-01-13 10:37:25
 - [AI法律助手](https://law.ai2045.com/)
 - [AI-Powered Regular Expression Solver](https://regex.ai/)
 - [⚡Building applications with LLMs through composability⚡](https://github.com/hwchase17/langchain)
-- [LangFlow](https://github.com/logspace-ai/langflow)
 - [在线搞定面试](https://github.com/leetcode-mafia/cheetah)
+- [Lamini: The LLM engine for rapidly customizing models 🦙，微调即服务](https://github.com/lamini-ai/lamini)
+- [Copilot Hub: 基于ChatGPT创建个人的知识库AI](https://app.copilothub.ai)
+- [开源大模型的推理实现统一的后端接口](https://github.com/xusenlinzy/api-for-open-llm)
+
+# AI Agent
+- [gpt-engineer：一个提示生成整个代码库](https://github.com/AntonOsika/gpt-engineer)
+- [向量脉络 VectorVein: 利用AI的力量构建您的个人知识库+自动化工作流程](https://github.com/AndersonBY/vector-vein)
 - [babyapi: AI-powered task management system](https://github.com/yoheinakajima/babyagi)
 - [AutoGPT: make GPT-4 fully autonomous](https://github.com/Significant-Gravitas/Auto-GPT)
 - [AgentGPT: Assemble, configure, and deploy autonomous AI Agents in your browser](https://agentgpt.reworkd.ai/)
-- [Lamini: The LLM engine for rapidly customizing models 🦙，微调即服务](https://github.com/lamini-ai/lamini)
-- [Copilot Hub: 基于ChatGPT创建个人的知识库AI](https://app.copilothub.ai)
-- [向量脉络 VectorVein: 利用AI的力量构建您的个人知识库+自动化工作流程](https://github.com/AndersonBY/vector-vein)
+- [LangFlow](https://github.com/logspace-ai/langflow)
+- [LangChain](https://github.com/hwchase17/langchain)
 
 # AIGC图像专区
 ## 图像编辑
 - [Cleanup - Remove object, defect, people, or text from your pictures in seconds](https://clipdrop.co/cleanup)
 - [Remove background - Remove background online in 1 click](https://clipdrop.co/remove-background)
+- [背景去除](https://pixian.ai/)
 - [Relight - Relight your photos & drawings in seconds](https://clipdrop.co/relight)
 - [Image upscaler - Upscale, denoise and enhance your images in seconds](https://clipdrop.co/image-upscaler)
 - [Replace background - Teleport anything, anywhere with AI](https://clipdrop.co/replace-background)
