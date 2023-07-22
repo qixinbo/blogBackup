@@ -37,6 +37,7 @@ date: 2016-01-13 10:37:25
 - [Lamini: The LLM engine for rapidly customizing models 🦙，微调即服务](https://github.com/lamini-ai/lamini)
 - [Copilot Hub: 基于ChatGPT创建个人的知识库AI](https://app.copilothub.ai)
 - [开源大模型的推理实现统一的后端接口](https://github.com/xusenlinzy/api-for-open-llm)
+- [提示词优化](https://promptperfect.jina.ai/)
 
 # AI Agent
 - [gpt-engineer：一个提示生成整个代码库](https://github.com/AntonOsika/gpt-engineer)
