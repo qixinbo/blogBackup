@@ -23,6 +23,7 @@ date: 2016-01-13 10:37:25
 
 ## 二次应用
 - [AI Watch](aiwatch.ai)
+- [AI Code Translator | AI Code Converter | AI Code Generator，Generate Code or Natural Language To Programming Language](https://github.com/JustAIGithub/AI-Code-Convert)
 - [ChatGPT Apps](https://ossinsight.io/collections/chat-gpt-apps/)
 - [ChatGPT学术优化](https://github.com/binary-husky/chatgpt_academic)
 - [ChatPDF: 从PDF文件里快速提取信息](https://www.chatpdf.com/)
@@ -38,6 +39,7 @@ date: 2016-01-13 10:37:25
 - [Copilot Hub: 基于ChatGPT创建个人的知识库AI](https://app.copilothub.ai)
 - [开源大模型的推理实现统一的后端接口](https://github.com/xusenlinzy/api-for-open-llm)
 - [提示词优化](https://promptperfect.jina.ai/)
+- [LangGPT: Empowering everyone to become a prompt expert!🚀 Structured Prompt，结构化提示词](https://github.com/yzfly/LangGPT)
 
 # AI Agent
 - [gpt-engineer：一个提示生成整个代码库](https://github.com/AntonOsika/gpt-engineer)
@@ -77,6 +79,7 @@ date: 2016-01-13 10:37:25
 - [https://github.com/AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
 - [Stable Diffusion XL - Generate images from text](https://clipdrop.co/stable-diffusion)
 - [Stable Diffusion reimagine - Create multiple variations from a single image](https://clipdrop.co/stable-diffusion-reimagine)
+- [An extensible, easy-to-use, and portable diffusion web UI 👨🎨](https://github.com/varunshenoy/opendream)
 
 ## 图像分割
 - [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything)
@@ -190,6 +193,7 @@ date: 2016-01-13 10:37:25
 - [XXMac - 苹果电脑软件下载](https://www.xxmac.com/) 
 - [扩展迷 | Chrome插件推荐与下载](https://www.extfans.com/)
 - [Clash for Android](https://github.com/Kr328/ClashForAndroid/releases)
+- [Telegram（电报）：新手指南、使用教程及频道推荐](https://tingtalk.me/telegram/)
 
 # 爬虫相关
 - [基于python的网页自动化工具。既能控制浏览器，也能收发数据包](https://github.com/g1879/DrissionPage)
