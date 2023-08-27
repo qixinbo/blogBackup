@@ -220,6 +220,8 @@ date: 2016-01-13 10:37:25
 ## Neovim
 - [neovimcraft: curated list of neovim plugins](https://neovimcraft.com/)
 - [Awesome Neovim: Collections of awesome Neovim plugins](https://github.com/rockerBOO/awesome-neovim)
+- [NvChad](https://github.com/NvChad/NvChad)
+- [AstroNvim](https://github.com/AstroNvim/AstroNvim)
 
 ## Hexo NexT theme
 - [NexT Math Equations](https://github.com/theme-next/hexo-theme-next/blob/master/docs/MATH.md)
