@@ -17,6 +17,8 @@ date: 2016-01-13 08:41:43
 - [Y. Chen, D.Z. Li, B. Billia, H. Nguyen-Thi, X.B. Qi, N.M. Xiao. Quantitative phase-field simulation of dendritic equiaxed growth and comparison with in situ observation on Al-4wt.% Cu alloy by means of synchrotron X-ray radiography, ISIJ Int. 54 (2014) 445-451. (IF: 0.96)](https://www.jstage.jst.go.jp/article/isijinternational/54/2/54_445/_article)
 
 # 实用工具
+- [LINEEX: Data Extraction from Scientific Line Charts](https://github.com/Shiva-sankaran/LineEX), [paper](https://openaccess.thecvf.com/content/WACV2023/papers/P._LineEX_Data_Extraction_From_Scientific_Line_Charts_WACV_2023_paper.pdf)
+- [ChartOCR: Data Extraction from Charts Images via a Deep Hybrid Framework](https://github.com/soap117/DeepRule), [paper](https://openaccess.thecvf.com/content/WACV2021/papers/Luo_ChartOCR_Data_Extraction_From_Charts_Images_via_a_Deep_Hybrid_WACV_2021_paper.pdf)
 - [Image annotation tools](https://github.com/topics/image-annotation)
 - [Mathics | Mathematica开源替代](https://github.com/Mathics3/mathics-core)
 - [Text Renderer](https://github.com/Sanster/text_renderer)
