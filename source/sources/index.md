@@ -108,6 +108,7 @@ date: 2016-01-13 10:37:25
 
 # 影视
 - 天空影视 [1](https://tkznp.com/), [2](http://tkys.vip/)
+- 影视仓 [爱优腾都删了吧，一个影视仓就够了](https://tvlabs.cn/post/189), [下载地址及电视源](https://docs.qq.com/sheet/DRGhQc3lVQXBMUUlj?tab=BB08J2)
 
 # 机场
 - [免费1](https://lncn.org/)
