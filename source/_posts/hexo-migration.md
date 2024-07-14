@@ -5,6 +5,14 @@ categories: coding
 date: 2021-3-25
 ---
 
+# 2024-7-14 说明
+今天将博客从vercel迁移到了cloudflare。步骤也非常简单，跟vercel类似，将github库关联到cloudflare即可，可参考[该博客](https://www.jgduhao.xyz/2023/08/06/%E6%8A%8Ahexo%E5%8D%9A%E5%AE%A2%E9%83%A8%E7%BD%B2%E5%88%B0Cloudflare-Pages/)以及[这个博客](https://blog.lianglianglee.com/2023/04/05/hexo-cloudflare/)。
+需要注意的点有：
+- 在godaddy上配置cloudflare的域名服务器
+- 在cloudflare的dns里配置两个CNAME，一个是'qixinbo.info'，一个是'www.qixinbo.info'。
+- 还要在Workers和Pages里单独设置一下“自定义域”。
+
+
 # 说明
 在最近一次在不同电脑间迁移时，使用了[`Vercel`](https://vercel.com/)这个站点托管工具，有如下几个优点：
 - 完全不需要像下面那样在本地搭建开发环境，只需`git clone`源码到本地即可
