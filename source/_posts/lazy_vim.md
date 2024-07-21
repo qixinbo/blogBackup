@@ -9,6 +9,11 @@ date: 2024-7-21
 
 之前写过[一篇使用NvChad来配置Neovim的博客](https://qixinbo.info/2022/08/11/neovim_nvchad/)，今天试试使用[LazyVim](https://github.com/LazyVim/LazyVim)来将Neovim打造成IDE。
 
+教程：
+
+- [LazyVim for Ambitious Developers](https://lazyvim-ambitious-devs.phillips.codes/)
+- [Zero to IDE with LazyVim](https://www.youtube.com/watch?v=N93cTbtLCIM&ab_channel=ElijahManor)
+
 # 前置条件
 
 LazyVim需要的前置条件（软件及其版本号）要满足要求，可参见[官方文档](https://www.lazyvim.org/)。
