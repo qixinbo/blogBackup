@@ -113,6 +113,7 @@ http://<your server's IP or hostname>:9000/if/flow/initial-setup/.
 AUTHENTIK_ISSUER=http://localhost:9000/application/o/fastapi-demo
 OIDC_CLIENT_ID=demo-fastapi-client-id
 OIDC_CLIENT_SECRET=demo-fastapi-client-secret
+SESSION_SECRET=demo-secret-9b8e2d8e3a4c5f6d7e8f9a0b1c2d3e4  # 这个随意设置
 ```
 
 ## 本地应用示例
@@ -126,47 +127,26 @@ OIDC_CLIENT_SECRET=demo-fastapi-client-secret
 ```python
 import os
 from fastapi import FastAPI, Request, HTTPException
-from starlette.responses import HTMLResponse, RedirectResponse, PlainTextResponse
+from starlette.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from authlib.integrations.starlette_client import OAuth, OAuthError
+from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
 
-# Load environment variables from .env if present
 load_dotenv()
 
 app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "dev-secret"))
 
-# Session secret for signing cookies
-SESSION_SECRET = os.getenv("SESSION_SECRET", "dev-secret-change-me")
-app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
-
-# Authentik OIDC configuration from environment
-AUTHENTIK_ISSUER = os.getenv("AUTHENTIK_ISSUER")  # e.g. http://localhost:9000/application/o/fastapi-demo
+AUTHENTIK_ISSUER = os.getenv("AUTHENTIK_ISSUER")
 OIDC_CLIENT_ID = os.getenv("OIDC_CLIENT_ID")
 OIDC_CLIENT_SECRET = os.getenv("OIDC_CLIENT_SECRET")
-
-if not AUTHENTIK_ISSUER:
-    print("[WARN] AUTHENTIK_ISSUER is not set. Set it to your provider base URL.")
-if not OIDC_CLIENT_ID or not OIDC_CLIENT_SECRET:
-    print("[WARN] OIDC_CLIENT_ID / OIDC_CLIENT_SECRET are not set. Login will fail until set.")
-
-# Configure OAuth client with Authlib
-
-def _build_metadata_url(issuer: str | None):
-    if not issuer:
-        return None
-    issuer_clean = issuer.rstrip('/')
-    well_known = '/.well-known/openid-configuration'
-    if issuer_clean.endswith(well_known):
-        return issuer_clean
-    return f"{issuer_clean}{well_known}"
 
 oauth = OAuth()
 oauth.register(
     name="authentik",
     client_id=OIDC_CLIENT_ID,
     client_secret=OIDC_CLIENT_SECRET,
-    server_metadata_url=_build_metadata_url(AUTHENTIK_ISSUER),
+    server_metadata_url=f"{AUTHENTIK_ISSUER.rstrip('/')}/.well-known/openid-configuration" if AUTHENTIK_ISSUER else None,
     client_kwargs={"scope": "openid profile email"},
 )
 
@@ -174,68 +154,70 @@ oauth.register(
 async def index(request: Request):
     user = request.session.get("user")
     if user:
-        display_name = user.get("name") or user.get("preferred_username") or user.get("email") or "User"
+        name = user.get("name") or user.get("preferred_username") or user.get("email") or "User"
         return HTMLResponse(
-            f"""
-            <h1>Hello, {display_name}</h1>
-            <p>You are signed in via Authentik.</p>
-            <p><a href=\"/logout\">Logout</a></p>
-            <p><a href=\"/api/hello\">Call protected API</a></p>
-            """
+            f"<h1>Hello, {name}</h1>\n"
+            f"<p><a href=\"/api/hello\">Protected API</a></p>\n"
+            f"<p><a href=\"/logout\">Logout</a></p>"
         )
     return HTMLResponse(
-        """
-        <h1>Hello, FastAPI + Authentik</h1>
-        <p><a href=\"/login\">Login with Authentik</a></p>
-        """
+        "<h1>FastAPI + Authentik</h1>\n"
+        "<p><a href=\"/login\">Login with Authentik</a></p>"
     )
 
 @app.get("/login")
 async def login(request: Request):
-    if not AUTHENTIK_ISSUER or not OIDC_CLIENT_ID or not OIDC_CLIENT_SECRET:
-        return PlainTextResponse("OIDC is not configured. Set AUTHENTIK_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET.", status_code=500)
-    redirect_uri = request.url_for("auth_callback")
-    return await oauth.authentik.authorize_redirect(request, redirect_uri)
+    return await oauth.authentik.authorize_redirect(request, request.url_for("auth_callback"))
 
 @app.get("/auth/callback")
 async def auth_callback(request: Request):
-    try:
-        token = await oauth.authentik.authorize_access_token(request)
-    except OAuthError as err:
-        return PlainTextResponse(f"OAuth error: {err.error}", status_code=400)
-
-    # Prefer ID Token; fallback to UserInfo when id_token is missing
-    user = None
-    try:
-        if isinstance(token, dict) and token.get("id_token"):
-            user = await oauth.authentik.parse_id_token(request, token)
-    except Exception:
-        user = None
-
-    if user is None:
-        try:
-            user = await oauth.authentik.userinfo(token=token)
-        except Exception as e:
-            return PlainTextResponse(f"Failed to fetch user info: {e}", status_code=400)
-
+    token = await oauth.authentik.authorize_access_token(request)
+    user = await oauth.authentik.userinfo(token=token)
     request.session["user"] = user
-    return RedirectResponse(url="/")
+    return RedirectResponse("/")
 
 @app.get("/logout")
 async def logout(request: Request):
     request.session.pop("user", None)
-    return RedirectResponse(url="/")
+    return RedirectResponse("/")
 
-# Simple protected API example
 @app.get("/api/hello")
 async def api_hello(request: Request):
     user = request.session.get("user")
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     who = user.get("preferred_username") or user.get("email") or "user"
-    return {"message": f"Hello, {who}! This is a protected endpoint."}
+    return {"message": f"Hello, {who}!"}
 ```
 
+# 允许用户注册
+默认Authentik没有允许用户自己注册账号，所以在登录页面没有signup这个选项。
+这里配置开启该功能，核心思路是：我们告诉主登录流程，“如果遇到不认识的用户，就把他们引导到这个专门的注册流程去”。
+第1步：确认存在一个“注册流程”(Enrollment Flow)
+Authentik 通常会内置一个默认的注册流程，我们先检查它是否存在且配置正确。
+1、在左侧导航栏，展开 Flows & Stages -> Flows。
+2、在流程列表中，寻找一个名为 default-enrollment-flow 的流程。
+（1）如果存在，点击进入，检查一下它是否绑定了必要的 Stage，通常默认的配置是可用的。
+（2）如果不存在，从[这里](https://docs.goauthentik.io/add-secure-apps/flows-stages/flow/examples/flows/#enrollment-2-stage)下载示例文件，并在页面导入。
+第2步：将注册流程关联到主登录流程
+这是最关键的一步。
+1、回到 Flows & Stages -> Flows 列表。
+2、点击打开您的主登录流程，即 default-authentication-flow。
+3、点击 Stage Bindings 标签页。
+4、点击编辑那个 Identification Stage (默认名为 default-authentication-identification-stage)。
+5、现在，在这个 Stage 的编辑页面中，您会看到一个名为 Enrollment 的板块。
+6、找到 Enrollment flow 字段。它默认是空的。
+7、点击下拉菜单，选择您在第一步中确认或创建的 default-enrollment-flow。
+8、(可选) 在 Recovery flow 字段中，您可以类似地关联一个 default-recovery-flow，这样登录页面就会同时出现“忘记密码”的选项。
+9、点击页面底部的 Update 保存更改。
+
+现在请您刷新登录页面，应该就可以看到 "Sign up" 的链接了。如果点击该链接，就会进入一个引导您设置用户名、密码等信息的流程。
+此时再次使用上面的HelloWorld应用，就可以新建用户了。
+
+注意，如果用新建的用户访问一些权限高的Authentik链接，就会报错，比如`"Interface can only be accessed by internal users"`。
+这是因为Authentik 出于安全考虑，默认会保护一些敏感的应用，比如它自己的管理后台 (authentik Embedded Outpost)。它的默认策略是：只允许“内部用户”(Internal users) 访问。
+内部用户 (Internal user): 通常指由管理员在后台直接创建的用户。
+外部用户 (External user): 通过开放注册、社交登录（如Google/GitHub）或邀请链接创建的用户，默认都属于“外部用户”。
 
 # 参考教程
 - [Up主ecwuuu的Authentik视频教程](https://space.bilibili.com/509461/lists/2694404?type=season)
