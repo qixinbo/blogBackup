@@ -207,9 +207,8 @@ links_settings:
 links:
   #Title: http://yoursite.com
   THU: https://www.tsinghua.edu.cn
-  IMR: http://www.imr.cas.cn
+  UCAS: https://www.ucas.ac.cn/
   SDU: http://www.sdu.edu.cn
-  黄晨成: http://liam0205.me/
 
 # Table of Contents in the Sidebar
 # Front-matter variable (unsupport wrap expand_all).
