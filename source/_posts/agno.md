@@ -1627,3 +1627,380 @@ Agno 的 “Dependencies” 机制本质上是一种 **轻量级依赖注入（D
 它允许在代理运行前动态加载变量、函数结果或外部数据（如 API 响应、数据库记录、用户信息等）。
 这样可以让 LLM 代理在执行时拥有实时、个性化的上下文，而无需手动拼接 prompt。
 
+
+## 智能体状态
+
+**状态（State）** 是指在一个会话（session）的多次运行之间需要保持的数据。
+
+一个常见的 Agent 用例是帮助用户管理各种列表或信息，例如：购物清单、待办事项清单、心愿单等。
+这些内容都可以通过 `session_state` 来轻松管理。
+
+Agent 可以在工具调用（tool calls）或指令中访问或更新 `session_state`，并在系统消息中将其暴露给模型。
+
+然后，该会话状态会被持久化到配置的数据库中，并在同一会话的多次运行之间保持一致。
+
+---
+
+<Note>
+
+**理解 Agno 中的“无状态性”**：
+Agno 中的Agent本身在不同的会话或运行之间并不直接维护工作状态，但它提供了完善的状态管理机制：
+
+* `Agent` 的 `session_state` 参数为新会话提供默认状态模板。
+* `get_session_state()` 方法可从数据库中检索特定会话的状态。
+* 工作状态按运行（run）进行管理，并在每个会话中持久化保存。
+* 智能体实例（或其实例属性）本身在运行过程中不会被修改。
+
+</Note>
+
+---
+
+### 状态管理
+
+Agno 提供了一个功能强大且优雅的状态管理系统。其工作机制如下：
+
+* 你可以通过 `session_state` 参数为 Agent 设置默认状态变量（字典格式）。
+* 你可以在工具（tools）或其他函数中更新 `session_state`。
+* 你可以在系统消息的 `description` 和 `instructions` 中引用状态变量，从而让 LLM 了解当前状态。
+* 你可以在调用 `agent.run()` 时传入 `session_state`，它的优先级高于 Agent 默认状态。
+* `session_state` 会在数据库中按会话存储，并在该会话的多次运行间保持。
+* 当你在 `agent.run()` 中指定 `session_id` 时，会自动从数据库加载对应会话的状态。
+
+以下是一个管理购物清单（shopping list）的代理示例：
+
+```python
+from agno.agent import Agent
+from agno.db.sqlite import SqliteDb
+from agno.models.openai import OpenAIChat
+
+# 定义一个工具，用于向购物清单添加物品
+def add_item(session_state, item: str) -> str:
+    """添加物品到购物清单"""
+    session_state["shopping_list"].append(item)
+    return f"The shopping list is now {session_state['shopping_list']}"
+
+# 创建一个维护状态的智能体
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    # 存储会话和状态的数据库
+    db=SqliteDb(db_file="tmp/agents.db"),
+    # 初始化会话状态（空购物清单）
+    session_state={"shopping_list": []},
+    tools=[add_item],
+    # 可以在指令中引用状态变量
+    instructions="Current state (shopping list) is: {shopping_list}",
+    markdown=True,
+)
+
+# 示例使用
+agent.print_response("Add milk, eggs, and bread to the shopping list", stream=True)
+print(f"Final session state: {agent.get_session_state()}")
+```
+
+<Note>  
+`session_state` 变量会自动作为参数传递给工具函数。  
+任何对它的修改都会自动同步到共享状态中。  
+</Note>
+
+<Check>  
+在团队模式下（Team），会话状态会在团队成员之间共享。  
+详情参见 [Teams](https://docs.agno.com/concepts/teams/state)。  
+</Check>
+
+---
+
+### 在同一会话中保持状态
+
+使用 **sessions** 的最大优势之一，就是能在同一会话的多次运行中保持状态。
+例如，一个帮助用户维护购物清单的 Agent。
+
+<Tip>  
+要让状态在多次运行之间持久化，你必须通过 `db` 参数配置存储。  
+</Tip>
+
+```python
+from textwrap import dedent
+from agno.agent import Agent
+from agno.db.sqlite import SqliteDb
+from agno.models.openai import OpenAIChat
+
+# 定义管理购物清单的工具
+def add_item(session_state, item: str) -> str:
+    """添加物品"""
+    if item.lower() not in [i.lower() for i in session_state["shopping_list"]]:
+        session_state["shopping_list"].append(item)
+        return f"Added '{item}' to the shopping list"
+    else:
+        return f"'{item}' is already in the shopping list"
+
+def remove_item(session_state, item: str) -> str:
+    """删除物品"""
+    for i, list_item in enumerate(session_state["shopping_list"]):
+        if list_item.lower() == item.lower():
+            session_state["shopping_list"].pop(i)
+            return f"Removed '{list_item}' from the shopping list"
+    return f"'{item}' was not found in the shopping list"
+
+def list_items(session_state) -> str:
+    """列出购物清单中的所有物品"""
+    shopping_list = session_state["shopping_list"]
+    if not shopping_list:
+        return "The shopping list is empty."
+    items_text = "\n".join([f"- {item}" for item in shopping_list])
+    return f"Current shopping list:\n{items_text}"
+
+# 创建一个带状态的购物清单管理 Agent
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    session_state={"shopping_list": []},
+    db=SqliteDb(db_file="tmp/example.db"),
+    tools=[add_item, remove_item, list_items],
+    instructions=dedent("""\
+        Your job is to manage a shopping list.
+
+        The shopping list starts empty. You can add items, remove items by name, and list all items.
+
+        Current shopping list: {shopping_list}
+    """),
+    markdown=True,
+)
+
+# 示例使用
+agent.print_response("Add milk, eggs, and bread to the shopping list", stream=True)
+print(f"Session state: {agent.get_session_state()}")
+agent.print_response("I got bread", stream=True)
+agent.print_response("I need apples and oranges", stream=True)
+agent.print_response("whats on my list?", stream=True)
+agent.print_response("Clear everything and start with bananas and yogurt", stream=True)
+```
+
+---
+
+### 会话状态
+Agno 还支持让智能体自动更新会话状态。
+只需设置参数 `enable_agentic_state=True`。
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.db.sqlite import SqliteDb
+
+agent = Agent(
+    db=SqliteDb(db_file="tmp/agents.db"),
+    model=OpenAIChat(id="gpt-5-mini"),
+    session_state={"shopping_list": []},
+    add_session_state_to_context=True,  # 让代理能够感知会话状态
+    enable_agentic_state=True,          # 自动添加管理状态的工具
+)
+
+agent.print_response("Add milk, eggs, and bread to the shopping list", stream=True)
+print(f"Session state: {agent.get_session_state()}")
+```
+
+<Tip>  
+请务必设置 `add_session_state_to_context=True`，  
+以便代理能够访问并感知当前会话状态。  
+</Tip>
+
+---
+
+### 在指令中使用状态
+
+你可以在指令中引用会话状态中的变量。
+
+<Tip>  
+不要使用 Python 的 f-string 语法（`f"{}"`），  
+直接写 `{key}` 即可，Agno 会自动替换。  
+</Tip>
+
+```python
+from textwrap import dedent
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.db.sqlite import SqliteDb
+
+agent = Agent(
+    db=SqliteDb(db_file="tmp/agents.db"),
+    model=OpenAIChat(id="gpt-5-mini"),
+    session_state={"user_name": "John"},
+    instructions="Users name is {user_name}",
+    markdown=True,
+)
+
+agent.print_response("What is my name?", stream=True)
+```
+
+---
+
+### 在运行时切换状态
+
+当你在 `agent.run()` 时传入 `session_id`，
+代理会自动切换到对应的会话，并加载该会话的状态。
+这在为不同用户维持独立会话时非常有用。
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.db.sqlite import SqliteDb
+
+agent = Agent(
+    db=SqliteDb(db_file="tmp/agents.db"),
+    model=OpenAIChat(id="gpt-5-mini"),
+    instructions="Users name is {user_name} and age is {age}",
+)
+
+# 用户1
+agent.print_response("What is my name?", session_id="user_1_session_1", user_id="user_1", session_state={"user_name": "John", "age": 30})
+agent.print_response("How old am I?", session_id="user_1_session_1", user_id="user_1")
+
+# 用户2
+agent.print_response("What is my name?", session_id="user_2_session_1", user_id="user_2", session_state={"user_name": "Jane", "age": 25})
+agent.print_response("How old am I?", session_id="user_2_session_1", user_id="user_2")
+```
+
+---
+
+### 覆盖数据库中的状态
+
+默认情况下，如果在运行时传入了 `session_state`，
+Agno 会将新的状态与数据库中的状态合并。
+
+如果你希望覆盖数据库中的状态，可以启用以下参数：
+
+```python
+from agno.agent import Agent
+from agno.db.sqlite import SqliteDb
+from agno.models.openai import OpenAIChat
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o-mini"),
+    db=SqliteDb(db_file="tmp/agents.db"),
+    markdown=True,
+    session_state={},
+    add_session_state_to_context=True,
+    overwrite_db_session_state=True,  # 允许覆盖数据库状态
+)
+
+agent.print_response(
+    "Can you tell me what's in your session_state?",
+    session_state={"shopping_list": ["Potatoes"]},
+    stream=True,
+)
+print(f"Stored session state: {agent.get_session_state()}")
+
+agent.print_response(
+    "Can you tell me what is in your session_state?",
+    session_state={"secret_number": 43},
+    stream=True,
+)
+print(f"Stored session state: {agent.get_session_state()}")
+```
+
+✅ **总结：**
+Agno 的状态系统让每个 Agent 都能像“有记忆的助手”一样，
+在多轮对话中保存并使用上下文信息（如购物清单、用户资料等）。
+它通过 `session_state` 与数据库配合，实现了持久化、可控、可覆盖的状态管理。
+
+
+## 存储
+
+### 为什么我们需要会话存储？
+
+智能体是**临时且无状态（stateless）**的。当你运行一个智能体时，它的状态不会被自动保存。
+在生产环境中，我们通常通过 API 来调用（或触发）智能体，并希望能在多次请求之间**延续同一个会话**。
+
+**Storage（存储）**的作用是将会话历史与状态保存到数据库中，使我们能够从上次中断的地方继续运行。
+
+除此之外，存储还可以让我们：
+
+* 检查与评估智能体的会话；
+* 提取 few-shot 示例；
+* 构建内部监控工具。
+
+换句话说，它让我们能够**观察数据本身**，从而构建更优秀的智能体。
+
+只需为Agent、Team或Workflow提供一个数据库驱动（`DB driver`），Agno 就会自动完成剩下的工作。
+你可以使用 **SQLite、Postgres、MongoDB** 或任何其他数据库。
+
+下面是一个展示智能体在多次执行间持久化状态的简单示例：
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.db.sqlite import SqliteDb
+from rich.pretty import pprint
+
+agent = Agent(
+     model=OpenAIChat(id="gpt-5-mini"),
+    # 固定会话 ID，以便在多次运行间保持同一会话
+    session_id="fixed_id_for_demo",
+    db=SqliteDb(db_file="tmp/data.db"),
+    # 让智能体能够访问会话历史
+    add_history_to_context=True,
+    num_history_runs=3,
+)
+
+agent.print_response("What was my last question?")
+agent.print_response("What is the capital of France?")
+agent.print_response("What was my last question?")
+pprint(agent.get_messages_for_session())
+```
+
+首次运行时，智能体无法回答 “What was my last question?”，
+但再次运行后，它就能回答正确。
+因为我们为其设置了固定的 `session_id`，智能体会在每次运行时**延续相同的会话上下文**。
+
+---
+
+### 存储的优势
+
+存储通常是「智能体工程」中**被低估但极其关键的部分**。
+在生产系统中，存储的重要性体现在：
+
+* **延续会话**：恢复历史记录，从上次中断处继续；
+* **维护会话列表**：便于用户选择继续先前的对话；
+* **保存会话状态**：将智能体的运行状态存入数据库或文件，以便后续分析。
+
+但它的价值远不止于此：
+
+* 存储让我们可以检查智能体的**会话数据与评估指标**；
+* 通过存储的数据，我们可以提取 **few-shot 示例** 来优化模型；
+* 存储是构建 **内部监控面板与运营工具** 的基础。
+
+---
+
+> ⚠️ **警告：**
+>
+> 存储是智能体基础架构中至关重要的一环，**绝不应完全交给第三方服务**。
+> 在生产系统中，你几乎总是应该**自建存储层**来管理智能体的状态与会话。
+
+---
+
+### 会话表结构（Session Table Schema）
+
+当为智能体配置了 `db` 参数后，Agno 会在数据库中创建一个 **sessions 表**，
+用于保存每个会话的信息。
+
+表结构如下：
+
+| 字段名             | 类型     | 说明        |
+| --------------- | ------ | --------- |
+| `session_id`    | `str`  | 会话的唯一标识符  |
+| `session_type`  | `str`  | 会话类型      |
+| `agent_id`      | `str`  | 所属智能体的 ID |
+| `team_id`       | `str`  | 所属团队的 ID  |
+| `workflow_id`   | `str`  | 所属工作流的 ID |
+| `user_id`       | `str`  | 所属用户的 ID  |
+| `session_data`  | `dict` | 会话相关数据    |
+| `agent_data`    | `dict` | 智能体相关数据   |
+| `team_data`     | `dict` | 团队相关数据    |
+| `workflow_data` | `dict` | 工作流相关数据   |
+| `metadata`      | `dict` | 会话元数据     |
+| `runs`          | `list` | 会话中的执行记录  |
+| `summary`       | `dict` | 会话摘要信息    |
+| `created_at`    | `int`  | 会话创建时间戳   |
+| `updated_at`    | `int`  | 会话最后更新时间戳 |
+
+这些数据最直观地展示在
+👉 [AgentOS 的会话页面](https://os.agno.com/sessions)。
+
