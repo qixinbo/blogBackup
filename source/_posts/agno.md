@@ -2309,8 +2309,8 @@ Agno 提供了许多预构建的 **工具包（toolkits）**，可直接添加�
 
 创建文件 `web_search.py`
 ```python
-    from agno.agent import Agent
-    from agno.tools.duckduckgo import DuckDuckGoTools
+from agno.agent import Agent
+from agno.tools.duckduckgo import DuckDuckGoTools
 
 agent = Agent(tools=[DuckDuckGoTools()], markdown=True)
 agent.print_response("法国现在发生了什么？", stream=True)
@@ -2427,10 +2427,8 @@ Agno 智能体支持 **文本、图像、音频、视频和文件** 作为输入
 
 想了解多模态功能的完整概述，请查看 [multimodal 官方文档](https://docs.agno.com/concepts/multimodal/overview)。
 
-<Tip>
-  并非所有模型都支持多模态输入和输出。  
-  查看 [兼容性矩阵](https://docs.agno.com/concepts/models/compatibility) 以了解哪些模型具备该能力。
-</Tip>
+并非所有模型都支持多模态输入和输出。  
+查看[兼容性矩阵](https://docs.agno.com/concepts/models/compatibility) 以了解哪些模型具备该能力。
 
 ---
 
@@ -2633,4 +2631,306 @@ if agent.run_response.response_audio is not None:
 * Agno 智能体支持多种输入与输出模态；
 * 可实现“看图说话”“语音交互”“视频理解”等应用；
 * 通过模型选择与工具组合，可构建复杂的多模态交互系统。
+
+## 前置钩子与后置钩子
+Agno 提供了一种简单的机制，让你在智能体执行前后插入自定义逻辑，从而实现 **输入验证、输出过滤、合规控制、数据增强** 等功能。
+### 🧩 Pre-hooks（前置钩子）
+
+前置钩子在智能体**处理输入之前**执行，让你完全掌控送入 LLM 的数据。
+
+它非常适合：
+
+* 验证输入是否合法；
+* 移除或脱敏敏感信息；
+* 对输入数据进行格式化或预处理。
+
+---
+
+#### ✅ 常见使用场景
+
+##### 🔒 输入验证
+
+* 检查格式、长度或内容；
+* 屏蔽敏感信息；
+* 拒绝违规内容。
+
+##### ⚙️ 数据预处理
+
+* 转换输入格式或结构；
+* 增加上下文信息；
+* 在输入前应用业务逻辑。
+
+---
+
+#### 💡 示例：验证输入长度
+
+```python
+from agno.agent import Agent
+from agno.exceptions import CheckTrigger, InputCheckError
+from agno.models.openai import OpenAIChat
+
+# 定义一个前置钩子函数
+def validate_input_length(
+    run_input,
+    session,
+    user_id=None,
+    debug_mode=None,
+):
+    """前置钩子：校验输入长度"""
+    max_length = 1000
+    if len(run_input.input_content) > max_length:
+        raise InputCheckError(
+            f"输入过长，最大允许 {max_length} 个字符。",
+            check_trigger=CheckTrigger.INPUT_NOT_ALLOWED,
+        )
+
+# 创建智能体并注册 pre-hook
+agent = Agent(
+    name="My Agent",
+    model=OpenAIChat(id="gpt-5-mini"),
+    pre_hooks=[validate_input_length],
+)
+```
+
+如果输入超过 1000 字符，智能体会在处理前抛出错误，避免无效或危险请求继续执行。
+
+📚 完整示例可见：[Pre-hooks and Post-hooks Examples](/examples/concepts/agents/pre-hooks-and-post-hooks)
+
+---
+
+#### 🧠 Pre-hooks 参数说明
+
+前置钩子会在每次运行时自动执行，Agno 会自动注入以下参数：
+
+* `run_input`：本次运行的输入；
+* `session`：当前会话；
+* `user_id`：可选的用户标识；
+* `debug_mode`：调试模式标记。
+
+详细参数请见：[Pre-hooks 参考文档](/reference/hooks/pre-hooks)
+
+---
+
+### 🧩 Post-hooks（后置钩子）
+
+后置钩子在智能体**生成响应之后**执行，允许你对输出结果进行验证、清理或增强。
+
+它非常适合：
+
+* 过滤输出中的违规内容；
+* 添加元数据；
+* 进行输出格式转换。
+
+---
+
+#### ✅ 常见使用场景
+
+##### 🧾 输出验证
+
+* 检查响应长度、格式、质量；
+* 移除敏感或不合规内容；
+* 确保响应符合业务要求。
+
+##### 🔄 输出转换
+
+* 为响应添加上下文或元信息；
+* 转换格式以适配不同客户端；
+* 进行二次加工（如摘要、翻译等）。
+
+---
+
+#### 💡 示例：验证输出长度
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.exceptions import CheckTrigger, OutputCheckError
+from agno.run.agent import RunOutput
+
+# 定义一个后置钩子函数
+def validate_output_length(run_output: RunOutput) -> None:
+    """后置钩子：校验输出长度"""
+    max_length = 1000
+    if len(run_output.content) > max_length:
+        raise OutputCheckError(
+            f"输出过长，最大允许 {max_length} 个字符。",
+            check_trigger=CheckTrigger.OUTPUT_NOT_ALLOWED,
+        )
+
+# 创建智能体并注册 post-hook
+agent = Agent(
+    name="My Agent",
+    model=OpenAIChat(id="gpt-5-mini"),
+    post_hooks=[validate_output_length],
+)
+```
+
+📚 完整示例可见：[Post-hooks Examples](/examples/concepts/agent/hooks)
+
+---
+
+#### 🧠 Post-hooks 参数说明
+
+与前置钩子类似，Agno 会在执行后自动注入：
+
+* `run_output`：本次执行的输出对象；
+* 其他上下文参数（如会话、配置等）。
+
+详细说明请见：[Post-hooks 参考文档](/reference/hooks/post-hooks)
+
+---
+
+### 🛡️ Guardrails（防护栏）
+
+**Guardrails** 是基于 Pre-hooks 的一种常见应用，用于为智能体添加内置安全防护机制。
+
+例如：
+
+* 防止提示注入；
+* 限制请求内容；
+* 阻止敏感词输入。
+
+详细文档请见：[Guardrails](/concepts/agents/guardrails)
+
+
+✅ **总结**
+
+* `Pre-hooks`：在输入前执行，做验证、过滤或增强。
+* `Post-hooks`：在输出后执行，做清理、格式化或合规检查。
+* 二者结合可构建**更安全、可控、可扩展**的智能体系统。
+
+
+## 防护栏
+
+### 🛡️ 什么是 Guardrails？
+
+**Guardrails** 是智能体内置的安全防护机制，用于确保发送给大语言模型（LLM）的输入是安全的，不包含敏感或恶意内容。
+它可以在模型运行前自动检测和阻止潜在风险。
+
+---
+
+### 🔍 常见用途
+
+Guardrails 通常用于以下几种安全场景：
+
+* 🧩 **PII 检测与脱敏**（检测个人隐私信息）
+* 🧱 **Prompt 注入防御**（防止提示词攻击）
+* 🔓 **越狱防御**（阻止模型被诱导绕过安全限制）
+* 🧾 **数据泄露防护**
+* 🚫 **NSFW 内容过滤**（过滤不适宜内容）
+
+---
+
+### 🧰 Agno 内置 Guardrails
+
+Agno 提供了多种**开箱即用**的防护模块，可直接集成到智能体中：
+
+| Guardrail 名称                                                                 | 功能说明                       |
+| ---------------------------------------------------------------------------- | -------------------------- |
+| [PII Detection Guardrail](/concepts/agents/guardrails/pii)                   | 检测输入中是否包含个人身份信息（如邮箱、手机号等）。 |
+| [Prompt Injection Guardrail](/concepts/agents/guardrails/prompt-injection)   | 检测并阻止 Prompt 注入攻击。         |
+| [OpenAI Moderation Guardrail](/concepts/agents/guardrails/openai-moderation) | 检测违反 OpenAI 内容政策的输入。       |
+
+---
+
+#### ✅ 示例：使用 PII 检测防护
+
+```python
+from agno.guardrails import PIIDetectionGuardrail
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+# 初始化内置 Guardrail
+pii_guardrail = PIIDetectionGuardrail()
+
+# 创建带防护功能的 Agent
+agent = Agent(
+    name="Privacy-Protected Agent",
+    model=OpenAIChat(id="gpt-5-mini"),
+    pre_hooks=[pii_guardrail],  # 在输入前执行
+)
+```
+
+📘 查看完整示例：[Guardrails Examples](/examples/concepts/agent/guardrails)
+
+---
+
+### ⚙️ 自定义 Guardrails
+
+如果内置防护无法满足需求，你可以**自定义 Guardrail**，通过继承 `BaseGuardrail` 类实现自己的检测逻辑。
+
+#### 实现步骤
+
+1. 继承 `BaseGuardrail`；
+2. 实现 `check()` 和（可选）`async_check()` 方法；
+3. 当检测到违规内容时，抛出 `InputCheckError`。
+
+<Check>
+Agno 会根据你使用的运行方式自动调用同步或异步版本：  
+- `.run()` → 调用 `check()`  
+- `.arun()` → 调用 `async_check()`
+</Check>
+
+---
+
+#### 💡 示例：检测输入中是否包含 URL
+
+```python
+import re
+from agno.exceptions import CheckTrigger, InputCheckError
+from agno.guardrails import BaseGuardrail
+from agno.run.agent import RunInput
+
+class URLGuardrail(BaseGuardrail):
+    """检测输入中是否包含 URL 的防护。"""
+
+    def check(self, run_input: RunInput) -> None:
+        """如果输入包含 URL，则抛出异常。"""
+        if isinstance(run_input.input_content, str):
+            url_pattern = r'https?://[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*'
+            if re.search(url_pattern, run_input.input_content):
+                raise InputCheckError(
+                    "输入内容中包含 URL，不被允许。",
+                    check_trigger=CheckTrigger.INPUT_NOT_ALLOWED,
+                )
+
+    async def async_check(self, run_input: RunInput) -> None:
+        """异步版本的检测逻辑。"""
+        if isinstance(run_input.input_content, str):
+            url_pattern = r'https?://[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*'
+            if re.search(url_pattern, run_input.input_content):
+                raise InputCheckError(
+                    "输入内容中包含 URL，不被允许。",
+                    check_trigger=CheckTrigger.INPUT_NOT_ALLOWED,
+                )
+```
+
+---
+
+#### 🚀 使用自定义 Guardrail
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+# 使用自定义 URL 检测防护
+agent = Agent(
+    name="URL-Protected Agent",
+    model=OpenAIChat(id="gpt-5-mini"),
+    pre_hooks=[URLGuardrail()],
+)
+
+# 会触发 InputCheckError
+agent.run("Can you check what's in https://fake.com?")
+```
+
+### ✅ 总结
+
+| 类型                | 作用                   | 示例                       |
+| ----------------- | -------------------- | ------------------------ |
+| **内置 Guardrail**  | 开箱即用的标准防护（PII、注入检测等） | `PIIDetectionGuardrail`  |
+| **自定义 Guardrail** | 按需编写检测逻辑（如 URL、敏感词等） | `URLGuardrail`           |
+| **运行机制**          | 作为 `pre_hooks` 执行    | `Agent(pre_hooks=[...])` |
+
+🔐 **Guardrails** 是智能体安全体系的第一道防线，确保所有传入 LLM 的数据符合你的安全与合规要求。
 
