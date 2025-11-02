@@ -551,8 +551,6 @@ agent.cli_app(stream=True)
 
 更多细节请参考 [Session Storage（会话存储）](https://docs.agno.com/concepts/agents/storage)。
 
----
-
 ### 单轮会话示例
 在下例中，Agno 自动为我们生成 `run_id` 和 `session_id`：
 
@@ -567,8 +565,6 @@ print(response.content)
 print(response.run_id)
 print(response.session_id)
 ```
-
----
 
 ### 多轮会话（Multi-turn Sessions）
 每个用户都可以拥有自己的会话集，多个用户可同时与同一个 Agent 交互。
@@ -1455,4 +1451,179 @@ Agno 的上下文构建逻辑天然会将最可能缓存的静态内容放在系
 * [Anthropic 的提示缓存](https://docs.claude.com/en/docs/build-with-claude/prompt-caching) — [Agno 示例](/examples/models/anthropic/prompt_caching)
 * [OpenRouter 的提示缓存](https://openrouter.ai/docs/features/prompt-caching)
 
+
+## 依赖注入
+**依赖项（Dependencies）** 是一种向智能体上下文（Agent Context）注入变量的方式。
+`dependencies` 是一个字典，包含一组函数（或静态变量），这些依赖项会在智能体运行前被解析。
+
+<Note>  
+你可以使用依赖项来注入记忆、动态 few-shot 示例、检索得到的文档等。  
+</Note>
+
+---
+
+### 基本用法
+
+可以在智能体的 `instructions`（指令）或用户消息中引用依赖项。
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    dependencies={"name": "John Doe"},
+    instructions="You are a story writer. The current user is {name}."
+)
+
+agent.print_response("Write a 5 second short story about {name}")
+```
+
+<Tip>  
+你既可以在 `Agent` 初始化时设置 `dependencies`，  
+也可以在运行时通过 `run()` 或 `arun()` 方法传入。  
+</Tip>
+
+---
+
+### 使用函数作为依赖项
+
+你可以将一个可调用函数指定为依赖项。
+当代理运行时，该依赖项会被自动解析并执行。
+
+```python
+import json
+from textwrap import dedent
+import httpx
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+
+def get_top_hackernews_stories() -> str:
+    """获取并返回 HackerNews 上的热门新闻。
+
+    Args:
+        num_stories: 要获取的热门新闻数量（默认：5）
+    Returns:
+        JSON 字符串，包含新闻的标题、链接、评分等信息。
+    """
+    # 获取热门新闻
+    stories = [
+        {
+            k: v
+            for k, v in httpx.get(
+                f"https://hacker-news.firebaseio.com/v0/item/{id}.json"
+            )
+            .json()
+            .items()
+            if k != "kids"  # 排除评论部分
+        }
+        for id in httpx.get(
+            "https://hacker-news.firebaseio.com/v0/topstories.json"
+        ).json()[:num_stories]
+    ]
+    return json.dumps(stories, indent=4)
+
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    # 每个依赖项函数会在代理运行时自动求值
+    # 可以将其理解为 Agent 的“依赖注入”
+    dependencies={"top_hackernews_stories": get_top_hackernews_stories},
+    # 也可以手动将依赖项添加到指令中
+    instructions=dedent("""\
+        You are an insightful tech trend observer! 📰
+
+        Here are the top stories on HackerNews:
+        {top_hackernews_stories}\
+    """),
+    markdown=True,
+)
+
+# 示例使用
+agent.print_response(
+    "Summarize the top stories on HackerNews and identify any interesting trends.",
+    stream=True,
+)
+```
+
+<Check>  
+依赖项会在代理运行时自动解析。  
+</Check>
+
+---
+
+### 将依赖项添加到上下文
+
+设置 `add_dependencies_to_context=True`，
+可以将整个依赖项字典添加到用户消息中。
+这样你就不必手动把依赖项插入到指令中了。
+
+```python
+import json
+from textwrap import dedent
+import httpx
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+
+def get_user_profile() -> str:
+    """获取并返回指定用户 ID 的用户档案。
+
+    Args:
+        user_id: 要检索的用户 ID
+    """
+
+    # 从数据库中获取用户信息（此处为示例）
+    user_profile = {
+      "name": "John Doe",
+      "experience_level": "senior",
+    }
+
+    return json.dumps(user_profile, indent=4)
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    dependencies={"user_profile": get_user_profile},
+    # 将整个依赖项字典添加到用户消息中
+    add_dependencies_to_context=True,
+    markdown=True,
+)
+
+agent.print_response(
+    "Get the user profile for the user with ID 123 and tell me about their experience level.",
+    stream=True,
+)
+# 也可以在调用 print_response 时传入依赖项
+# agent.print_response(
+#     "Get the user profile for the user with ID 123 and tell me about their experience level.",
+#     dependencies={"user_profile": get_user_profile},
+#     stream=True,
+# )
+```
+
+<Note>  
+这会将整个依赖项字典插入到用户消息中，位于 `<additional context>` 标签之间。  
+新的用户消息看起来如下：
+
+```
+Get the user profile for the user with ID 123 and tell me about their experience level.                                                       
+                                                                                                                                                 
+<additional context>                                                                                                                     
+{                                                                                                                                        
+"user_profile": "{\n    \"name\": \"John Doe\",\n    \"experience_level\": \"senior\"\n}"                                              
+}                                                                                                                                        
+</additional context> 
+```
+
+</Note>
+
+<Tip>  
+你可以在以下方法中传入 `dependencies` 和 `add_dependencies_to_context` 参数：  
+`run()`、`arun()`、`print_response()`、`aprint_response()`。  
+</Tip>
+
+Agno 的 “Dependencies” 机制本质上是一种 **轻量级依赖注入（Dependency Injection）**，
+它允许在代理运行前动态加载变量、函数结果或外部数据（如 API 响应、数据库记录、用户信息等）。
+这样可以让 LLM 代理在执行时拥有实时、个性化的上下文，而无需手动拼接 prompt。
 
