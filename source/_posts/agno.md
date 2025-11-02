@@ -2307,38 +2307,23 @@ Agno 提供了许多预构建的 **工具包（toolkits）**，可直接添加�
   更多工具包请参见 [Toolkits 指南](https://docs.agno.com/concepts/tools/toolkits)。
 </Tip>
 
-<Steps>
-  <Step title="创建网页搜索智能体">
-    创建文件 `web_search.py`
-    ```python
+创建文件 `web_search.py`
+```python
     from agno.agent import Agent
     from agno.tools.duckduckgo import DuckDuckGoTools
 
-````
 agent = Agent(tools=[DuckDuckGoTools()], markdown=True)
 agent.print_response("法国现在发生了什么？", stream=True)
 ```
-````
 
-  </Step>
-
-  <Step title="运行智能体">
-    安装依赖库：
-    ```bash
-    pip install openai ddgs agno
-    ```
-
-````
+安装依赖库：
+```bash
+pip install openai ddgs agno
+```
 运行智能体：
 ```bash
 python web_search.py
 ```
-````
-
-  </Step>
-</Steps>
-
----
 
 ### 编写自定义工具
 
@@ -2436,4 +2421,216 @@ async def run_mcp_agent():
   想了解更多 MCP 工具，请参见 [MCP 工具指南](/concepts/tools/mcp)。
 </Tip>
 
+## 多模态智能体
+Agno 智能体支持 **文本、图像、音频、视频和文件** 作为输入，并且也可以生成这些类型的输出。
+这意味着你可以构建能“看图”“听音”“读文档”的智能体。
+
+想了解多模态功能的完整概述，请查看 [multimodal 官方文档](https://docs.agno.com/concepts/multimodal/overview)。
+
+<Tip>
+  并非所有模型都支持多模态输入和输出。  
+  查看 [兼容性矩阵](https://docs.agno.com/concepts/models/compatibility) 以了解哪些模型具备该能力。
+</Tip>
+
+---
+
+### 向智能体提供多模态输入（Multimodal Inputs）
+
+下面我们创建一个能理解图像的智能体，它会根据需要自动调用工具。
+
+#### 图像智能体
+
+```python
+# image_agent.py
+from agno.agent import Agent
+from agno.media import Image
+from agno.models.openai import OpenAIChat
+from agno.tools.duckduckgo import DuckDuckGoTools
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    tools=[DuckDuckGoTools()],
+    markdown=True,
+)
+
+agent.print_response(
+    "请描述这张图片，并告诉我有关它的最新新闻。",
+    images=[
+        Image(
+            url="https://upload.wikimedia.org/wikipedia/commons/0/0c/GoldenGateBridge-001.jpg"
+        )
+    ],
+    stream=True,
+)
+```
+
+运行智能体：
+
+```bash
+python image_agent.py
+```
+
+更多详情请见 [Image as input](/concepts/multimodal/images/image_input)。
+
+---
+
+#### 音频智能体（Audio Agent）
+
+```python
+# audio_agent.py
+import requests
+from agno.agent import Agent
+from agno.media import Audio
+from agno.models.openai import OpenAIChat
+
+# 下载音频文件
+url = "https://openaiassets.blob.core.windows.net/$web/API/docs/audio/alloy.wav"
+response = requests.get(url)
+response.raise_for_status()
+wav_data = response.content
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini-audio-preview", modalities=["text"]),
+    markdown=True,
+)
+
+agent.print_response("这段音频中说了什么？", audio=[Audio(content=wav_data, format="wav")])
+```
+
+---
+
+#### 视频智能体（Video Agent）
+
+<Note>目前，Agno 仅在 Gemini 模型中支持视频输入。</Note>
+
+```python
+# video_agent.py
+from pathlib import Path
+from agno.agent import Agent
+from agno.media import Video
+from agno.models.google import Gemini
+
+agent = Agent(
+    model=Gemini(id="gemini-2.0-flash-exp"),
+    markdown=True,
+)
+
+# 请先下载视频
+# wget https://storage.googleapis.com/generativeai-downloads/images/GreatRedSpot.mp4
+video_path = Path(__file__).parent.joinpath("GreatRedSpot.mp4")
+
+agent.print_response("请描述这段视频内容。", videos=[Video(filepath=video_path)])
+```
+
+---
+
+### 智能体的多模态输出
+
+除了接收多模态输入外，Agno 智能体还可以生成图像、音频等多模态输出。
+
+#### 图像生成（Image Generation）
+
+以下示例展示了如何使用 DALL·E 生成图像：
+
+```python
+# image_agent.py
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.tools.dalle import DalleTools
+
+image_agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    tools=[DalleTools()],
+    description="你是一个可以用 DALL-E 生成图像的智能体。",
+    instructions="当用户请求创建图像时，请使用 `create_image` 工具。",
+    markdown=True,
+)
+
+image_agent.print_response("生成一只白色的暹罗猫的图像。")
+
+images = image_agent.get_images()
+if images and isinstance(images, list):
+    for image_response in images:
+        print(image_response.url)
+```
+
+---
+
+#### 音频响应（Audio Response）
+
+以下示例展示了如何让智能体同时返回文本与音频响应：
+
+```python
+# audio_agent.py
+from agno.agent import Agent, RunOutput
+from agno.models.openai import OpenAIChat
+from agno.utils.audio import write_audio_to_file
+
+agent = Agent(
+    model=OpenAIChat(
+        id="gpt-5-mini-audio-preview",
+        modalities=["text", "audio"],
+        audio={"voice": "alloy", "format": "wav"},
+    ),
+    markdown=True,
+)
+
+response: RunOutput = agent.run("请讲一个 5 秒钟的恐怖故事。")
+
+# 保存生成的音频
+if response.response_audio is not None:
+    write_audio_to_file(
+        audio=agent.run_response.response_audio.content,
+        filename="tmp/scary_story.wav"
+    )
+```
+
+---
+
+### 多模态输入 + 多模态输出（Inputs and Outputs Together）
+
+你还可以创建既接收多模态输入、又输出多模态内容的智能体。
+
+#### 音频输入 + 音频输出
+
+```python
+# audio_agent.py
+import requests
+from agno.agent import Agent
+from agno.media import Audio
+from agno.models.openai import OpenAIChat
+from agno.utils.audio import write_audio_to_file
+
+# 下载音频
+url = "https://openaiassets.blob.core.windows.net/$web/API/docs/audio/alloy.wav"
+response = requests.get(url)
+response.raise_for_status()
+wav_data = response.content
+
+agent = Agent(
+    model=OpenAIChat(
+        id="gpt-5-mini-audio-preview",
+        modalities=["text", "audio"],
+        audio={"voice": "alloy", "format": "wav"},
+    ),
+    markdown=True,
+)
+
+agent.run("这段录音中说了什么？", audio=[Audio(content=wav_data, format="wav")])
+
+# 保存智能体的语音回应
+if agent.run_response.response_audio is not None:
+    write_audio_to_file(
+        audio=agent.run_response.response_audio.content,
+        filename="tmp/result.wav"
+    )
+```
+
+---
+
+✅ **总结：**
+
+* Agno 智能体支持多种输入与输出模态；
+* 可实现“看图说话”“语音交互”“视频理解”等应用；
+* 通过模型选择与工具组合，可构建复杂的多模态交互系统。
 
