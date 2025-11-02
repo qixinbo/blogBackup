@@ -1,5 +1,5 @@
 ---
-title: 多智能体开发框架Agno教程
+title: 多智能体开发框架Agno教程0——快速上手和相关概念
 tags: [LLM]
 categories: coding 
 date: 2025-5-7
@@ -2933,4 +2933,439 @@ agent.run("Can you check what's in https://fake.com?")
 | **运行机制**          | 作为 `pre_hooks` 执行    | `Agent(pre_hooks=[...])` |
 
 🔐 **Guardrails** 是智能体安全体系的第一道防线，确保所有传入 LLM 的数据符合你的安全与合规要求。
+
+## 指标
+
+### 📊 什么是 Metrics？
+
+当你在 **Agno** 中运行一个智能体时，系统返回的结果对象 **`RunOutput`** 会包含详细的运行指标（metrics），用于帮助你分析：
+
+* **资源使用情况**（如 token 消耗）
+* **性能数据**（如响应时间）
+* **工具调用的成本与耗时**
+
+这些指标在多个层级上可用：
+
+| 层级                    | 描述                               |
+| --------------------- | -------------------------------- |
+| **每条消息（Per Message）** | 每个消息（如模型回复、工具调用）都有独立指标。          |
+| **每次运行（Per Run）**     | 每个 `RunOutput` 对象都有整体运行指标。       |
+| **每个会话（Per Session）** | `AgentSession` 汇总了本次会话中所有运行的总指标。 |
+
+---
+
+### 🧠 示例：如何访问指标
+
+下面的示例展示了如何运行一个智能体，并打印出消息级、运行级、会话级的指标。
+
+```python
+from agno.agent import Agent
+from agno.models.google import Gemini
+from agno.tools.duckduckgo import DuckDuckGoTools
+from agno.db.sqlite import SqliteDb
+from rich.pretty import pprint
+
+agent = Agent(
+    model=Gemini(id="gemini-2.5-flash"),
+    tools=[DuckDuckGoTools()],
+    db=SqliteDb(db_file="tmp/agents.db"),
+    markdown=True,
+)
+
+# 执行一次智能体任务
+run_response = agent.run("What is current news in the world?")
+
+# 输出每条消息的指标
+if run_response.messages:
+    for message in run_response.messages:
+        if message.role == "assistant":
+            if message.content:
+                print(f"Message: {message.content}")
+            elif message.tool_calls:
+                print(f"Tool calls: {message.tool_calls}")
+            print("---" * 5, "Message Metrics", "---" * 5)
+            pprint(message.metrics.to_dict())
+            print("---" * 20)
+
+# 输出本次运行的总体指标
+print("---" * 5, "Run Metrics", "---" * 5)
+pprint(run_response.metrics.to_dict())
+
+# 输出整个会话的累计指标
+print("---" * 5, "Session Metrics", "---" * 5)
+pprint(agent.get_session_metrics().to_dict())
+```
+
+---
+
+### 📈 典型指标字段说明
+
+| 指标名称                      | 含义                                    |
+| ------------------------- | ------------------------------------- |
+| **`input_tokens`**        | 发送给模型的 token 数。                       |
+| **`output_tokens`**       | 模型输出的 token 数。                        |
+| **`total_tokens`**        | `input_tokens + output_tokens`。       |
+| **`audio_input_tokens`**  | 音频输入的 token 数（针对多模态模型）。               |
+| **`audio_output_tokens`** | 音频输出的 token 数。                        |
+| **`audio_total_tokens`**  | 音频输入输出 token 总和。                      |
+| **`cache_read_tokens`**   | 从缓存中读取的 token 数。                      |
+| **`cache_write_tokens`**  | 写入缓存的 token 数。                        |
+| **`reasoning_tokens`**    | 模型推理过程中使用的 token 数（适用于 reasoning 模型）。 |
+| **`duration`**            | 整个运行的持续时间（秒）。                         |
+| **`time_to_first_token`** | 从请求到第一个 token 生成的耗时（秒）。               |
+| **`provider_metrics`**    | 各模型提供商特定的附加指标（如延迟、API 调用状态等）。         |
+
+---
+
+### 🧭 数据层级示意
+
+```
+AgentSession
+ ├── session_metrics (所有 run 的累计)
+ │
+ ├── RunOutput #1
+ │    ├── run_metrics
+ │    ├── messages[assistant/tool/...].metrics
+ │
+ ├── RunOutput #2
+      ├── run_metrics
+      ├── messages[assistant/tool/...].metrics
+```
+
+---
+
+### 🧩 典型用途
+
+| 使用场景          | 说明                      |
+| ------------- | ----------------------- |
+| 💰 **成本监控**   | 统计 token 使用量，控制 API 成本。 |
+| 🧪 **性能分析**   | 分析响应耗时、延迟、缓存命中率。        |
+| 📊 **用户分析**   | 跟踪会话中每个用户的模型使用趋势。       |
+| ⚙️ **调优模型参数** | 比较不同模型或温度参数下的性能表现。      |
+
+---
+
+✅ **总结**
+Agno 的 Metrics 系统提供了精细化的运行监控机制，让你能够清晰了解智能体的：
+
+* token 使用与成本；
+* 执行性能；
+* 缓存效率；
+* 模型与工具的具体表现。
+
+这使得你能够基于数据，持续优化智能体的性能与成本效率。
+
+## 取消运行
+在 Agno 中，你可以通过调用 **`agent.cancel_run()`** 来取消正在执行的智能体任务。
+
+这在以下场景非常有用：
+
+* 当任务运行时间过长；
+* 当用户主动中断操作；
+* 当通过 API 或 WebSocket 管理智能体运行时；
+* 当希望限制模型计算成本或时间。
+
+Agno 的取消机制也与 **[AgentOS](/agent-os/api#cancelling-a-run)** 集成，可通过 API 实现远程取消。
+
+---
+
+### 🧩 示例：多线程取消运行
+
+下面的完整示例展示了如何：
+
+1. 在一个线程中启动智能体；
+2. 在另一个线程中延迟几秒后取消它；
+3. 并检测取消状态（`RunEvent.run_cancelled`）。
+
+```python
+import threading
+import time
+
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.run.agent import RunEvent
+from agno.run.base import RunStatus
+
+
+def long_running_task(agent: Agent, run_id_container: dict):
+    """
+    模拟一个可以被取消的长时间运行任务。
+    """
+    final_response = None
+    content_pieces = []
+
+    for chunk in agent.run(
+        "Write a very long story about a dragon who learns to code. "
+        "Make it at least 2000 words with detailed descriptions and dialogue. "
+        "Take your time and be very thorough.",
+        stream=True,  # 启用流式输出以便实时取消
+    ):
+        if "run_id" not in run_id_container and chunk.run_id:
+            run_id_container["run_id"] = chunk.run_id
+
+        if chunk.event == RunEvent.run_content:
+            print(chunk.content, end="", flush=True)
+            content_pieces.append(chunk.content)
+        elif chunk.event == RunEvent.run_cancelled:
+            print(f"\n🚫 Run was cancelled: {chunk.run_id}")
+            run_id_container["result"] = {
+                "status": "cancelled",
+                "run_id": chunk.run_id,
+                "cancelled": True,
+                "content": "".join(content_pieces)[:200] + "..." if content_pieces else "No content before cancellation",
+            }
+            return
+        elif hasattr(chunk, "status") and chunk.status == RunStatus.completed:
+            final_response = chunk
+
+    # 正常结束
+    if final_response:
+        run_id_container["result"] = {
+            "status": final_response.status.value if final_response.status else "completed",
+            "run_id": final_response.run_id,
+            "cancelled": final_response.status == RunStatus.cancelled,
+            "content": ("".join(content_pieces)[:200] + "...") if content_pieces else "No content",
+        }
+
+
+def cancel_after_delay(agent: Agent, run_id_container: dict, delay_seconds: int = 3):
+    """
+    在延迟一段时间后取消运行。
+    """
+    print(f"⏰ Will cancel run in {delay_seconds} seconds...")
+    time.sleep(delay_seconds)
+
+    run_id = run_id_container.get("run_id")
+    if run_id:
+        print(f"🚫 Cancelling run: {run_id}")
+        success = agent.cancel_run(run_id)
+        if success:
+            print(f"✅ Run {run_id} marked for cancellation")
+        else:
+            print(f"❌ Failed to cancel run {run_id} (may not exist or already completed)")
+    else:
+        print("⚠️  No run_id found to cancel")
+
+
+def main():
+    agent = Agent(
+        name="StorytellerAgent",
+        model=OpenAIChat(id="gpt-5-mini"),
+        description="An agent that writes detailed stories",
+    )
+
+    print("🚀 Starting agent run cancellation example...")
+    print("=" * 50)
+
+    run_id_container = {}
+
+    agent_thread = threading.Thread(
+        target=lambda: long_running_task(agent, run_id_container),
+        name="AgentRunThread",
+    )
+
+    cancel_thread = threading.Thread(
+        target=cancel_after_delay,
+        args=(agent, run_id_container, 8),  # 8 秒后取消
+        name="CancelThread",
+    )
+
+    print("🏃 Starting agent run thread...")
+    agent_thread.start()
+
+    print("🏃 Starting cancellation thread...")
+    cancel_thread.start()
+
+    print("⌛ Waiting for threads to complete...")
+    agent_thread.join()
+    cancel_thread.join()
+
+    print("\n" + "=" * 50)
+    print("📊 RESULTS:")
+    print("=" * 50)
+
+    result = run_id_container.get("result")
+    if result:
+        print(f"Status: {result['status']}")
+        print(f"Run ID: {result['run_id']}")
+        print(f"Was Cancelled: {result['cancelled']}")
+        print(f"Content Preview: {result['content']}")
+        if result["cancelled"]:
+            print("\n✅ SUCCESS: Run was successfully cancelled!")
+        else:
+            print("\n⚠️  WARNING: Run completed before cancellation")
+    else:
+        print("❌ No result obtained - check if cancellation happened during streaming")
+
+    print("\n🏁 Example completed!")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+### 🔍 工作原理
+
+| 概念                                | 描述                      |
+| --------------------------------- | ----------------------- |
+| **`agent.run(..., stream=True)`** | 启动流式运行，允许边生成边取消。        |
+| **`RunEvent.run_cancelled`**      | 表示运行被取消的事件类型。           |
+| **`agent.cancel_run(run_id)`**    | 主动请求取消指定运行（需提供 run_id）。 |
+| **`RunStatus.cancelled`**         | 运行状态字段，标记已取消。           |
+
+---
+
+### 🧠 注意事项
+
+* 取消机制通过 **事件流（RunEvent）** 实现，适合异步或多线程任务。
+* 一旦运行完成或出错，调用 `cancel_run()` 将不再生效。
+* 若你使用 **AgentOS** 部署智能体，可直接通过 REST API 或 SDK 调用取消接口。
+* 对于批量任务或流式生成类应用，强烈推荐实现“中断控制”以防模型过度计算。
+
+---
+
+✅ **总结**
+
+Agno 的取消机制让你可以：
+
+* 在任何阶段中止长时间任务；
+* 在前端或 API 层实现“停止生成”；
+* 节省模型计算成本；
+* 保持智能体响应灵活与安全。
+
+这为构建交互式或多用户 LLM 应用提供了重要的可控性。
+
+## 自定义日志记录器
+Agno 默认自带一个标准化的日志系统，但你也可以用自己定义的日志记录器（logger）替换它。
+
+这在以下场景非常有用：
+
+* 想要与现有系统的日志标准（如 JSON 格式、结构化日志）集成；
+* 想将日志输出到特定目标（如文件、数据库、Elastic、Grafana 等）；
+* 想为不同类型的组件（Agent / Team / Workflow）使用不同的日志格式。
+
+---
+
+### 🛠️ 指定自定义日志记录器
+
+下面示例展示如何替换 Agno 的默认日志系统为自定义日志器：
+
+```python
+import logging
+
+from agno.agent import Agent
+from agno.utils.log import configure_agno_logging, log_info
+
+
+# 1️⃣ 设置自定义日志器
+custom_logger = logging.getLogger("custom_logger")
+handler = logging.StreamHandler()  # 控制台输出
+formatter = logging.Formatter("[CUSTOM_LOGGER] %(levelname)s: %(message)s")
+handler.setFormatter(formatter)
+custom_logger.addHandler(handler)
+custom_logger.setLevel(logging.INFO)
+custom_logger.propagate = False  # 不向上层传播日志
+
+
+# 2️⃣ 告诉 Agno 使用我们的自定义日志器
+configure_agno_logging(custom_default_logger=custom_logger)
+
+# 所有来自 agno.utils.log 的日志都会使用我们的 custom_logger
+log_info("This is using our custom logger!")
+
+
+# 3️⃣ 创建并运行 Agent
+agent = Agent()
+agent.print_response("What can I do to improve my sleep?")
+```
+
+运行时输出类似：
+
+```
+[CUSTOM_LOGGER] INFO: This is using our custom logger!
+[CUSTOM_LOGGER] INFO: Starting Agent run...
+[CUSTOM_LOGGER] INFO: Agent responded: “To improve your sleep, try keeping a consistent bedtime...”
+```
+
+---
+
+### 🔧 多日志器配置（Multiple Loggers）
+
+你也可以分别为不同组件（Agent、Team、Workflow）定义独立的日志器：
+
+```python
+configure_agno_logging(
+    custom_default_logger=custom_agent_logger,
+    custom_agent_logger=custom_agent_logger,
+    custom_team_logger=custom_team_logger,
+    custom_workflow_logger=custom_workflow_logger,
+)
+```
+
+📘 用法建议：
+
+* **Agent 日志**：用于记录智能体的推理、模型调用、输入输出。
+* **Team 日志**：用于多智能体协作或团队任务追踪。
+* **Workflow 日志**：用于长流程任务、管道式执行日志。
+
+---
+
+### 🧱 使用命名日志器（Named Loggers）
+
+Agno 遵循 Python 的标准日志命名约定。
+
+如果你在应用的日志配置文件中预先定义了这些命名日志器，它们会被 **自动识别和使用**：
+
+| 名称              | 用途              |
+| --------------- | --------------- |
+| `agno.agent`    | 智能体（Agent）日志    |
+| `agno.team`     | 团队（Team）日志      |
+| `agno.workflow` | 工作流（Workflow）日志 |
+
+例如在你的 `logging.conf` 中：
+
+```ini
+[loggers]
+keys=root,agno.agent,agno.team,agno.workflow
+
+[logger_agno.agent]
+level=INFO
+handlers=consoleHandler
+qualname=agno.agent
+propagate=0
+
+[handler_consoleHandler]
+class=StreamHandler
+level=DEBUG
+formatter=simpleFormatter
+args=(sys.stdout,)
+
+[formatter_simpleFormatter]
+format=[%(name)s] %(levelname)s - %(message)s
+```
+
+Agno 启动后会自动检测并使用这些命名日志器。
+
+---
+
+### 💡 提示与最佳实践
+
+* ✅ 若你使用 **FastAPI / Flask** 构建后端，可以统一使用应用的 logging 设置。
+* ✅ 可配合 **Loguru**、**structlog** 或 **JSONFormatter** 输出结构化日志。
+* ✅ 在生产环境建议设置日志级别为 `INFO` 或 `WARNING`，避免模型调用日志过多。
+* ✅ 支持同时写入多个目标（如控制台 + 文件 + 远程）。
+
+
+✅ **总结**
+
+Agno 的自定义日志系统让你：
+
+* 灵活接入企业级日志平台；
+* 对智能体运行进行可观测性分析；
+* 保持统一日志格式；
+* 精确控制不同组件的日志输出。
+
+这为构建生产级智能体系统提供了强大的调试与监控支持。
 
