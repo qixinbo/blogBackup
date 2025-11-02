@@ -570,7 +570,7 @@ print(response.session_id)
 
 ---
 
-## 多轮会话（Multi-turn Sessions）
+### 多轮会话（Multi-turn Sessions）
 每个用户都可以拥有自己的会话集，多个用户可同时与同一个 Agent 交互。
 
 可以使用 `user_id` 和 `session_id` 来区分不同用户与会话：
@@ -1007,5 +1007,452 @@ agent = Agent(
 
 > ✨ 一些 Gemini 模型无法同时使用工具与结构化输出，此法是一个有效解决方案。
 
+
+## 上下文工程
+
+**上下文工程**是指设计和控制发送给语言模型的信息（上下文）的过程，以此来引导模型的行为和输出。
+在实践中，构建上下文可以归结为一个问题：“**哪些信息最有可能实现期望的结果？**”
+在 **Agno** 中，这意味着要仔细构建系统消息（system message），其中包含Agent的描述、指令以及其他相关设定。通过精心设计这些上下文，你可以：
+
+* 引导Agent表现出特定行为或角色；
+* 限制或扩展Agent的能力；
+* 确保输出结果一致、相关，并符合应用需求；
+* 启用更高级的用例，例如多步推理、工具使用或结构化输出。
+
+有效的上下文工程是一个**迭代过程**：反复优化系统消息，尝试不同的描述和指令，并利用诸如 **schemas、delegation、tool integrations** 等特性。
+
+Agno智能体的上下文由以下部分组成：
+
+* **System message（系统消息）**：发送给智能体的主要上下文信息，包括所有附加内容。
+* **User message（用户消息）**：发送给智能体的用户输入。
+* **Chat history（聊天记录）**：智能体与用户的对话历史。
+* **Additional input（附加输入）**：添加到上下文中的 few-shot 示例或其他额外内容。
+
+---
+
+### 系统消息上下文（System message context）
+
+以下是用于创建系统消息的一些关键参数：
+
+1. **Description（描述）**：指导代理总体行为的描述。
+2. **Instructions（指令）**：一组具体、任务导向的操作指令，用于实现目标。
+3. **Expected Output（期望输出）**：描述代理预期生成的输出形式。
+
+系统消息由代理的 `description`、`instructions` 和其他设置构建而成。
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    description="You are a famous short story writer asked to write for a magazine",
+    instructions=["Always write 2 sentence stories."],
+    markdown=True,
+    debug_mode=True,  # 设置为 True 以查看详细日志及系统消息内容
+)
+agent.print_response("Tell me a horror story.", stream=True)
+```
+
+该代码将生成以下系统消息：
+
+```
+You are a famous short story writer asked to write for a magazine                                                                          
+<instructions>                                                                                                                             
+- Always write 2 sentence stories.                                                                                                         
+</instructions>                                                                                                                            
+                                                                                                                                            
+<additional_information>                                                                                                                   
+- Use markdown to format your answer
+</additional_information>
+```
+
+---
+
+#### 系统消息参数说明
+
+`Agent` 会创建一个默认的系统消息，可通过以下参数进行自定义：
+
+| 参数名                                | 类型          | 默认值     | 说明                                                                                 |
+| ---------------------------------- | ----------- | ------- | ---------------------------------------------------------------------------------- |
+| `description`                      | `str`       | `None`  | 添加到系统消息开头的代理描述。                                                                    |
+| `instructions`                     | `List[str]` | `None`  | 添加到系统提示中 `<instructions>` 标签内的指令列表。默认指令会根据 `markdown`、`expected_output` 等自动生成。     |
+| `additional_context`               | `str`       | `None`  | 添加到系统消息结尾的附加上下文。                                                                   |
+| `expected_output`                  | `str`       | `None`  | 期望输出描述，添加到系统消息末尾。                                                                  |
+| `markdown`                         | `bool`      | `False` | 若为 True，则添加“使用 markdown 格式化输出”的指令。                                                 |
+| `add_datetime_to_context`          | `bool`      | `False` | 若为 True，则在提示中添加当前日期时间，让代理具备时间感知能力。                                                 |
+| `add_name_to_context`              | `bool`      | `False` | 若为 True，则将代理名称添加到上下文。                                                              |
+| `add_location_to_context`          | `bool`      | `False` | 若为 True，则添加代理的地理位置，用于生成与地点相关的回复。                                                   |
+| `add_session_summary_to_context`   | `bool`      | `False` | 若为 True，则将会话摘要加入上下文。详见 [sessions](/concepts/agents/sessions)。                      |
+| `add_memories_to_context`          | `bool`      | `False` | 若为 True，则添加用户记忆。详见 [memory](/concepts/agents/memory)。                              |
+| `add_session_state_to_context`     | `bool`      | `False` | 若为 True，则添加会话状态。详见 [state](/concepts/agents/state)。                                |
+| `enable_agentic_knowledge_filters` | `bool`      | `False` | 若为 True，则允许代理选择知识过滤器。详见 [knowledge filters](/concepts/knowledge/filters/overview)。 |
+| `system_message`                   | `str`       | `None`  | 直接覆盖默认系统消息。                                                                        |
+| `build_context`                    | `bool`      | `True`  | 若为 False，可禁用自动构建上下文。                                                               |
+
+详见 [Agent 参考文档](https://docs.agno.com/reference/agents/agent)。
+
+#### 系统消息的构建方式
+
+来看以下示例代理：
+
+```python
+from agno.agent import Agent
+
+agent = Agent(
+    name="Helpful Assistant",
+    role="Assistant",
+    description="You are a helpful assistant",
+    instructions=["Help the user with their question"],
+    additional_context="""
+    Here is an example of how to answer the user's question: 
+        Request: What is the capital of France?
+        Response: The capital of France is Paris.
+    """,
+    expected_output="You should format your response with `Response: <response>`",
+    markdown=True,
+    add_datetime_to_context=True,
+    add_location_to_context=True,
+    add_name_to_context=True,
+    add_session_summary_to_context=True,
+    add_memories_to_context=True,
+    add_session_state_to_context=True,
+)
+```
+
+生成的系统消息如下：
+
+```
+You are a helpful assistant
+<your_role>
+Assistant
+</your_role>
+
+<instructions>
+  Help the user with their question
+</instructions>
+
+<additional_information>
+Use markdown to format your answers.
+The current time is 2025-09-30 12:00:00.
+Your approximate location is: New York, NY, USA.
+Your name is: Helpful Assistant.
+</additional_information>
+
+<expected_output>
+  You should format your response with `Response: <response>`
+</expected_output>
+
+Here is an example of how to answer the user's question: 
+    Request: What is the capital of France?
+    Response: The capital of France is Paris.
+
+You have access to memories from previous interactions with the user that you can use:
+
+<memories_from_previous_interactions>
+- User really likes Digimon and Japan.
+- User really likes Japan.
+- User likes coffee.
+</memories_from_previous_interactions>
+
+Note: this information is from previous interactions and may be updated in this conversation. You should always prefer information from this conversation over the past memories.
+
+Here is a brief summary of your previous interactions:
+
+<summary_of_previous_interactions>
+The user asked about information about Digimon and Japan.
+</summary_of_previous_interactions>
+
+Note: this information is from previous interactions and may be outdated. You should ALWAYS prefer information from this conversation over the past summary.
+
+<session_state> ... </session_state>
+```
+
+> 💡 **提示**：
+> 这个示例展示了系统消息的完整结构，以说明它的可定制性。但在实际应用中，你通常只会启用其中的一部分配置。
+
+---
+
+##### 附加上下文（Additional Context）
+
+你可以通过 `additional_context` 参数在系统消息的末尾添加额外说明。
+
+例如，下面的 `additional_context` 参数为代理添加了一条说明，告诉它可以访问特定数据库表。
+
+```python
+from textwrap import dedent
+from agno.agent import Agent
+from agno.models.langdb import LangDB
+from agno.tools.duckdb import DuckDbTools
+
+duckdb_tools = DuckDbTools(
+    create_tables=False, export_tables=False, summarize_tables=False
+)
+duckdb_tools.create_table_from_path(
+    path="https://phidata-public.s3.amazonaws.com/demo_data/IMDB-Movie-Data.csv",
+    table="movies",
+)
+
+agent = Agent(
+    model=LangDB(id="llama3-1-70b-instruct-v1.0"),
+    tools=[duckdb_tools],
+    markdown=True,
+    additional_context=dedent("""\
+    You have access to the following tables:
+    - movies: contains information about movies from IMDB.
+    """),
+)
+agent.print_response("What is the average rating of movies?", stream=True)
+```
+
+---
+
+##### 工具指令（Tool Instructions）
+
+当智能体使用某个 [Toolkit](https://docs.agno.com/concepts/tools/toolkits/toolkits) 时，可以通过 `instructions` 参数将工具说明加入系统消息：
+
+```python
+from agno.agent import Agent
+from agno.tools.slack import SlackTools
+
+slack_tools = SlackTools(
+    instructions=["Use `send_message` to send a message to the user.  If the user specifies a thread, use `send_message_thread` to send a message to the thread."],
+    add_instructions=True,
+)
+agent = Agent(
+    tools=[slack_tools],
+)
+```
+
+这些指令会被注入到系统消息的 `<additional_information>` 标签之后。
+
+---
+
+##### 智能体记忆
+
+当智能体设置了 `enable_agentic_memory=True` 时，它将具备创建或更新用户记忆的能力。
+此时系统消息中会新增如下内容：
+
+```
+<updating_user_memories>
+- You have access to the `update_user_memory` tool that you can use to add new memories, update existing memories, delete memories, or clear all memories.
+- If the user's message includes information that should be captured as a memory, use the `update_user_memory` tool to update your memory database.
+- Memories should include details that could personalize ongoing interactions with the user.
+- Use this tool to add new memories or update existing memories that you identify in the conversation.
+- Use this tool if the user asks to update their memory, delete a memory, or clear all memories.
+- If you use the `update_user_memory` tool, remember to pass on the response to the user.
+</updating_user_memories>
+```
+
+---
+
+##### 知识过滤器
+
+若启用了知识功能并设置了 `enable_agentic_knowledge_filters=True`，则它能自动选择合适的知识过滤器。
+系统消息会新增以下说明：
+
+```
+The knowledge base contains documents with these metadata filters: [filter1, filter2, filter3].
+Always use filters when the user query indicates specific metadata.
+
+Examples:
+1. If the user asks about a specific person like "Jordan Mitchell", you MUST use the search_knowledge_base tool with the filters parameter set to {{'<valid key like user_id>': '<valid value based on the user query>'}}.
+2. If the user asks about a specific document type like "contracts", you MUST use the search_knowledge_base tool with the filters parameter set to {{'document_type': 'contract'}}.
+4. If the user asks about a specific location like "documents from New York", you MUST use the search_knowledge_base tool with the filters parameter set to {{'<valid key like location>': 'New York'}}.
+
+General Guidelines:
+- Always analyze the user query to identify relevant metadata.
+- Use the most specific filter(s) possible to narrow down results.
+- If multiple filters are relevant, combine them in the filters parameter (e.g., {{'name': 'Jordan Mitchell', 'document_type': 'contract'}}).
+- Ensure the filter keys match the valid metadata filters: [filter1, filter2, filter3].
+
+You can use the search_knowledge_base tool to search the knowledge base and get the most relevant documents. Make sure to pass the filters as [Dict[str: Any]] to the tool. FOLLOW THIS STRUCTURE STRICTLY.
+```
+
+详细内容可参见 [知识过滤器](https://docs.agno.com/concepts/knowledge/filters/overview)。
+
+---
+
+#### 直接设置系统消息
+
+可以通过 `system_message` 参数手动定义系统消息。
+此时，所有其他设置将被忽略，仅使用你提供的内容。
+
+```python
+from agno.agent import Agent
+agent.print_response("What is the capital of France?")
+
+agent = Agent(system_message="Share a 2 sentence story about")
+agent.print_response("Love in the year 12000.")
+```
+
+> 💡 **提示：**
+> 某些模型（例如 Groq 平台上的 `llama-3.2-11b-vision-preview`）要求不包含系统消息。
+> 若要移除系统消息，请设置 `build_context=False` 且 `system_message=None`。
+> 注意：若设置了 `markdown=True`，仍会自动添加系统消息，因此需关闭或显式禁用。
+
+---
+
+### 用户消息上下文
+
+传递给 `Agent.run()` 或 `Agent.print_response()` 的 `input` 即为用户消息。
+
+---
+
+#### 附加用户上下文
+
+可以使用以下参数为用户消息添加额外上下文：
+
+* `add_knowledge_to_context`
+* `add_dependencies_to_context`
+
+```python
+from agno.agent import Agent
+agent = Agent(add_knowledge_to_context=True, add_dependencies_to_context=True)
+agent.print_response("What is the capital of France?", dependencies={"name": "John Doe"})
+```
+
+发送给模型的用户消息如下：
+
+```
+What is the capital of France?
+
+Use the following references from the knowledge base if it helps:
+<references>
+- Reference 1
+- Reference 2
+</references>
+
+<additional context>
+{"name": "John Doe"}
+</additional context>
+```
+
+详见 [依赖注入](https://docs.agno.com/concepts/agents/dependencies)。
+
+---
+
+### 聊天记录
+
+当智能体启用数据库存储后，会自动保存会话历史（参见 [sessions](/concepts/agents/sessions)）。
+可以通过 `add_history_to_context=True` 将对话历史添加到上下文中：
+
+```python
+from agno.agent.agent import Agent
+from agno.db.postgres import PostgresDb
+from agno.models.openai import OpenAIChat
+
+db_url = "postgresql+psycopg://ai:ai@localhost:5532/ai"
+db = PostgresDb(db_url=db_url)
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    db=db,
+    session_id="chat_history",
+    instructions="You are a helpful assistant that can answer questions about space and oceans.",
+    add_history_to_context=True,
+    num_history_runs=2,  # 可选：限制添加到上下文中的历史轮数
+)
+
+agent.print_response("Where is the sea of tranquility?")
+agent.print_response("What was my first question?")
+```
+
+这会将之前的对话添加到上下文中，使智能体能利用先前的信息生成更连贯的回答。
+详见 [sessions#session-history](/concepts/agents/sessions#session-history)。
+
+---
+
+### 工具调用管理
+
+参数 `max_tool_calls_from_history` 用于限制上下文中保留的最近 `n` 次工具调用，
+以控制上下文大小并降低 token 成本。
+
+```python
+from agno.agent import Agent
+from agno.db.sqlite import SqliteDb
+from agno.models.openai import OpenAIChat
+import random
+
+def get_weather_for_city(city: str) -> str:
+    conditions = ["Sunny", "Cloudy", "Rainy", "Snowy", "Foggy", "Windy"]
+    temperature = random.randint(-10, 35)
+    condition = random.choice(conditions)
+    return f"{city}: {temperature}°C, {condition}"
+
+agent = Agent(
+    model=OpenAIChat(id="gpt-5-mini"),
+    tools=[get_weather_for_city],
+    db=SqliteDb(db_file="tmp/agent.db"),
+    add_history_to_context=True,
+    max_tool_calls_from_history=3,  # 仅保留最近 3 次工具调用
+)
+agent.print_response("What's the weather in Tokyo?")
+agent.print_response("What's the weather in Paris?")  
+agent.print_response("What's the weather in London?")
+agent.print_response("What's the weather in Berlin?")
+agent.print_response("What's the weather in Mumbai?")
+agent.print_response("What's the weather in Miami?")
+agent.print_response("What's the weather in New York?")
+agent.print_response("What's the weather in above cities?")
+```
+
+此时模型仅会看到最近 3 个城市（Mumbai、Miami、New York）的工具调用结果。
+
+> 🔎 **说明：**
+> `max_tool_calls_from_history` 仅过滤由 `num_history_runs` 加载的历史记录。
+> 数据库中仍会保留完整历史。
+
+---
+
+### 少样本学习（Few-shot learning）与附加输入
+
+通过 `additional_input` 参数可以在上下文中添加额外的消息（如 few-shot 示例），
+这些消息会像对话历史一样参与上下文构建。
+
+```python
+from agno.agent import Agent
+from agno.models.message import Message
+from agno.models.openai.chat import OpenAIChat
+
+# Few-shot 示例
+support_examples = [
+    Message(role="user", content="I forgot my password and can't log in"),
+    Message(role="assistant", content="""I'll help you reset your password right away...
+"""),
+    ...
+]
+
+agent = Agent(
+    name="Customer Support Specialist",
+    model=OpenAIChat(id="gpt-5-mini"),
+    add_name_to_context=True,
+    additional_input=support_examples,
+    instructions=[
+        "You are an expert customer support specialist.",
+        "Always be empathetic, professional, and solution-oriented.",
+        "Provide clear, actionable steps to resolve customer issues.",
+        "Follow the established patterns for consistent, high-quality support.",
+    ],
+    markdown=True,
+)
+```
+
+这让智能体能够根据少量示例学习回应风格与格式。
+
+---
+
+### 上下文缓存
+多数模型提供商支持系统与用户消息的缓存机制，但实现方式各不相同。
+通用思路是缓存**重复或静态内容**，在后续请求中重用，以减少 token 消耗。
+
+Agno 的上下文构建逻辑天然会将最可能缓存的静态内容放在系统消息的开头。
+如需进一步优化，可手动设置 `system_message`。
+
+示例：
+
+* [OpenAI 的提示缓存](https://platform.openai.com/docs/guides/prompt-caching)
+* [Anthropic 的提示缓存](https://docs.claude.com/en/docs/build-with-claude/prompt-caching) — [Agno 示例](/examples/models/anthropic/prompt_caching)
+* [OpenRouter 的提示缓存](https://openrouter.ai/docs/features/prompt-caching)
 
 
