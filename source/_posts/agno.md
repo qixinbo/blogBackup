@@ -2004,3 +2004,436 @@ pprint(agent.get_messages_for_session())
 这些数据最直观地展示在
 👉 [AgentOS 的会话页面](https://os.agno.com/sessions)。
 
+## 记忆
+
+> **Memory** 赋予智能体记住用户信息的能力。
+
+**记忆** 是智能体上下文的一部分，用于帮助其生成更好、更个性化的回答。
+
+<Tip>
+  例如：如果用户告诉智能体他们喜欢滑雪，那么智能体在之后的对话中可以引用这一信息，为用户提供更个性化的体验。
+</Tip>
+
+---
+
+### 用户记忆
+
+下面是一个使用记忆功能的简单示例：
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from agno.db.postgres import PostgresDb
+from rich.pretty import pprint
+
+user_id = "ava"
+
+db_url = "postgresql+psycopg://ai:ai@localhost:5532/ai"
+
+db = PostgresDb(
+  db_url=db_url,
+  memory_table="user_memories",  # 可选：指定存储记忆的表名
+)
+
+# 初始化智能体
+memory_agent = Agent(
+    model=OpenAIChat(id="gpt-4.1"),
+    db=db,
+    # 让智能体具备更新用户记忆的能力
+    enable_agentic_memory=True,
+    # 或者：在每次回复后自动运行 MemoryManager 来更新记忆
+    enable_user_memories=True,
+    markdown=True,
+)
+
+db.clear_memories()
+
+# 第一次交互
+memory_agent.print_response(
+    "My name is Ava and I like to ski.",
+    user_id=user_id,
+    stream=True,
+    stream_events=True,
+)
+print("关于 Ava 的记忆：")
+pprint(memory_agent.get_user_memories(user_id=user_id))
+
+# 第二次交互
+memory_agent.print_response(
+    "I live in san francisco, where should i move within a 4 hour drive?",
+    user_id=user_id,
+    stream=True,
+    stream_events=True,
+)
+print("关于 Ava 的记忆：")
+pprint(memory_agent.get_user_memories(user_id=user_id))
+```
+
+---
+
+<Tip>
+  设置 `enable_agentic_memory=True` 后，智能体会获得一个「管理用户记忆」的工具，  
+  该工具的实际处理逻辑由 `MemoryManager` 类负责。
+
+你也可以使用 `enable_user_memories=True`，这样智能体会在**每次用户发消息后自动运行 MemoryManager**，
+从而自动更新用户记忆。 </Tip>
+
+<Note>
+  想了解更多关于记忆机制的细节，请参阅 [Memory 概览](/concepts/memory/overview)。
+</Note>
+
+
+## 知识
+**知识（Knowledge）** 用于存储特定领域的内容，这些内容可以被添加到智能体（Agent）的上下文中，以帮助其做出更好的决策。
+
+<Note>
+  Agno 提供了一个通用的知识系统，支持多种形式的内容。  
+  详细信息请参阅 [知识文档](https://docs.agno.com/concepts/knowledge/overview)。
+</Note>
+
+智能体可以在运行时**搜索这些知识**，以便更好地决策并提供更准确的回答。
+这种“按需搜索”的模式被称为 **Agentic RAG（智能体检索增强生成）**。
+
+<Tip>
+  **示例：**  
+  如果我们在构建一个 Text2SQL 智能体，我们需要向其提供表结构、列名、数据类型、示例查询等信息，以帮助它生成最优的 SQL 查询。  
+  这些信息不适合全部放入系统提示（system message）中。  
+  因此，我们将这些信息存储为“知识”，让智能体在运行时查询。  
+  智能体借助这些信息，能够生成最优 SQL 查询。这种机制称为 **动态少样本学习（dynamic few-shot learning）**。
+</Tip>
+
+---
+
+### 智能体的知识系统
+
+Agno 智能体默认使用 **Agentic RAG**。
+这意味着当我们为智能体提供 `knowledge`（知识）时，它会在运行时搜索该知识库，以检索完成任务所需的特定信息。
+
+示例代码如下：
+
+```python
+import asyncio
+from agno.agent import Agent
+from agno.db.postgres.postgres import PostgresDb
+from agno.knowledge.embedder.openai import OpenAIEmbedder
+from agno.knowledge.knowledge import Knowledge
+from agno.vectordb.pgvector import PgVector
+
+db = PostgresDb(
+    db_url="postgresql+psycopg://ai:ai@localhost:5532/ai",
+    knowledge_table="knowledge_contents",
+)
+
+# 创建知识实例
+knowledge = Knowledge(
+    name="Basic SDK Knowledge Base",
+    description="Agno 2.0 知识库实现",
+    contents_db=db,
+    vector_db=PgVector(
+        table_name="vectors",
+        db_url="postgresql+psycopg://ai:ai@localhost:5532/ai",
+        embedder=OpenAIEmbedder(),
+    ),
+)
+
+# 从 URL 添加内容到知识库
+asyncio.run(
+    knowledge.add_content_async(
+        name="Recipes",
+        url="https://agno-public.s3.amazonaws.com/recipes/ThaiRecipes.pdf",
+        metadata={"user_tag": "Recipes from website"},
+    )
+)
+
+agent = Agent(
+    name="My Agent",
+    description="Agno 2.0 智能体实现",
+    knowledge=knowledge,
+    search_knowledge=True,
+)
+
+agent.print_response(
+    "How do I make chicken and galangal in coconut milk soup?",
+    markdown=True,
+)
+```
+
+我们可以通过以下方式为智能体提供知识库访问能力：
+
+* 设置 `search_knowledge=True`，为智能体添加 `search_knowledge_base()` 工具。
+  如果你为智能体提供了 `knowledge`，则默认 `search_knowledge=True`。
+* 设置 `add_knowledge_to_context=True`，自动将与用户消息相关的知识引用添加到智能体上下文中（即传统 RAG 模式）。
+
+---
+
+### 自定义知识检索
+
+如果你希望完全控制知识库的搜索方式，可以定义自定义的 `knowledge_retriever` 函数：
+
+```python
+def knowledge_retriever(agent: Agent, query: str, num_documents: Optional[int], **kwargs) -> Optional[list[dict]]:
+    ...
+```
+
+示例配置：
+
+```python
+def knowledge_retriever(agent: Agent, query: str, num_documents: Optional[int], **kwargs) -> Optional[list[dict]]:
+    ...
+
+agent = Agent(
+    knowledge_retriever=knowledge_retriever,
+    search_knowledge=True,
+)
+```
+
+该函数会在执行 `search_knowledge_base()` 时被调用，用于从知识库检索相关内容。
+
+<Tip>
+  支持异步（async）检索函数。  
+  只需将其定义为异步函数并传递给 `knowledge_retriever` 参数即可。
+</Tip>
+
+---
+
+### 知识存储
+
+知识内容会被分别存储在 **内容数据库（Contents DB）** 和 **向量数据库（Vector DB）** 中。
+
+#### 📘 内容数据库（Contents Database）
+
+内容数据库存储知识条目的名称、描述、元数据及其他信息。
+其表结构如下：
+
+| 字段名              | 类型     | 描述                        |
+| ---------------- | ------ | ------------------------- |
+| `id`             | `str`  | 知识内容的唯一标识符                |
+| `name`           | `str`  | 知识内容名称                    |
+| `description`    | `str`  | 知识内容描述                    |
+| `metadata`       | `dict` | 知识内容的元数据                  |
+| `type`           | `str`  | 内容类型                      |
+| `size`           | `int`  | 内容大小（仅适用于文件类型）            |
+| `linked_to`      | `str`  | 链接到的知识内容 ID               |
+| `access_count`   | `int`  | 内容被访问的次数                  |
+| `status`         | `str`  | 内容状态                      |
+| `status_message` | `str`  | 状态相关信息                    |
+| `created_at`     | `int`  | 创建时间戳                     |
+| `updated_at`     | `int`  | 最后更新时间戳                   |
+| `external_id`    | `str`  | 外部 ID，用于外部向量库（如 LightRAG） |
+
+这些数据可在 [AgentOS UI 的知识页面](https://os.agno.com/knowledge) 中查看。
+
+---
+
+#### 🧭 向量数据库（Vector Databases）
+
+向量数据库用于高效地从海量密集信息中检索相关结果。
+它通过嵌入向量搜索的方式快速找到与查询最相关的知识片段。
+
+---
+
+#### 📥 添加内容（Adding Contents）
+
+将内容添加到知识库的典型流程如下：
+
+<Steps>
+  <Step title="解析内容（Parse the content）">
+    根据内容类型使用相应的读取器（Reader）解析内容。
+  </Step>
+
+  <Step title="分块信息（Chunk the information）">
+    将内容分割成较小的片段（Chunk），以提高检索相关性。
+  </Step>
+
+  <Step title="向量化（Embed each chunk）">
+    将每个片段转换为向量并存储到向量数据库中。
+  </Step>
+</Steps>
+
+例如，将一个 PDF 文件添加到知识库：
+
+```python
+knowledge = Knowledge(
+    name="Basic SDK Knowledge Base",
+    description="Agno 2.0 知识库实现",
+    vector_db=vector_db,
+    contents_db=contents_db,
+)
+
+asyncio.run(
+    knowledge.add_content_async(
+        name="CV",
+        path="cookbook/knowledge/testing_resources/cv_1.pdf",
+        metadata={"user_tag": "Engineering Candidates"},
+    )
+)
+```
+
+<Tip>
+  详细步骤请参阅 [加载知识库（Loading the Knowledge Base）](/concepts/knowledge/overview#loading-the-knowledge)。
+</Tip>
+
+<Note>
+  当前知识过滤器（Knowledge Filters）支持以下类型：  
+  **PDF**、**PDF_URL**、**Text**、**JSON**、**DOCX**。  
+  详情请见 [知识过滤文档](/concepts/knowledge/filters/overview)。
+</Note>
+
+## 工具
+**智能体通过工具来执行操作并与外部系统交互。**
+
+工具（Tools）是智能体可以调用的函数，用来完成特定任务。例如：搜索网页、运行 SQL、发送邮件或调用外部 API。
+你可以使用任意 Python 函数作为工具，也可以使用 Agno 提供的 **预构建工具包（Toolkits）**。
+
+基本语法如下：
+
+```python
+from agno.agent import Agent
+
+agent = Agent(
+    # 添加函数或工具包
+    tools=[...],
+)
+```
+
+---
+
+### 使用工具包
+
+Agno 提供了许多预构建的 **工具包（toolkits）**，可直接添加到你的智能体中。
+例如，下面展示了如何使用 DuckDuckGo 工具包来进行网页搜索。
+
+<Tip>
+  更多工具包请参见 [Toolkits 指南](https://docs.agno.com/concepts/tools/toolkits)。
+</Tip>
+
+<Steps>
+  <Step title="创建网页搜索智能体">
+    创建文件 `web_search.py`
+    ```python
+    from agno.agent import Agent
+    from agno.tools.duckduckgo import DuckDuckGoTools
+
+````
+agent = Agent(tools=[DuckDuckGoTools()], markdown=True)
+agent.print_response("法国现在发生了什么？", stream=True)
+```
+````
+
+  </Step>
+
+  <Step title="运行智能体">
+    安装依赖库：
+    ```bash
+    pip install openai ddgs agno
+    ```
+
+````
+运行智能体：
+```bash
+python web_search.py
+```
+````
+
+  </Step>
+</Steps>
+
+---
+
+### 编写自定义工具
+
+如果你想要更强的控制能力，可以自己编写 Python 函数并作为工具添加给智能体。
+例如，下面展示了如何添加一个 `get_top_hackernews_stories` 工具，用于获取 Hacker News 的热门文章。
+
+```python
+# hn_agent.py
+import json
+import httpx
+from agno.agent import Agent
+
+def get_top_hackernews_stories(num_stories: int = 10) -> str:
+    """获取 Hacker News 的热门文章。
+    参数:
+        num_stories (int): 返回的文章数量，默认 10。
+    """
+    # 获取热门文章 ID
+    response = httpx.get('https://hacker-news.firebaseio.com/v0/topstories.json')
+    story_ids = response.json()
+
+    # 获取每篇文章的详细信息
+    stories = []
+    for story_id in story_ids[:num_stories]:
+        story_response = httpx.get(f'https://hacker-news.firebaseio.com/v0/item/{story_id}.json')
+        story = story_response.json()
+        if "text" in story:
+            story.pop("text", None)
+        stories.append(story)
+    return json.dumps(stories)
+
+agent = Agent(tools=[get_top_hackernews_stories], markdown=True)
+agent.print_response("请总结 Hacker News 上最热门的 5 篇文章。", stream=True)
+```
+
+📚 延伸阅读：
+
+* [可用的工具包](/concepts/tools/toolkits)
+* [如何创建自定义工具](/concepts/tools/custom-tools)
+
+---
+
+#### 在工具中访问内置参数（Accessing built-in parameters in tools）
+
+在工具函数中，你可以访问智能体的一些内置属性，如：
+
+* `session_state`（会话状态）
+* `dependencies`（依赖项）
+* `agent`（当前智能体实例）
+* `team`（团队信息）
+
+例如：
+
+```python
+from agno.agent import Agent
+
+def get_shopping_list(session_state: dict) -> str:
+    """获取购物清单"""
+    return session_state["shopping_list"]
+
+agent = Agent(
+    tools=[get_shopping_list],
+    session_state={"shopping_list": ["牛奶", "面包", "鸡蛋"]},
+    markdown=True
+)
+agent.print_response("我的购物清单上有什么？", stream=True)
+```
+
+更多信息请参见 [工具内置参数](/concepts/tools/overview#tool-built-in-parameters)。
+
+---
+
+### MCP工具
+
+Agno 支持 [Model Context Protocol (MCP)](https://docs.agno.com/concepts/tools/mcp) 工具。
+
+基本语法如下：
+
+```python
+from agno.agent import Agent
+from agno.tools.mcp import MCPTools
+
+async def run_mcp_agent():
+    # 初始化 MCP 工具
+    mcp_tools = MCPTools(command=f"uvx mcp-server-git")
+
+    # 连接 MCP 服务端
+    await mcp_tools.connect()
+
+    agent = Agent(tools=[mcp_tools], markdown=True)
+    await agent.aprint_response("这个项目的许可证是什么？", stream=True)
+```
+
+<Tip>
+  想了解更多 MCP 工具，请参见 [MCP 工具指南](/concepts/tools/mcp)。
+</Tip>
+
+
