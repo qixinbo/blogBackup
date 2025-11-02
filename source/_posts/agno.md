@@ -472,4 +472,69 @@ agent.run(
 
 更多详情请参见 [“取消运行” 文档](https://docs.agno.com/concepts/agents/run-cancel)。
 
+## 调试 Agents
+Agno 提供了一个非常完善的 **调试模式（Debug Mode）**，它能显著提升你的开发体验，帮助你理解代理（Agent）的执行流程和中间步骤。例如：
+
+1. 检查发送给模型的消息及其返回的响应。
+2. 跟踪中间步骤并监控指标（如 token 使用量、执行时间等）。
+3. 检查工具调用、错误及其结果。
+
+---
+
+### 启用调试模式
+
+有三种方式可以启用调试模式：
+
+1. 在创建Agent时设置 `debug_mode=True`，对所有运行生效。
+2. 在调用 `run()` 方法时设置 `debug_mode=True`，仅对当前运行生效。
+3. 设置环境变量 `AGNO_DEBUG=True`，启用全局调试模式。
+
+示例：
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAI
+from agno.tools.hackernews import HackerNewsTools
+
+agent = Agent(
+    model=OpenAI(id="gpt-4o-mini"),
+    tools=[HackerNewsTools()],
+    instructions="撰写关于该主题的报告，仅输出报告内容。",
+    markdown=True,
+    debug_mode=True,
+    # debug_level=2,  # 取消注释可获得更详细的日志
+)
+
+# 运行代理并在终端中打印结果
+agent.print_response("热门初创公司和产品趋势。")
+```
+
+💡 可以设置 `debug_level=2` 来输出更详细的调试日志。
+
+---
+
+### 交互式 CLI
+
+Agno 还提供了一个内置的 **交互式命令行界面（CLI）**，可以直接在终端中与代理进行对话式测试，非常适合调试多轮交互。
+
+示例：
+
+```python
+from agno.agent import Agent
+from agno.db.sqlite import SqliteDb
+from agno.models.openai import OpenAI
+from agno.tools.hackernews import HackerNewsTools
+
+agent = Agent(
+    model=OpenAI(id="gpt-4o-mini"),
+    tools=[HackerNewsTools()],
+    db=SqliteDb(db_file="tmp/data.db"),
+    add_history_to_context=True,  # 将对话历史添加到上下文
+    num_history_runs=3,           # 仅保留最近3轮对话
+    markdown=True,
+)
+
+# 以交互式 CLI 方式运行代理
+agent.cli_app(stream=True)
+```
 
